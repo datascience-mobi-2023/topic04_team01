@@ -6,5 +6,14 @@
  
  Test Manon 
  
+<<<<<<< Updated upstream
  
  himmel 
+=======
+<<<<<<< HEAD
+ test Noemi 
+=======
+ 
+ himmel 
+
+>>>>>>> Stashed changes
