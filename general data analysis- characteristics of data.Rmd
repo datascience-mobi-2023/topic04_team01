@@ -1,0 +1,199 @@
+---
+title: "general data analysis: characteristics of the data"
+output: html_document
+date: "2023-05-16"
+---
+
+# General analysis: characteristics of the data
+
+## loading the data
+
+```{r}
+#loading mean monthly relative humidity, temperature, precipitation data
+
+install.packages("readxl")
+library(readxl)
+
+sheet_names = excel_sheets("/Users/leamrowiec/Desktop/Datenanalyse SS23/era5_data_2006_2020_thailand_monmean.xlsx")
+
+#laden von den einzelnen sheets
+T.huss.mon = read_excel("/Users/leamrowiec/Desktop/Datenanalyse SS23/era5_data_2006_2020_thailand_monmean.xlsx", sheet="era5_huss_2006_2020_thailand_mo")
+T.tp.mon = read_excel("/Users/leamrowiec/Desktop/Datenanalyse SS23/era5_data_2006_2020_thailand_monmean.xlsx", sheet="era5_tp_2006_2020_thailand_monm")
+T.t2m.mon = read_excel("/Users/leamrowiec/Desktop/Datenanalyse SS23/era5_data_2006_2020_thailand_monmean.xlsx", sheet="era5_t2m_2006_2020_thailand_mon")
+
+
+
+
+```
+
+```{r}
+show(T.huss.mon)
+show(T.tp.mon)
+show(T.t2m.mon)
+```
+
+## 2) data cleanup
+
+### 2.1) naming columns and rows
+
+```{r}
+# naming each row with the name of the province
+rownames(T.huss.mon) <- T.huss.mon[,2]
+rownames(T.tp.mon) <- T.tp.mon[,2]
+rownames(T.t2m.mon) <- T.t2m.mon[,2]
+
+#naming each colum with years of year, numbers of month
+show(colnames(T.huss.mon)) # -> colums are already named 
+```
+
+```{r}
+#naming each colum with years of year, numbers of month
+show(colnames(T.huss.mon))
+```
+
+### 2.2) removing unnecessary columns
+
+```{r}
+#removing unnecessary colums: numbers of provinces (col 1), lonitude and latitude data (col 3,4)
+T.huss.mon <- T.huss.mon[,c(-1,-3,-4)]
+T.tp.mon <- T.tp.mon[,c(-1,-3,-4)]
+T.t2m.mon <-T.t2m.mon[,c(-1,-3,-4)]
+
+show(T.huss.mon)
+show(T.tp.mon)
+show(T.t2m.mon)
+```
+
+```{r}
+# summary of each dataset
+summary(T.huss.mon)
+summary(T.tp.mon)
+summary(T.t2m.mon)
+```
+
+## 3) computing the mean and median monthly relative humidity, temperature and precipitation (mean of province data)
+
+```{r}
+# instaling ggplot2
+install.packages("ggplot2")
+library(ggplot2)
+
+```
+
+```{r}
+# computing monthly mean per province
+mean.huss.monthly = sapply(T.huss.mon[,-(1)],function(x) {mean(x)})
+mean.tp.monthly = sapply(T.tp.mon[,-(1)],function(x) {mean(x)})
+mean.t2m.monthly = sapply(T.t2m.mon[,-(1)], function(x) {mean(x)})
+
+#plotting monthly mean 
+plot.ts(mean.huss.monthly, main= "relative humidity (mean of all provinces) per month", ylab="mean of relative humidity (monthly)", xlab="month")
+plot.ts(mean.tp.monthly, main= "temperature (mean of all provinces) per month", ylab="mean precipitation (monthly)", xlab="month")
+plot.ts(mean.t2m.monthly, main= "temperature (t2m) (mean of all provinces) per month", ylab="mean temperature (monthly)", xlab="month")
+
+
+
+
+# plotting monthly mean of relative humidity, precipitation and temperature in one plot
+x= colnames(T.huss.mon[, -(1)])
+
+#runden
+new.mean.huss.monthly = round( mean.huss.monthly, 0)
+new.mean.tp.monthly = round(mean.tp.monthly, 0)
+new.mean.t2m.monthly =round(mean.t2m.monthly, 0)
+#converting into numbers
+new.mean.huss.monthly.num = as.numeric(new.mean.huss.monthly)
+new.mean.tp.monthly.num = as.numeric(new.mean.tp.monthly)
+new.mean.t2m.monthly.num = as.numeric(new.mean.t2m.monthly)
+#plotten
+plot(x, new.mean.huss.monthly.num, col = "red", pch="o", lty=2, xlim = c(1, 200), ylim = c(1, 300), xlab = "months", ylab = "mean huss/mean tp/mean t2m")
+
+lines(x, new.mean.tp.monthly.num, col = "blue",lty=2)
+points(x, new.mean.tp.monthly.num, col = "blue", pch="o")
+
+lines(x, new.mean.t2m.monthly.num, col = "green",lty=2)
+points(x, new.mean.t2m.monthly.num, col = "green", pch="o")
+
+legend("topright", legend = c("mean monthly huss", "mean monthly precipitation","mean monthly temperature"), col = c("red", "blue", "green"), lwd = c(2, 2, 2, 2), pch = c(16, 16, 16))
+
+#wieso funktioniert es nicht? gleiche länge,numercs, keine characters, keine kommas
+```
+
+```{r}
+# computing monthly mean per province
+median.huss.monthly = sapply(T.huss.mon[,-(1)],function(x) {median(x)})
+median.tp.monthly = sapply(T.tp.mon[,-(1)],function(x) {median(x)})
+median.t2m.monthly = sapply(T.t2m.mon[,-(1)], function(x) {median(x)})
+
+#plotting monthly mean 
+plot.ts(median.huss.monthly, main= "relative humidity (median of all provinces) per month", ylab="median of relative humidity (monthly)", xlab="month")
+plot.ts(median.tp.monthly, main= "temperature (median of all provinces) per month", ylab="median precipitation (monthly)", xlab="month")
+plot.ts(median.t2m.monthly, main= "temperature (t2m) (median of all provinces) per month", ylab="median temperature (monthly)", xlab="month")
+```
+
+## 4) plotting mean of values (of each month) for each province
+
+```{r}
+# computing monthly mean of climate values for province over complete time span of available data
+
+#step1: transposing the dataframe to use sapply rowwise
+t.T.huss.mon = t(T.huss.mon)
+t.T.tp.mon = t(T.tp.mon)
+t.T.t2m.mon = t(T.t2m.mon)
+#step2: computing the mean of each value in each province
+mean.huss.prov = apply(T.huss.mon[,-(1)],2,function(x) {mean(x)})
+mean.tp.prov = apply(T.tp.mon[,-(1)],2,function(x) {mean(x)})
+mean.t2m.prov = apply(T.t2m.mon[,-(1)],2,function(x) {mean(x)})
+
+```
+
+## 5) computing the maximum/minimum value for each month of each year
+
+```{r}
+# computing monthly maximum over all provinces
+T.huss.mon.max = apply(T.huss.mon[,-(1)], 1, function(x) {max(x)})
+T.tp.mon.max = apply(T.tp.mon[,-(1)], 1, function(x) {max(x)})
+T.t2m.mon.max = apply(T.t2m.mon[,-(1)], 1, function(x) {max(x)})
+
+# computing monthly minimum over all provinces
+T.huss.mon.min = apply(T.huss.mon[,-(1)],1, function(x) {min(x)})
+T.tp.mon.min = apply(T.tp.mon[,-(1)],1, function(x) {min(x)})
+T.t2m.mon.min = apply(T.t2m.mon[,-(1)],1, function(x) {min(x)})
+
+# max and min return the mximum/minimum value of the dataframe, not the index
+
+# plotting maximum monthly value of all provinces 
+plot.ts(T.huss.mon.max, main= "maximum monthly relative humidity of all provinces", ylab= "maximum relative humidity (monthly)", xlab="month")
+plot.ts(T.tp.mon.max, main= "maximum monthly precipitation of all provinces", ylab= "maximum precipitation (monthly)", xlab="month")
+plot.ts(T.t2m.mon.max, main= "maximum monthly temperature of all provinces", ylab= "maximum temperature (monthly)", xlab="month")
+
+# plotting minimim monthly value of all provinces
+plot.ts(T.huss.mon.min, main= "minimum monthly relative humidity of all provinces", ylab= "minimum temperature (monthly)", xlab="month")
+plot.ts(T.tp.mon.min, main= "minimum monthly precipitation of all provinces", ylab= "minimum temperature (monthly)", xlab="month")
+plot.ts(T.t2m.mon.min, main= "minimum monthly temperature of all provinces", ylab= "minimum temperature (monthly)", xlab="month")
+
+
+```
+
+## 6) plotting abnormalities
+
+```{r}
+# 1) computing the mean of all entries in the dataframe
+mean.huss = mean(unlist(T.huss.mon))
+mean.tp = mean(unlist(T.tp.mon))
+mean.t2m = mean(unlist(T.t2m.mon))
+
+# 2) computing abnormality
+abn.T.huss.mon = apply(T.huss.mon, 1, function(x)
+  {x-mean.huss})
+abn.T.tp.mon = apply(T.tp.mon, 1, function(x)
+  {x-mean.tp})
+abn.T.t2m.mon = apply(T.t2m.mon, 1, function(x)
+  {x-mean.t2m})
+
+# 3) plotting abnormalities of each month in a histogramm
+hist(abn.T.huss.mon)
+hist(abn.T.tp.mon)
+hist(abn.T.t2m.mon)
+
+```
