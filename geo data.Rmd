@@ -1,0 +1,128 @@
+---
+title: "geodata"
+output: html_document
+date: "2023-06-01"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 1) loading point data
+
+```{r}
+install.packages("readxl")
+library(readxl)
+
+sheet_names = excel_sheets("/Users/leamrowiec/Desktop/Datenanalyse SS23/era5_data_2006_2020_thailand_monmean.xlsx")
+
+#laden von den einzelnen sheets
+T.huss.mon = read_excel("/Users/leamrowiec/Desktop/Datenanalyse SS23/era5_data_2006_2020_thailand_monmean.xlsx", sheet="era5_huss_2006_2020_thailand_mo")
+T.tp.mon = read_excel("/Users/leamrowiec/Desktop/Datenanalyse SS23/era5_data_2006_2020_thailand_monmean.xlsx", sheet="era5_tp_2006_2020_thailand_monm")
+T.t2m.mon = read_excel("/Users/leamrowiec/Desktop/Datenanalyse SS23/era5_data_2006_2020_thailand_monmean.xlsx", sheet="era5_t2m_2006_2020_thailand_mon")
+
+```
+
+# a) Example 01: map with coordinate points of the centroids
+
+```{r}
+#assuming that longitude and latitude data in climate data are the centroids
+centroids = T.huss.mon[,2:4] #including the names of the province to join the data later
+
+# downloading the geo data (borders of districts)
+library(sf)
+geography <- st_read("/Users/leamrowiec/Desktop/Datenanalyse SS23/other data/gadm36_THA_shp")
+```
+
+```{r}
+install.packages("dplyr")
+library(dplyr)
+
+# zeilen der dataframe centroids nach der reihenfolge der Distrikte in geography ordnen
+centroids.ordered <- arrange(centroids, ADM1_EN) 
+#aber: namen der distrikte sind nicht immer gleich -> hinzufügen einer Nummerierung der Dsitrikte, um gleiche spalte zu bekommen
+centroids.ordered['numbers'] = c(1:77)
+geography["numbers"] = c(1:77)
+
+
+```
+
+```{r}
+# Zeilen beider dataframes (centroids und geography) nach alphabetischer reihenfolge der provinzen ordnen
+centroids.sorted = arrange(centroids, ADM1_EN) #geography ist schon nach dem alphabet geordnet
+
+#namen der distrikte sind nicht immer gleich -> hinzufügen einer Nummerierung der Dsitrikte, um gleiche spalte zu bekommen
+
+centroids.sorted['numbers'] = c(1:77)
+geography["numbers"] = c(1:77)
+
+
+```
+
+```{r}
+# combining the two dataframes via the common column "numbers"
+centroids.geography = merge(centroids.sorted, geography, by= "numbers")
+# verview of data structure
+class(centroids.geography)
+head(centroids.geography)
+summary(centroids.geography)
+str(centroids.geography)
+
+```
+
+```{r}
+install.packages("ggplot2")
+library(ggplot2)
+library(sf)
+```
+
+```{r}
+install.packages("rgdal")
+install.packages("data.table")
+
+library(rgdal)
+library(data.table)
+```
+
+```{r}
+ggplot() +
+  geom_sf(data = centroids.geography, aes(geometry=geometry),col = "black", fill = NA) +  # adds geometric layer of polygons stored in the data object
+  geom_point(data = centroids.geography, aes(x = Longitude, y = Latitude)) # adds coordinate points
+
+
+```
+
+# b) Example 02: Map with data plotted over district area
+
+```{r}
+# plotting polygon data with ggplot2
+# geography is dataframe with polygon data
+class(geography)
+
+# to plot the data we need a new dataframe combining geography data and relative humidity data
+
+# 1. putting lines of dataframe T.huss.mon in alphabetical order of the province names
+library(dplyr)
+T.huss.mon.ordered = arrange(T.huss.mon, ADM1_EN) 
+
+# 2. changing numers in column "Number"
+T.huss.mon.ordered = subset(T.huss.mon.ordered, select = -Number)
+T.huss.mon.ordered['numbers'] = c(1:77)
+# geography["numbers"] = c(1:77); numbers have already been added
+
+# 3. merging the two dataframes of relative humidtiy and geography
+huss.geography = merge(T.huss.mon.ordered, geography, by= "numbers")
+```
+
+```{r}
+# 4. (data from 2006 to 2020)
+mean.huss.jan = sapply(T.huss.mon.ordered[1,], function(x) {rowMeans(x[1, c(2006.1, 2007.1, 2008.1, 2009.1, 2010.1, 2011.1, 2012.1, 2013.1, 2014.1, 2015.1, 2016.1, 2017.1,2018.1, 2019.1,2020.1)])
+
+mean.huss.jan = sapply(1:nrow(T.huss.mon.ordered), function(i) rowMeans(T.huss.mon.ordered[i,c(2006.1, 2007.1, 2008.1, 2009.1, 2010.1, 2011.1, 2012.1, 2013.1, 2014.1, 2015.1, 2016.1, 2017.1,2018.1, 2019.1, 2020.1)])
+
+mean.huss.jan = sapply(1:nrow(T.huss.mon.ordered), function(i) rowMeans(T.huss.mon.ordered[i,c(2006.1, 2007.1, 2008.1, 2009.1, 2010.1, 2011.1, 2012.1, 2013.1, 2014.1, 2015.1, 2016.1, 2017.1, 2018.1, 2019.1, 2020.1)])) 
+
+
+# Was zur Hölle ist da falsch?????
+# das wollte ich eigentlich für jeden Monat machen
+```
