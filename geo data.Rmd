@@ -125,4 +125,7 @@ mean.huss.jan = sapply(1:nrow(T.huss.mon.ordered), function(i) rowMeans(T.huss.m
 
 # Was zur Hölle ist da falsch?????
 # das wollte ich eigentlich für jeden Monat machen
+
+
+test änderung 
 ```
