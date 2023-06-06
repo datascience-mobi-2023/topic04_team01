@@ -53,7 +53,7 @@ dengue2018 <- read_excel(path2018)
 dengue2019 <- read_excel(path2019)
 dengue2020 <- read_excel(path2020)
 
-
+ 
 # Den eingelesenen Dataframe anzeigen
 print(dengue2006)
 print(dengue2007)
