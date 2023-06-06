@@ -1,0 +1,100 @@
+---
+title: "How to upload excel sheets into R (dengue data set)"
+output: html_document
+date: "2023-05-30"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Installieren des httr-Pakets, falls es noch nicht installiert ist
+```{r}
+install.packages("httr")
+```
+
+# Laden des httr-Pakets
+```{r}
+library(httr) 
+```
+
+# GitHub-Link zur Raw-Version der Datei
+```{r}
+github_link <- "https://raw.githubusercontent.com/datascience-mobi-2023/topic04_team01/main/2006_dengue_extracted.csv"
+```
+
+# Abrufen des Dateiinhalts von GitHub
+```{r}
+response <- GET(github_link)
+```
+
+# Überprüfen Sie den Status der Antwort
+```{r}
+
+if (status_code(response) == 200) {
+  # Extrahieren Sie den Inhalt der Datei
+  file_content <- content(response, as = "text")
+  
+  # Verarbeiten Sie den Inhalt der Datei (z. B. lesen Sie ihn in ein DataFrame ein)
+  data <- read.csv(text = file_content, quote = "")
+  
+  # Führen Sie die gewünschten Analysen oder Operationen mit den Daten durch
+  # ...
+} else {
+  # Wenn der Abruf fehlgeschlagen ist, geben Sie eine Fehlermeldung aus
+  stop("Fehler beim Abrufen der Datei von GitHub.")
+}
+```
+
+# Extrahieren Sie den Inhalt der Datei
+```{r}
+file_content <- content(response, "text")
+```
+
+# Verarbeiten Sie den Inhalt der Datei (z. B. lesen Sie ihn in ein DataFrame ein)
+```{r}
+data <- read.csv(text = file_content)
+```
+
+```{r}
+# Installieren des readr-Pakets, falls es noch nicht installiert ist
+install.packages("readr")
+
+# Laden des readr-Pakets
+library(readr)
+
+# GitHub-Link zur Raw-Version der CSV-Datei
+github_link <- "https://raw.githubusercontent.com/datascience-mobi-2023/topic04_team01/main/2006_dengue_extracted.csv"
+
+# Einlesen der CSV-Datei von GitHub
+data <- read_csv(github_link)
+?read_csv
+
+
+# Anzeigen der eingelesenen Daten
+print(data)
+```
+
+
+3. Version with raltive path 
+```{r}
+# Benötigte Bibliothek installieren
+install.packages("readxl")
+
+# Benötigte Bibliothek laden
+library(readxl)
+
+# Relativer Pfad zur Excel-Datei
+relative_path <- "./topic04_team01/2006_dengue_extracted.xlsx"
+
+# Pfad zum Arbeitsverzeichnis setzen (wo die Excel-Datei liegt)
+setwd(dirname(rstudioapi::getSourceEditorContext()$path))
+
+# Excel-Datei einlesen und als Dataframe speichern
+data <- read_excel(relative_path)
+
+# Den eingelesenen Dataframe anzeigen
+print(data)
+```
+
