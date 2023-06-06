@@ -4,97 +4,86 @@ output: html_document
 date: "2023-05-30"
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+#Dengue data als dataframe einzeln einlesen in den Jahren 2006 - 2020:
 
-
-# Installieren des httr-Pakets, falls es noch nicht installiert ist
-```{r}
-install.packages("httr")
-```
-
-# Laden des httr-Pakets
-```{r}
-library(httr) 
-```
-
-# GitHub-Link zur Raw-Version der Datei
-```{r}
-github_link <- "https://raw.githubusercontent.com/datascience-mobi-2023/topic04_team01/main/2006_dengue_extracted.csv"
-```
-
-# Abrufen des Dateiinhalts von GitHub
-```{r}
-response <- GET(github_link)
-```
-
-# Überprüfen Sie den Status der Antwort
-```{r}
-
-if (status_code(response) == 200) {
-  # Extrahieren Sie den Inhalt der Datei
-  file_content <- content(response, as = "text")
-  
-  # Verarbeiten Sie den Inhalt der Datei (z. B. lesen Sie ihn in ein DataFrame ein)
-  data <- read.csv(text = file_content, quote = "")
-  
-  # Führen Sie die gewünschten Analysen oder Operationen mit den Daten durch
-  # ...
-} else {
-  # Wenn der Abruf fehlgeschlagen ist, geben Sie eine Fehlermeldung aus
-  stop("Fehler beim Abrufen der Datei von GitHub.")
-}
-```
-
-# Extrahieren Sie den Inhalt der Datei
-```{r}
-file_content <- content(response, "text")
-```
-
-# Verarbeiten Sie den Inhalt der Datei (z. B. lesen Sie ihn in ein DataFrame ein)
-```{r}
-data <- read.csv(text = file_content)
-```
-
-```{r}
-# Installieren des readr-Pakets, falls es noch nicht installiert ist
-install.packages("readr")
-
-# Laden des readr-Pakets
-library(readr)
-
-# GitHub-Link zur Raw-Version der CSV-Datei
-github_link <- "https://raw.githubusercontent.com/datascience-mobi-2023/topic04_team01/main/2006_dengue_extracted.csv"
-
-# Einlesen der CSV-Datei von GitHub
-data <- read_csv(github_link)
-?read_csv
-
-
-# Anzeigen der eingelesenen Daten
-print(data)
-```
-
-
-3. Version with raltive path 
 ```{r}
 # Benötigte Bibliothek installieren
 install.packages("readxl")
+```
 
+```{r}
 # Benötigte Bibliothek laden
 library(readxl)
 
 # Relativer Pfad zur Excel-Datei
-relative_path <- "./topic04_team01/2006_dengue_extracted.xlsx"
+path2006 <- "./dengue data converted /2006_dengue_extracted.xlsx" 
+path2007 <- "./dengue data converted /2007_dengue_extracted.xlsx"
+path2008 <- "./dengue data converted /2008_dengue_extracted.xlsx" 
+path2009 <- "./dengue data converted /2009_dengue_extracted.xlsx"
+path2010 <- "./dengue data converted /2010_dengue_extracted.xlsx" 
+path2011 <- "./dengue data converted /2011_dengue_extracted.xlsx"
+path2012 <- "./dengue data converted /2012_dengue_extracted.xlsx" 
+path2013 <- "./dengue data converted /2013_dengue_extracted.xlsx"
+path2014 <- "./dengue data converted /2014_dengue_extracted.xlsx" 
+path2015 <- "./dengue data converted /2015_dengue_extracted.xlsx"
+path2016 <- "./dengue data converted /2016_dengue_extracted.xlsx" 
+path2017 <- "./dengue data converted /2017_dengue_extracted.xlsx"
+path2018 <- "./dengue data converted /2018_dengue_extracted.xlsx" 
+path2019 <- "./dengue data converted /2019_dengue_extracted.xlsx"
+path2020 <- "./dengue data converted /2010_dengue_extracted.xlsx" 
+
 
 # Pfad zum Arbeitsverzeichnis setzen (wo die Excel-Datei liegt)
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 
 # Excel-Datei einlesen und als Dataframe speichern
-data <- read_excel(relative_path)
+dengue2006 <- read_excel(path2006)
+dengue2007 <- read_excel(path2007)
+
+dengue2009 <- read_excel(path2009)
+dengue2010 <- read_excel(path2010)
+dengue2011 <- read_excel(path2011)
+dengue2012 <- read_excel(path2012)
+dengue2013 <- read_excel(path2013)
+dengue2014 <- read_excel(path2014)
+dengue2015 <- read_excel(path2015)
+dengue2016 <- read_excel(path2016)
+dengue2017 <- read_excel(path2017)
+dengue2018 <- read_excel(path2018)
+dengue2019 <- read_excel(path2019)
+dengue2020 <- read_excel(path2020)
+
 
 # Den eingelesenen Dataframe anzeigen
-print(data)
+print(dengue2006)
+print(dengue2007)
 ```
+##Vereinfachtes einlesen mit schleife -> funktioniert noch nicht: 
+- hab versucht es einfacher zu machen hat aber noch nicht geklappt 
+- wenn sich da jemand drin auskennt gerne ausprobieren 
+```{r}
+#Liste der Dateinamen
+file_names <- c("2006_dengue_extracted.xlsx", "2007_dengue_extracted.xlsx", "2009_dengue_extracted.xlsx", "2010_dengue_extracted.xlsx", "2011_dengue_extracted.xlsx", "2012_dengue_extracted.xlsx", "2013_dengue_extracted.xlsx", "2014_dengue_extracted.xlsx", "2015_dengue_extracted.xlsx", "2016_dengue_extracted.xlsx", "2017_dengue_extracted.xlsx", "2018_dengue_extracted.xlsx", "2019_dengue_extracted.xlsx","2020_dengue_extracted.xlsx")
 
+# Relativer Pfad zum Ordner, in dem die Dateien liegen
+folder_path <- "/Users/noemitigrato/Desktop/topic04_team01/dengue data converted"
+
+# Leere Liste zum Speichern der eingelesenen Dataframes
+data_list <- list()
+
+# Liste zum Speichern der relativen Pfade
+relative_paths <- list()
+
+# Schleife zum Einlesen der Excel-Dateien
+for (file_name in file_names) {
+  
+  # Konstruieren Sie den vollständigen relativen Pfad für jede Datei
+  relative_paths <- paste0(folder_path,"/", file_name)
+  
+  # Excel-Datei einlesen und als Dataframe speichern
+  dengue_data <- read_excel(relative_paths)
+  
+  # Dataframe zur Liste hinzufügen
+  data_list[[file_name]] <- data
+}
+```
