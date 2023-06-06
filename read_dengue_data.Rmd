@@ -87,3 +87,19 @@ for (file_name in file_names) {
   data_list[[file_name]] <- data
 }
 ```
+
+Dataframe für die Jahre 2006, 2007, 2009 , 2010 
+```{r}
+ 
+```
+
+
+
+Angleichen der Daten von 2006 -2011 & 2017 - 2020 ohne Zonen zahlen an die der Jahre dazwischen
+```{r}
+rownames(dengue2006) = dengue2006$`Reporting areas`
+
+#let`s remove the total Zone numbers and Regions 
+i.remove = which(rownames(dengue2006) %in% c("Zone:1","Zone:4","Zone:2","Zone:5","Zone:6", "Zone:3","Zone:7", ))
+```
+
