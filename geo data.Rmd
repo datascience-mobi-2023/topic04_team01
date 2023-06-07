@@ -189,7 +189,7 @@ ggplot() +
   scale_fill_viridis()
   
 #cutting data to what we want to plot 
-
+########???
 
 ```
 
@@ -208,24 +208,6 @@ library(dplyr)
 library(magrittr)
  
 
-cases_facet <- 
-  data %>%  # this connects the data object
-  group_by(year, month, day, adm2code) %>% # this groups the cases per month and year for each district
-  # calculate state level incidence rate
-  summarise(cases = sum(cases)) %>% 
-  ggplot(aes(x = month, y = year, fill = cases)) + # for each facet plot it sets the time which is summarized per x and y axis
-  geom_raster() + # creates a raster-based heatmap representing the data in color spectrum
-  ylab("Year") + 
-  xlab("Month") +
-  scale_fill_gradientn(name = "# Dengue Cases", colours=brewer.pal(7, "PuRd"), trans = "log1p", breaks = c(0, 10, 100, 300, 1000), labels = c(0, 10, 100, 300, 1000) ) + 
-  scale_y_discrete() +
-  scale_x_discrete(labels = c("", "2", "", "4", "", "6", "", "8", "", "10", "", "12")) + # improved readability of the axis
-  theme_bw() + 
-  theme(plot.title = element_text(size = 25), axis.title = element_text(size = 20), legend.text = element_text(size = 20), legend.title = element_text(size = 20)) +
-  # organise by district code in grid file
-  facet_geo( ~ adm2code, grid = grid, label = "code") # arranges the facet plots position to each other
-
-cases_facet
 
 
 ```
