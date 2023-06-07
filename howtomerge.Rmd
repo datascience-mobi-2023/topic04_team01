@@ -9,24 +9,6 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
-#wie lösen wir merges ?
-
-
-## wir scheiben hier drin
-
-#ich hba keine anhnag wie das funktioniert lasst es uns lernen
-```
-
-```{r}
-<<rstehe Github nicht
-=======
-## Hilfe ich verstehe Github nicht 
-
-Kuchen Backen
-```
-
-```{r}
-Aloha 
->>>>>>> Stashed changes
+okay new
 ```
 
