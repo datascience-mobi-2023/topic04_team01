@@ -39,7 +39,7 @@ setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 # Excel-Datei einlesen und als Dataframe speichern
 dengue2006 <- read_excel(path2006)
 dengue2007 <- read_excel(path2007)
-
+dengue2008 <- read_excel(path2008)
 dengue2009 <- read_excel(path2009)
 dengue2010 <- read_excel(path2010)
 dengue2011 <- read_excel(path2011)
@@ -95,12 +95,106 @@ Dataframe für die Jahre 2006, 2007, 2009 , 2010
 
 
 
-Angleichen der Daten von 2006 -2011 & 2017 - 2020 ohne Zonen zahlen an die der Jahre dazwischen
+#Angleichen der Daten von 2006 -2011 & 2017 - 2020 ohne Zonen zahlen an die der Jahre dazwischen
 ```{r}
 rownames(dengue2006) = dengue2006$`Reporting areas`
 
 #let`s remove the total Zone numbers and Regions 
-i.remove = which(rownames(dengue2006) %in% c("Zone:1","Zone:4","Zone:2","Zone:5","Zone:6", "Zone:3","Zone:7", ))
+i.remove = which(rownames(dengue2006) %in% c("Zone:1","Zone:4","Zone:2","Zone:5","Zone:6", "Zone:3","Zone:7", "Zone:8", "Zone:9", "Zone:10", "Zone:11", "Zone:12", "Zone:13", "Zone:14", "Zone:15", "Zone:16", "Zone:17", "Zone:18", "Zone:20", "Northern Region", "Central Region", "Southern Region", "North-Eastern Region","Total"))
+
+#let´s remove the lines 
+dengue2006 = dengue2006[- i.remove,]
+
+
+print(dengue2006)
 ```
 
+
+#apply function um die rows für alle dengue daten zu cleanen (=zusätzlichen rows rausschneiden und alphabetsich sortieren )
+
+```{r}
+# Erstelle eine Liste mit den Namen der DataFrames
+df_names <- paste0("dengue", c(2006:2007, 2009:2020))
+
+
+#Spalten umbennen 
+colnames(dengue2009) = dengue2009[1,]
+colnames(dengue2010) = dengue2010[1,]
+colnames(dengue2011) = dengue2011[1,]
+colnames(dengue2012) = dengue2009[1,]
+colnames(dengue2013) = dengue2009[1,]
+colnames(dengue2014) = dengue2009[1,]
+colnames(dengue2015) = dengue2009[1,]
+colnames(dengue2016) = dengue2009[1,]
+colnames(dengue2017) = dengue2017[1,]
+colnames(dengue2018) = dengue2018[1,]
+colnames(dengue2019) = dengue2019[1,]
+colnames(dengue2020) = dengue2020[1,]
+```
+
+```{r}
+# Liste der Jahre
+years <- c(2006:2007,2009:2020)
+
+#Nummern von 1-19
+years0 = paste0("0", 1:9)
+years1 = c(10:19)
+
+
+#liste der Zonen mit format: ZONE:01 - 19 
+ZONE0 = c(paste0("ZONE",":", years0), paste0("ZONE",":", years1)) 
+
+#Liste der Zonen mit format Zone:1 - 19 
+Zone1 = c(paste0("Zone",":", 1:19))
+
+zones# Schleife über die Jahre
+for (year in years) {
+  # DataFrame-Namen generieren
+  df_name <- paste0("dengue", year)
+  
+  # DataFrame laden
+  df <- get(df_name)
+  
+  # Setze die Zeilennamen auf die Werte der Spalte "Reporting areas"
+  rownames(df) <- df$`Reporting areas`
+  
+  # Zeilen entfernen
+  remove_rows <- c(ZONE0, Zone1, "Northern Region", "Central Region", "Southern Region", "North-Eastern Region","Total", "Reporting areas")
+  df <- df[!rownames(df) %in% remove_rows, ]
+  
+  # Speichere das modifizierte DataFrame unter dem gleichen Namen
+  assign(df_name, df)
+  
+  # Gib das modifizierte DataFrame aus
+  print(df)
+}
+```
+
+
+#Zeilen alphabetisch sortieren 
+```{r}
+
+dengue2006_sorted = dengue2006[order(dengue2006$`Reporting areas`),]
+
+#apply function zum sortieren alles dataframes alphabetisch nach den reporting areas: 
+
+# Erstelle eine Liste mit den Namen der DataFrames
+df_names <- paste0("dengue", 2006:2020)
+
+# Erstelle eine leere Liste, um die sortierten DataFrames zu speichern
+sorted_dfs <- list()
+
+# Verwende die apply-Funktion, um die DataFrames alphabetisch zu sortieren
+sorted_dfs <- lapply(df_names, function(name) {
+  # Lade das entsprechende DataFrame
+  df <- get(name)
+  
+  # Sortiere das DataFrame nach der Spalte "reporting areas"
+  sorted_df <- df[order(df$`Reporting areas`), ]
+  
+  # Gib das sortierte DataFrame zurück
+  return(sorted_df)
+})
+
+```
 
