@@ -8,6 +8,26 @@ date: "2023-06-01"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+##packages laden
+
+```{r}
+install.packages("sp")
+install.packages("terra")
+install.packages("raster")
+install.packages("ggplot2")
+install.packages("exactextractr")
+install.packages("sf")
+```
+
+```{r}
+library(sp)
+library(sf)
+library(terra)
+library(raster)
+library(ggplot2)
+library(exactextractr)
+```
+
 ## 1) loading point data
 
 ```{r}
@@ -202,3 +222,6 @@ mean.huss.jan = sapply(1:nrow(T.huss.mon.ordered), function(i) rowMeans(T.huss.m
 
 test änderung 
 ```
+
+
+
