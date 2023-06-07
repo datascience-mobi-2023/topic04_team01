@@ -20,7 +20,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 <<<<<<< Updated upstream
 ## Hilfe ich verstehe Github nicht
-=======
+======= hfhfhhfhfhfhfh
 ## Hilfe ich verstehe Github nicht 
 
 Kuchen Backen
