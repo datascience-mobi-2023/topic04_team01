@@ -8,18 +8,38 @@ date: "2023-06-01"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+##packages laden
+
+```{r}
+install.packages("sp")
+install.packages("terra")
+install.packages("raster")
+install.packages("ggplot2")
+install.packages("exactextractr")
+install.packages("sf")
+```
+
+```{r}
+library(sp)
+library(sf)
+library(terra)
+library(raster)
+library(ggplot2)
+library(exactextractr)
+```
+
 ## 1) loading point data
 
 ```{r}
 install.packages("readxl")
 library(readxl)
 
-sheet_names = excel_sheets("/Users/leamrowiec/Desktop/Datenanalyse SS23/era5_data_2006_2020_thailand_monmean.xlsx")
+sheet_names = excel_sheets("./era5_data_2006_2020_thailand_monmean.xlsx")
 
 #laden von den einzelnen sheets
-T.huss.mon = read_excel("/Users/leamrowiec/Desktop/Datenanalyse SS23/era5_data_2006_2020_thailand_monmean.xlsx", sheet="era5_huss_2006_2020_thailand_mo")
-T.tp.mon = read_excel("/Users/leamrowiec/Desktop/Datenanalyse SS23/era5_data_2006_2020_thailand_monmean.xlsx", sheet="era5_tp_2006_2020_thailand_monm")
-T.t2m.mon = read_excel("/Users/leamrowiec/Desktop/Datenanalyse SS23/era5_data_2006_2020_thailand_monmean.xlsx", sheet="era5_t2m_2006_2020_thailand_mon")
+T.huss.mon = read_excel("./era5_data_2006_2020_thailand_monmean.xlsx", sheet="era5_huss_2006_2020_thailand_mo")
+T.tp.mon = read_excel("./era5_data_2006_2020_thailand_monmean.xlsx", sheet="era5_tp_2006_2020_thailand_monm")
+T.t2m.mon = read_excel("./era5_data_2006_2020_thailand_monmean.xlsx", sheet="era5_t2m_2006_2020_thailand_mon")
 
 ```
 
@@ -31,7 +51,9 @@ centroids = T.huss.mon[,2:4] #including the names of the province to join the da
 
 # downloading the geo data (borders of districts)
 library(sf)
-geography <- st_read("/Users/leamrowiec/Desktop/Datenanalyse SS23/other data/gadm36_THA_shp")
+geography <- st_read("./shape files for thailand map/gadm36_THA_shp")
+
+## Was ist hierbei der Fehler ???
 ```
 
 ```{r}
@@ -39,17 +61,15 @@ install.packages("dplyr")
 library(dplyr)
 
 # zeilen der dataframe centroids nach der reihenfolge der Distrikte in geography ordnen
+
 centroids.ordered <- arrange(centroids, ADM1_EN) 
+
 #aber: namen der distrikte sind nicht immer gleich -> hinzufügen einer Nummerierung der Dsitrikte, um gleiche spalte zu bekommen
+
 centroids.ordered['numbers'] = c(1:77)
 geography["numbers"] = c(1:77)
 
 
-```
-
-```{r}
-install.packages("dplyr")
-library(dplyr)
 ```
 
 ```{r}
@@ -61,13 +81,12 @@ centroids.sorted = arrange(centroids, ADM1_EN) #geography ist schon nach dem alp
 centroids.sorted['numbers'] = c(1:77)
 geography["numbers"] = c(1:77)
 
-
 ```
 
 ```{r}
 # combining the two dataframes via the common column "numbers"
 centroids.geography = merge(centroids.sorted, geography, by= "numbers")
-# verview of data structure
+# perview of data structure
 class(centroids.geography)
 head(centroids.geography)
 summary(centroids.geography)
@@ -93,7 +112,8 @@ library(data.table)
 ggplot() +
   geom_sf(data = centroids.geography, aes(geometry=geometry),col = "black", fill = NA) +  # adds geometric layer of polygons stored in the data object
   geom_point(data = centroids.geography, aes(x = Longitude, y = Latitude)) # adds coordinate points
-  
+
+
 ```
 
 # b) Example 02: Map with data plotted over district area
@@ -110,122 +130,35 @@ library(dplyr)
 T.huss.mon.ordered = arrange(T.huss.mon, ADM1_EN) 
 
 # 2. changing numers in column "Number"
-#T.huss.mon.ordered = subset(T.huss.mon.ordered, select = -Number)
+T.huss.mon.ordered = subset(T.huss.mon.ordered, select = -Number)
 T.huss.mon.ordered['numbers'] = c(1:77)
 # geography["numbers"] = c(1:77); numbers have already been added
 
-
-```
-
-```{r}
-
-# using mean data of each province as a mean over all reported months
-T.huss.mon.mean = apply(T.huss.mon.ordered[-c(1,2)], 1, mean)
-T.huss.mon.mean.df = as.data.frame(T.huss.mon.mean)
-
-# adding another column of numberst to merge the dataframes
-T.huss.mon.mean.df['numbers'] = c(1:77)
-
 # 3. merging the two dataframes of relative humidtiy and geography
-huss.geography = merge(T.huss.mon.mean.df, geography, by= "numbers")
-
-
+huss.geography = merge(T.huss.mon.ordered, geography, by= "numbers")
 ```
 
 ```{r}
-ggplot() +
-  geom_sf(data = huss.geography,aes(geometry = geometry, fill= T.huss.mon.mean), main= "mean temperature of each province") +
-  coord_sf() +  
-  theme_minimal() +
-  labs(title = "mean relative humidity")
+print(T.huss.mon.ordered)
 ```
 
 ```{r}
-# using max data of each province as a mean over all reported months
-T.huss.mon.max = apply(T.huss.mon.ordered[-c(1,2)], 1, max)
-T.huss.mon.max.df = as.data.frame(T.huss.mon.max)
-
-# adding another column of numberst to merge the dataframes
-T.huss.mon.max.df['numbers'] = c(1:77)
-
-# merging the two dataframes of relative humidtiy and geography
-huss.geography.max = merge(T.huss.mon.max.df, geography, by= "numbers")
-
-# removing non-necessary colums of huss.geography.max
-huss.geography.max.rmv = huss.geography.max[-c(3,4),]
-
-ggplot() +
-  geom_sf(data = huss.geography.max.rmv, aes(geometry = geometry), fill= T.huss.mon.max) +
-  coord_sf() +  
-  theme_minimal() +
-  labs(title = "max relative humidity")
-
-```
-
-```{r}
-install.packages("viridis")
-
-# using max data of each province as a mean over all reported months
-T.huss.mon.min = apply(T.huss.mon.ordered[-c(1,2)], 1, min)
-T.huss.mon.min.df = as.data.frame(T.huss.mon.min)
-
-# adding another column of numberst to merge the dataframes
-T.huss.mon.min.df['numbers'] = c(1:77)
-
-# 3. merging the two dataframes of relative humidtiy and geography
-huss.geography = merge(T.huss.mon.min.df, geography, by= "numbers")
+# 4. (data from 2006 to 2020)
 
 
+x<- c()
+mean.huss.jan = sapply(T.huss.mon.ordered[1,], function(x) {rowMeans(as.matrix(x[1, c(2006.1, 2007.1, 2008.1, 2009.1, 2010.1, 2011.1, 2012.1, 2013.1, 2014.1, 2015.1, 2016.1, 2017.1,2018.1, 2019.1,2020.1)]))})
+
+mean.huss.jan = sapply(T.huss.mon.ordered[1,], function(x) {rowMeans(as.matrix(x[1, c(2006.1, 2007.1, 2008.1, 2009.1, 2010.1, 2011.1, 2012.1, 2013.1, 2014.1, 2015.1, 2016.1, 2017.1, 2018.1, 2019.1, 2020.1)]))})
+
+mean.huss.jan = sapply(1:nrow(T.huss.mon.ordered), function(i) rowMeans(T.huss.mon.ordered[i,c(2006.1, 2007.1, 2008.1, 2009.1, 2010.1, 2011.1, 2012.1, 2013.1, 2014.1, 2015.1, 2016.1, 2017.1,2018.1, 2019.1, 2020.1)])
+
+mean.huss.jan = sapply(1:nrow(T.huss.mon.ordered), function(i) rowMeans(T.huss.mon.ordered[i,c(2006.1, 2007.1, 2008.1, 2009.1, 2010.1, 2011.1, 2012.1, 2013.1, 2014.1, 2015.1, 2016.1, 2017.1, 2018.1, 2019.1, 2020.1)])) 
 
 
-library(viridis)
-library(ggplot2)
-
-ggplot() +
-  geom_sf(data = huss.geography,aes(geometry = geometry), fill= T.huss.mon.min) +
-  coord_sf() +  
-  theme_minimal() +
-  labs(title = "min relative humidity") +
-  scale_fill_viridis()
-  
-#cutting data to what we want to plot 
+# Was zur Hölle ist da falsch?????
+# das wollte ich eigentlich für jeden Monat machen
 
 
-```
-
-## c) geo facete plot of mean relative humidity (keine ahnung wie das gehen soll)
-
-```{r}
-install.packages("RColorBrewer")
-install.packages("geofacet")
-install.packages("magrittr")
-install.packages("ggplot2")
-
-library(RColorBrewer)
-library(geofacet)
-library(ggplot2)
-library(dplyr)
-library(magrittr)
- 
-
-cases_facet <- 
-  data %>%  # this connects the data object
-  group_by(year, month, day, adm2code) %>% # this groups the cases per month and year for each district
-  # calculate state level incidence rate
-  summarise(cases = sum(cases)) %>% 
-  ggplot(aes(x = month, y = year, fill = cases)) + # for each facet plot it sets the time which is summarized per x and y axis
-  geom_raster() + # creates a raster-based heatmap representing the data in color spectrum
-  ylab("Year") + 
-  xlab("Month") +
-  scale_fill_gradientn(name = "# Dengue Cases", colours=brewer.pal(7, "PuRd"), trans = "log1p", breaks = c(0, 10, 100, 300, 1000), labels = c(0, 10, 100, 300, 1000) ) + 
-  scale_y_discrete() +
-  scale_x_discrete(labels = c("", "2", "", "4", "", "6", "", "8", "", "10", "", "12")) + # improved readability of the axis
-  theme_bw() + 
-  theme(plot.title = element_text(size = 25), axis.title = element_text(size = 20), legend.text = element_text(size = 20), legend.title = element_text(size = 20)) +
-  # organise by district code in grid file
-  facet_geo( ~ adm2code, grid = grid, label = "code") # arranges the facet plots position to each other
-
-cases_facet
-
-
+test änderung 
 ```
