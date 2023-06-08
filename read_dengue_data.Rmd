@@ -16,21 +16,21 @@ install.packages("readxl")
 library(readxl)
 
 # Relativer Pfad zur Excel-Datei
-path2006 <- "./dengue data converted /2006_dengue_extracted.xlsx" 
-path2007 <- "./dengue data converted /2007_dengue_extracted.xlsx"
-path2008 <- "./dengue data converted /2008_dengue_extracted.xlsx" 
-path2009 <- "./dengue data converted /2009_dengue_extracted.xlsx"
-path2010 <- "./dengue data converted /2010_dengue_extracted.xlsx" 
-path2011 <- "./dengue data converted /2011_dengue_extracted.xlsx"
-path2012 <- "./dengue data converted /2012_dengue_extracted.xlsx" 
-path2013 <- "./dengue data converted /2013_dengue_extracted.xlsx"
-path2014 <- "./dengue data converted /2014_dengue_extracted.xlsx" 
-path2015 <- "./dengue data converted /2015_dengue_extracted.xlsx"
-path2016 <- "./dengue data converted /2016_dengue_extracted.xlsx" 
-path2017 <- "./dengue data converted /2017_dengue_extracted.xlsx"
-path2018 <- "./dengue data converted /2018_dengue_extracted.xlsx" 
-path2019 <- "./dengue data converted /2019_dengue_extracted.xlsx"
-path2020 <- "./dengue data converted /2010_dengue_extracted.xlsx" 
+path2006 <- "./dengue_data_converted /2006_dengue_extracted.xlsx" 
+path2007 <- "./dengue_data_converted /2007_dengue_extracted.xlsx"
+path2008 <- "./dengue_data_converted /2008_dengue_extracted.xlsx" 
+path2009 <- "./dengue_data_converted /2009_dengue_extracted.xlsx"
+path2010 <- "./dengue_data_converted /2010_dengue_extracted.xlsx" 
+path2011 <- "./dengue_data_converted /2011_dengue_extracted.xlsx"
+path2012 <- "./dengue_data_converted /2012_dengue_extracted.xlsx" 
+path2013 <- "./dengue_data_converted /2013_dengue_extracted.xlsx"
+path2014 <- "./dengue_data_converted /2014_dengue_extracted.xlsx" 
+path2015 <- "./dengue_data_converted /2015_dengue_extracted.xlsx"
+path2016 <- "./dengue_data_converted /2016_dengue_extracted.xlsx" 
+path2017 <- "./dengue_data_converted /2017_dengue_extracted.xlsx"
+path2018 <- "./dengue_data_converted /2018_dengue_extracted.xlsx" 
+path2019 <- "./dengue_data_converted /2019_dengue_extracted.xlsx"
+path2020 <- "./dengue_data_converted /2010_dengue_extracted.xlsx" 
 
 
 # Pfad zum Arbeitsverzeichnis setzen (wo die Excel-Datei liegt)
@@ -57,16 +57,23 @@ dengue2020 <- read_excel(path2020)
 # Den eingelesenen Dataframe anzeigen
 print(dengue2006)
 print(dengue2007)
+
+#eine zeile fehlt bei 2020: lasst uns sie hinzufügen 
+Bungkan = c("Bungkan",873, 17, 31, 48, 21, 154, 453, 122, 21, 5, 1, 0, 0)
+dengue2020 = rbind(dengue2020,Bungkan)
+
 ```
+
 ##Vereinfachtes einlesen mit schleife -> funktioniert noch nicht: 
 - hab versucht es einfacher zu machen hat aber noch nicht geklappt 
 - wenn sich da jemand drin auskennt gerne ausprobieren 
+
 ```{r}
 #Liste der Dateinamen
 file_names <- c("2006_dengue_extracted.xlsx", "2007_dengue_extracted.xlsx", "2009_dengue_extracted.xlsx", "2010_dengue_extracted.xlsx", "2011_dengue_extracted.xlsx", "2012_dengue_extracted.xlsx", "2013_dengue_extracted.xlsx", "2014_dengue_extracted.xlsx", "2015_dengue_extracted.xlsx", "2016_dengue_extracted.xlsx", "2017_dengue_extracted.xlsx", "2018_dengue_extracted.xlsx", "2019_dengue_extracted.xlsx","2020_dengue_extracted.xlsx")
 
 # Relativer Pfad zum Ordner, in dem die Dateien liegen
-folder_path <- "/Users/noemitigrato/Desktop/topic04_team01/dengue data converted"
+folder_path <- "./dengue_data_converted"
 
 # Leere Liste zum Speichern der eingelesenen Dataframes
 data_list <- list()
@@ -87,15 +94,30 @@ for (file_name in file_names) {
   data_list[[file_name]] <- data
 }
 ```
-
-Dataframe für die Jahre 2006, 2007, 2009 , 2010 
+#Calculate the total number of dengue cases for each region for the years 2012-2016
 ```{r}
- 
+
+# Liste der Jahre
+years <- c(2012:2016)  
+
+for (year in years) {
+   # Name des Dataframes
+  df_name <- paste0("dengue", year)  
+  # Dataframe abrufen
+  df <- get(df_name)  
+  
+  total_col_name <- paste0("Total", year)  # Name der "Total"-Spalte
+  
+  df[, total_col_name] <- rowSums(df[, 2:13])  # "Total"-Spalte hinzufügen
+  
+  assign(df_name, df)  # Aktualisierten Dataframe speichern
+}
+
 ```
 
 
-
 #Angleichen der Daten von 2006 -2011 & 2017 - 2020 ohne Zonen zahlen an die der Jahre dazwischen
+#Beispiel für das JAhr 2006
 ```{r}
 rownames(dengue2006) = dengue2006$`Reporting areas`
 
@@ -110,36 +132,43 @@ print(dengue2006)
 ```
 
 
-#apply function um die rows für alle dengue daten zu cleanen (=zusätzlichen rows rausschneiden und alphabetsich sortieren )
-
+# function um die rows für alle dengue daten zu cleanen (=zusätzlichen rows rausschneiden )
 ```{r}
-# Erstelle eine Liste mit den Namen der DataFrames
-df_names <- paste0("dengue", c(2006:2007, 2009:2020))
-
-
-#Spalten umbennen 
+#alle spalten namen angleichen
+colnames(dengue2008) = dengue2009[1,]
 colnames(dengue2009) = dengue2009[1,]
-colnames(dengue2010) = dengue2010[1,]
-colnames(dengue2011) = dengue2011[1,]
+colnames(dengue2010) = dengue2009[1,]
+colnames(dengue2011) = dengue2009[1,]
 colnames(dengue2012) = dengue2009[1,]
 colnames(dengue2013) = dengue2009[1,]
 colnames(dengue2014) = dengue2009[1,]
 colnames(dengue2015) = dengue2009[1,]
 colnames(dengue2016) = dengue2009[1,]
-colnames(dengue2017) = dengue2017[1,]
-colnames(dengue2018) = dengue2018[1,]
-colnames(dengue2019) = dengue2019[1,]
-colnames(dengue2020) = dengue2020[1,]
+colnames(dengue2017) = dengue2009[1,]
+colnames(dengue2018) = dengue2009[1,]
+colnames(dengue2019) = dengue2009[1,]
+colnames(dengue2020) = dengue2009[1,]
 ```
+
+#dataframes anhand der reporting regions vergleichen um falsche zeilen zu entfernen 
+```{r}
+
+#vergleich = which(dengue2019$`Reporting areas` %in% dengue2020$`Reporting areas`)
+
+#dengue_zeilezuviel= dengue2019[-vergleich,] 
+
+#print (dengue_zeilezuviel)
+
+```
+
 
 ```{r}
 # Liste der Jahre
-years <- c(2006:2007,2009:2020)
+years <- c(2006:2020)
 
 #Nummern von 1-19
 years0 = paste0("0", 1:9)
 years1 = c(10:19)
-
 
 #liste der Zonen mit format: ZONE:01 - 19 
 ZONE0 = c(paste0("ZONE",":", years0), paste0("ZONE",":", years1)) 
@@ -147,7 +176,7 @@ ZONE0 = c(paste0("ZONE",":", years0), paste0("ZONE",":", years1))
 #Liste der Zonen mit format Zone:1 - 19 
 Zone1 = c(paste0("Zone",":", 1:19))
 
-zones# Schleife über die Jahre
+# Schleife über die Jahre
 for (year in years) {
   # DataFrame-Namen generieren
   df_name <- paste0("dengue", year)
@@ -159,7 +188,7 @@ for (year in years) {
   rownames(df) <- df$`Reporting areas`
   
   # Zeilen entfernen
-  remove_rows <- c(ZONE0, Zone1, "Northern Region", "Central Region", "Southern Region", "North-Eastern Region","Total", "Reporting areas")
+  remove_rows <- c(ZONE0, Zone1, "Northern Region", "Central Region", "Southern Region", "North-Eastern Region","Total","Reportingareas", "Reporting areas", "North Region", "South Region", "Northeast Region")
   df <- df[!rownames(df) %in% remove_rows, ]
   
   # Speichere das modifizierte DataFrame unter dem gleichen Namen
@@ -174,28 +203,125 @@ for (year in years) {
 #Zeilen alphabetisch sortieren 
 ```{r}
 
-dengue2006_sorted = dengue2006[order(dengue2006$`Reporting areas`),]
+dataframes <- ls(pattern = "dengue\\d{4}")  # Liste der Dataframes, die dem Muster "dengueXXXX" entsprechen
 
-#apply function zum sortieren alles dataframes alphabetisch nach den reporting areas: 
+for (df_name in dataframes) {
+  df <- get(df_name)  # Dataframe abrufen
+  df <- df[order(df$`Reporting areas`), ]  # Sortierung nach "Reporting areas"
+  assign(df_name, df)  # Aktualisierten Dataframe speichern
+}
+```
 
-# Erstelle eine Liste mit den Namen der DataFrames
-df_names <- paste0("dengue", 2006:2020)
 
-# Erstelle eine leere Liste, um die sortierten DataFrames zu speichern
-sorted_dfs <- list()
+#DATAFRAME erstellen 
+Prinzip: 4 spalten mit einteilung: Reporting area; Year; Month; cases; humidity data
+```{r}
 
-# Verwende die apply-Funktion, um die DataFrames alphabetisch zu sortieren
-sorted_dfs <- lapply(df_names, function(name) {
-  # Lade das entsprechende DataFrame
-  df <- get(name)
+# Liste der Jahre
+years <- c(2006:2020)
+
+# Leeres DataFrame für die kombinierten Daten erstellen
+combined_df <- data.frame(Reporting_area = character(),
+                          Year = integer(),
+                          Month = character(),
+                          dengue_cases = integer(),
+                          stringsAsFactors = FALSE)
+
+# Schleife über die Jahre
+for (year in years) {
+  # DataFrame-Namen generieren
+  df_name <- paste0("dengue", year)
   
-  # Sortiere das DataFrame nach der Spalte "reporting areas"
-  sorted_df <- df[order(df$`Reporting areas`), ]
+  # DataFrame laden
+  df <- get(df_name)
   
-  # Gib das sortierte DataFrame zurück
-  return(sorted_df)
-})
+  # Spaltennamen für die Monate extrahieren
+  months <- colnames(df)[-1]
+  
+  # Schleife über die Monate
+  for (month in months) {
+    # Daten für den aktuellen Monat extrahieren
+    month_data <- df[, c("Reporting areas", month)]
+    
+    # Spaltennamen anpassen
+    colnames(month_data) <- c("Reporting_area", "dengue_cases")
+    
+    # Jahr und Monat hinzufügen
+    month_data$Year <- year
+    month_data$Month <- month
+    
+    # Zeilen an das kombinierte DataFrame anhängen
+    combined_df <- rbind(combined_df, month_data)
+  }
+}
 
-test test 
+# Das kombinierte DataFrame anzeigen
+print(combined_df)
+```
+
+##Lets losd the realtive humidity data 
+```{r}
+library(readxl)
+
+sheet_names = excel_sheets("./era5_data_2006_2020_thailand_monmean.xlsx")
+
+#laden von den einzelnen sheets
+T.huss.mon = read_excel("./era5_data_2006_2020_thailand_monmean.xlsx", sheet="era5_huss_2006_2020_thailand_mo")
+
+T.hussmon = as.data.frame(T.huss.mon)
+#reporting areas spalten namen ändern 
+colnames(T.huss.mon)[2] <- "Reporting_Area"
+
+colnames(T.huss.mon)
+```
+
+Versuchen wir jetzt die Klima daten hinzuzufügen zu dem bestehenden dataframe 
+```{r}
+# Spaltennamen für relative Luftfeuchtigkeit extrahieren
+humidity_columns <- colnames(T.huss.mon)[5:ncol(T.huss.mon)]
+
+# Leere Spalten für relative Luftfeuchtigkeit, Längen- und Breitengrad im kombinierten DataFrame hinzufügen
+combined_df$Relative_humidity <- NA
+combined_df$Longitude <- NA
+combined_df$Latitude <- NA
+
+
+# Funktion zum Zuweisen der Werte für relative Luftfeuchtigkeit, Längen- und Breitengrad definieren
+assign_values <- function(row) {
+  # Reporting Area für aktuelle Zeile extrahieren
+  reporting_area <- row["Reporting Area"]
+
+  # Zeile in T.huss.mon mit passender Reporting Area finden
+  climate_row <- T.huss.mon[T.huss.mon$Reporting_Area== reporting_area,]
+  
+  # Überprüfen, ob eine passende Zeile gefunden wurde
+  if (nrow(climate_row) > 0) {
+    # Relative Luftfeuchtigkeit, Längen- und Breitengrad für alle Monate aktualisieren
+    for (j in 1:length(humidity_columns)) {
+      # Spaltennamen für relative Luftfeuchtigkeit, Längen- und Breitengrad extrahieren
+      humidity_col <- humidity_columns[j]
+      longitude_col <- "longitude"
+      latitude_col <- "latitude"
+      
+      # Werte aus T.huss.mon extrahieren
+      relative_humidity <- climate_row[[humidity_col]]
+      longitude <- climate_row[[longitude_col]]
+      latitude <- climate_row[[latitude_col]]
+      
+      # Werte in den kombinierten DataFrame einfügen
+      row["Relative_humidity"] <- relative_humidity
+      row["Longitude"] <- longitude
+      row["Latitude"] <- latitude
+    }
+  }
+  
+  return(row)
+}
+
+# Werte für relative Luftfeuchtigkeit, Längen- und Breitengrad mit apply() zuweisen
+combined_df <- apply(combined_df, 1, assign_values)
+
+# Das aktualisierte DataFrame anzeigen
+print(combined_df)
 ```
 
