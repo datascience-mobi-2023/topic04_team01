@@ -1,0 +1,357 @@
+---
+title: "geodata"
+output: html_document
+date: "2023-06-01"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 1) loading point data
+
+```{r}
+#install.packages("readxl")
+library(readxl)
+
+sheet_names = excel_sheets("/Users/leamrowiec/Desktop/Datenanalyse SS23/era5_data_2006_2020_thailand_monmean.xlsx")
+
+#laden von den einzelnen sheets
+T.huss.mon = read_excel("/Users/leamrowiec/Desktop/Datenanalyse SS23/era5_data_2006_2020_thailand_monmean.xlsx", sheet="era5_huss_2006_2020_thailand_mo")
+T.tp.mon = read_excel("/Users/leamrowiec/Desktop/Datenanalyse SS23/era5_data_2006_2020_thailand_monmean.xlsx", sheet="era5_tp_2006_2020_thailand_monm")
+T.t2m.mon = read_excel("/Users/leamrowiec/Desktop/Datenanalyse SS23/era5_data_2006_2020_thailand_monmean.xlsx", sheet="era5_t2m_2006_2020_thailand_mon")
+
+```
+
+# a) Example 01: map with coordinate points of the centroids
+
+```{r}
+#assuming that longitude and latitude data in climate data are the centroids
+centroids = T.huss.mon[,2:4] #including the names of the province to join the data later
+
+# downloading the geo data (borders of districts)
+library(sf)
+geography <- st_read("/Users/leamrowiec/Desktop/Datenanalyse SS23/other data/gadm36_THA_shp")
+```
+
+```{r}
+#install.packages("dplyr")
+library(dplyr)
+
+# zeilen der dataframe centroids nach der reihenfolge der Distrikte in geography ordnen
+centroids.ordered <- arrange(centroids, ADM1_EN) 
+#aber: namen der distrikte sind nicht immer gleich -> hinzufügen einer Nummerierung der Dsitrikte, um gleiche spalte zu bekommen
+centroids.ordered['numbers'] = c(1:77)
+geography["numbers"] = c(1:77)
+
+
+```
+
+```{r}
+#install.packages("dplyr")
+library(dplyr)
+```
+
+```{r}
+# Zeilen beider dataframes (centroids und geography) nach alphabetischer reihenfolge der provinzen ordnen
+centroids.sorted = arrange(centroids, ADM1_EN) #geography ist schon nach dem alphabet geordnet
+
+#namen der distrikte sind nicht immer gleich -> hinzufügen einer Nummerierung der Dsitrikte, um gleiche spalte zu bekommen
+
+centroids.sorted['numbers'] = c(1:77)
+geography["numbers"] = c(1:77)
+
+
+```
+
+```{r}
+# combining the two dataframes via the common column "numbers"
+centroids.geography = merge(centroids.sorted, geography, by= "numbers")
+# verview of data structure
+class(centroids.geography)
+head(centroids.geography)
+summary(centroids.geography)
+str(centroids.geography)
+
+```
+
+```{r}
+#install.packages("ggplot2")
+library(ggplot2)
+library(sf)
+```
+
+```{r}
+#install.packages("rgdal")
+#install.packages("data.table")
+
+library(rgdal)
+library(data.table)
+```
+
+```{r}
+ggplot() +
+  geom_sf(data = centroids.geography, aes(geometry=geometry),col = "black", fill = NA) +  # adds geometric layer of polygons stored in the data object
+  geom_point(data = centroids.geography, aes(x = Longitude, y = Latitude)) # adds coordinate points
+  
+```
+
+# b) Example 02: Map with data plotted over district area
+
+```{r}
+# plotting polygon data with ggplot2
+# geography is dataframe with polygon data
+class(geography)
+
+# to plot the data we need a new dataframe combining geography data and relative humidity data
+
+# 1. putting lines of dataframe T.huss.mon in alphabetical order of the province names
+library(dplyr)
+T.huss.mon.ordered = arrange(T.huss.mon, ADM1_EN) 
+
+# 2. changing numers in column "Number"
+#T.huss.mon.ordered = subset(T.huss.mon.ordered, select = -Number)
+T.huss.mon.ordered['numbers'] = c(1:77)
+# geography["numbers"] = c(1:77); numbers have already been added
+
+
+```
+
+```{r}
+
+# using mean data of each province as a mean over all reported months
+T.huss.mon.mean = apply(T.huss.mon.ordered[-c(1,2)], 1, mean)
+T.huss.mon.mean.df = as.data.frame(T.huss.mon.mean)
+
+# adding another column of numberst to merge the dataframes
+T.huss.mon.mean.df['numbers'] = c(1:77)
+
+# 3. merging the two dataframes of relative humidtiy and geography
+huss.geography = merge(T.huss.mon.mean.df, geography, by= "numbers")
+
+
+```
+
+```{r}
+ggplot() +
+  geom_sf(data = huss.geography,aes(geometry = geometry, fill= T.huss.mon.mean), main= "mean temperature of each province") +
+  coord_sf() +  
+  theme_minimal() +
+  labs(title = "mean relative humidity")
+```
+
+```{r}
+# using max data of each province as a mean over all reported months
+T.huss.mon.max = apply(T.huss.mon.ordered[-c(1,2)], 1, max)
+T.huss.mon.max.df = as.data.frame(T.huss.mon.max)
+
+# adding another column of numberst to merge the dataframes
+T.huss.mon.max.df['numbers'] = c(1:77)
+
+# merging the two dataframes of relative humidtiy and geography
+huss.geography.max = merge(T.huss.mon.max.df, geography, by= "numbers")
+
+# removing non-necessary colums of huss.geography.max
+huss.geography.max.rmv = huss.geography.max[-c(3,4),]
+
+# umbenennen der Spalte "T.huss.mon.max" in der dataframe "huss.geography.max.rmv"
+huss.goegraphy.max.rmv.1=rename(huss.geography.max.rmv, mon.max= T.huss.mon.max)
+
+# only plotting the map
+ggplot(huss.goegraphy.max.rmv.1, aes(geometry = geometry)) +geom_sf()
+
+#
+install.packages("colorspace")
+library(colorspace)
+library(ggplot2)
+
+ggplot(huss.goegraphy.max.rmv.1, aes(geometry=geometry)) +
+  geom_sf (aes(fill = mon.max)) +
+  colorspace::scale_fill_continuous_sequential(palette= "viridis")
+
+# wieso geht es immernoch nicht? sieht aus, als ob es latitude plottet, obwohl nicht mehr im dataframe???
+```
+
+```{r}
+
+T.huss.mon.min = apply(T.huss.mon.ordered[-c(1,2)], 1, min)
+T.huss.mon.min.df = as.data.frame(T.huss.mon.min)
+
+# adding another column of numbers to merge the dataframes
+T.huss.mon.min.df['numbers'] = c(1:77)
+
+# 3. merging the two dataframes of relative humidtiy and geography
+huss.geography.min = merge(T.huss.mon.min.df, geography, by= "numbers")
+
+# umbenennen der Spalte "T.huss.mon.min" in der dataframe "huss.geography.min"
+library(dplyr)
+huss.goegraphy.min.1 = rename(huss.geography.min, mon.min= T.huss.mon.min)
+
+library(viridis)
+library(ggplot2)
+
+ggplot(huss.goegraphy.min.1, aes(geometry=geometry)) +
+  geom_sf (aes(fill = mon.min)) +
+  colorspace::scale_fill_continuous_sequential(palette= "viridis")
+  
+```
+
+```{r}
+T.huss.mon.median = apply(T.huss.mon.ordered[-c(1,2)], 1, median)
+T.huss.mon.median.df = as.data.frame(T.huss.mon.median)
+
+# adding another column of numbers to merge the dataframes
+T.huss.mon.median.df['numbers'] = c(1:77)
+
+# 3. merging the two dataframes of relative humidtiy and geography
+huss.geography.median = merge(T.huss.mon.median.df, geography, by= "numbers")
+
+# umbenennen der Spalte "T.huss.mon.min" in der dataframe "huss.geography.min"
+library(dplyr)
+huss.goegraphy.median.1 = rename(huss.geography.median, mon.median= T.huss.mon.median)
+
+library(viridis)
+library(ggplot2)
+
+ggplot(huss.goegraphy.median.1, aes(geometry=geometry)) +
+  geom_sf (aes(fill = mon.median)) +
+  colorspace::scale_fill_continuous_sequential(palette= "viridis")
+  
+```
+
+## c) geo plot of mean relative humidity of each month 
+
+```{r}
+install.packages("RColorBrewer")
+#install.packages("geofacet")
+#install.packages("magrittr")
+#install.packages("ggplot2")
+
+library(RColorBrewer)
+library(geofacet)
+library(ggplot2)
+library(dplyr)
+library(magrittr)
+
+# Ziel: facet plot mit einzelnen Bannern, die jeweils die mittlere relative humidität über alle jahre in einem bestimmten Monat zeigen
+
+# 1. Erstellen einer dataframe, die alle mittelwerte der jeweiligen Monate für jede Provinz beinhaltet
+
+jan = c("2006.01.", "2007.01.", "2008.01.", "2009.01.", "2010.01.", "2011.01.", "2012.01.", "2013.01.", "2014.01.", "2015.01.", "2016.01.", "2017.01.", "2018.01." , "2019.01.", "2020.01.")
+
+feb = c("2006.02.", "2007.02.", "2008.02.", "2009.02.", "2010.02.", "2011.02.", "2012.02.", "2013.02.", "2014.02.", "2015.02.", "2016.02.", "2017.02.", "2018.02." , "2019.02.", "2020.02.")
+
+mar = c("2006.03.", "2007.03.", "2008.03.", "2009.03.", "2010.03.", "2011.03.", "2012.03.", "2013.03.", "2014.03.", "2015.03.", "2016.03.", "2017.03.", "2018.03." , "2019.03.", "2020.03.")
+
+apr = c("2006.04.", "2007.04.", "2008.04.", "2009.04.", "2010.04.", "2011.04.", "2012.04.", "2013.04.", "2014.04.", "2015.04.", "2016.04.", "2017.04.", "2018.04." , "2019.04.", "2020.04.")
+
+mai = c("2006.05.", "2007.05.", "2008.05.", "2009.05.", "2010.05.", "2011.05.", "2012.05.", "2013.05.", "2014.05.", "2015.05.", "2016.05.", "2017.05.", "2018.05." , "2019.05.", "2020.05.")
+
+jun = c("2006.06.", "2007.06.", "2008.06.", "2009.06.", "2010.06.", "2011.06.", "2012.06.", "2013.06.", "2014.06.", "2015.06.", "2016.06.", "2017.06.", "2018.06." , "2019.06.", "2020.06.")
+
+jul = c("2006.07.", "2007.07.", "2008.07.", "2009.07.", "2010.07.", "2011.07.", "2012.07.", "2013.07.", "2014.07.", "2015.07.", "2016.07.", "2017.07.", "2018.07." , "2019.07.", "2020.07.")
+
+aug = c("2006.08.", "2007.08.", "2008.08.", "2009.08.", "2010.08.", "2011.08.", "2012.08.", "2013.08.", "2014.08.", "2015.08.", "2016.08.", "2017.08.", "2018.08." , "2019.08.", "2020.08.")
+
+sep = c("2006.09.", "2007.09.", "2008.09.", "2009.09.", "2010.09.", "2011.09.", "2012.09.", "2013.09.", "2014.09.", "2015.09.", "2016.09.", "2017.09.", "2018.09." , "2019.09.", "2020.09.")
+
+oct = c("2006.10.", "2007.10.", "2008.10.", "2009.10.", "2010.10.", "2011.10.", "2012.10.", "2013.10.", "2014.10.", "2015.10.", "2016.10.", "2017.10.", "2018.10." , "2019.10.", "2020.10.")
+
+nov = c("2006.11.", "2007.11.", "2008.11.", "2009.11.", "2010.11.", "2011.11.", "2012.11.", "2013.11.", "2014.11.", "2015.11.", "2016.11.", "2017.11.", "2018.11." , "2019.11.", "2020.11.")
+
+dec = c("2006.12.", "2007.12.", "2008.12.", "2009.12.", "2010.12.", "2011.12.", "2012.12.", "2013.12.", "2014.12.", "2015.12.", "2016.12.", "2017.12.", "2018.12." , "2019.12.", "2020.12.")
+
+T.huss.mon.ordered.df = as.data.frame(T.huss.mon.ordered[,-1]) #sicherstellen, dass es sich um dataframe handelt
+
+show(T.huss.mon.ordered)
+
+# definieren von einzelnen dataframes zu jedem Monat, in denen die Mittelwerte jedes Monats für jede Provinz sind
+means.jan = apply(T.huss.mon.ordered.df, 1, function(x) {rowMeans(T.huss.mon.ordered.df[,jan])})
+means.feb = apply(T.huss.mon.ordered.df, 1, function(x) {rowMeans(T.huss.mon.ordered.df[,feb])})
+means.mar = apply(T.huss.mon.ordered.df, 1, function(x) {rowMeans(T.huss.mon.ordered.df[,mar])})
+means.apr = apply(T.huss.mon.ordered.df, 1, function(x) {rowMeans(T.huss.mon.ordered.df[,apr])})
+means.mai = apply(T.huss.mon.ordered.df, 1, function(x) {rowMeans(T.huss.mon.ordered.df[,mai])})
+means.apr = apply(T.huss.mon.ordered.df, 1, function(x) {rowMeans(T.huss.mon.ordered.df[,apr])})
+means.jun = apply(T.huss.mon.ordered.df, 1, function(x) {rowMeans(T.huss.mon.ordered.df[,jun])})
+means.jul = apply(T.huss.mon.ordered.df, 1, function(x) {rowMeans(T.huss.mon.ordered.df[,jul])})
+means.aug = apply(T.huss.mon.ordered.df, 1, function(x) {rowMeans(T.huss.mon.ordered.df[,aug])})
+means.sep = apply(T.huss.mon.ordered.df, 1, function(x) {rowMeans(T.huss.mon.ordered.df[,sep])})
+means.oct = apply(T.huss.mon.ordered.df, 1, function(x) {rowMeans(T.huss.mon.ordered.df[,oct])})
+means.nov = apply(T.huss.mon.ordered.df, 1, function(x) {rowMeans(T.huss.mon.ordered.df[,nov])})
+means.dec = apply(T.huss.mon.ordered.df, 1, function(x) {rowMeans(T.huss.mon.ordered.df[,dec])})
+
+library(dplyr)
+
+# erstellen eines Vectors aus den einzelnen werten (in jeder spalte einer zeile stehen die gleichen Werte)
+means.jan.v = means.jan[,1]
+means.feb.v = means.feb[,1]
+means.mar.v = means.mar[,1]
+means.apr.v = means.apr[,1]
+means.mai.v = means.mai[,1]
+means.jun.v = means.jun[,1]
+means.jul.v = means.jul[,1]
+means.aug.v = means.aug[,1]
+means.sep.v = means.sep[,1]
+means.oct.v = means.oct[,1]
+means.nov.v = means.nov[,1]
+means.dec.v = means.dec[,1]
+
+#zusammenfügen der geometry-daten, provinzennummern und provinzennamen mit den Mittelwerten der einzelnen monaten zu einzelnen dataframes zu jedem monat
+new_cols = T.huss.mon.ordered.df[, c("ADM1_EN","numbers")]
+
+means.jan.df = cbind(ADM1_EN = T.huss.mon.ordered.df[,"ADM1_EN"], numbers = T.huss.mon.ordered.df[,"numbers"], jan = means.jan.v)
+
+means.feb.df = cbind(ADM1_EN = T.huss.mon.ordered.df[,"ADM1_EN"], numbers = T.huss.mon.ordered.df[,"numbers"], feb = means.feb.v)
+
+means.mar.df = cbind(ADM1_EN = T.huss.mon.ordered.df[,"ADM1_EN"], numbers = T.huss.mon.ordered.df[,"numbers"], mar = means.mar.v)
+
+means.apr.df = cbind(ADM1_EN = T.huss.mon.ordered.df[,"ADM1_EN"], numbers = T.huss.mon.ordered.df[,"numbers"], apr = means.apr.v)
+
+means.mai.df = cbind(ADM1_EN = T.huss.mon.ordered.df[,"ADM1_EN"], numbers = T.huss.mon.ordered.df[,"numbers"], mai = means.mai.v)
+
+means.jun.df = cbind(ADM1_EN = T.huss.mon.ordered.df[,"ADM1_EN"], numbers = T.huss.mon.ordered.df[,"numbers"], jun = means.jun.v)
+
+means.jul.df = cbind(ADM1_EN = T.huss.mon.ordered.df[,"ADM1_EN"], numbers = T.huss.mon.ordered.df[,"numbers"], jul = means.jul.v)
+
+means.aug.df = cbind(ADM1_EN = T.huss.mon.ordered.df[,"ADM1_EN"], numbers = T.huss.mon.ordered.df[,"numbers"], aug = means.aug.v)
+
+means.sep.df = cbind(ADM1_EN = T.huss.mon.ordered.df[,"ADM1_EN"], numbers = T.huss.mon.ordered.df[,"numbers"], sept = means.sep.v)
+
+means.oct.df = cbind(ADM1_EN = T.huss.mon.ordered.df[,"ADM1_EN"], numbers = T.huss.mon.ordered.df[,"numbers"], oct = means.oct.v)
+
+means.nov.df = cbind(ADM1_EN = T.huss.mon.ordered.df[,"ADM1_EN"], numbers = T.huss.mon.ordered.df[,"numbers"], nov = means.nov.v)
+
+means.dec.df = cbind(ADM1_EN = T.huss.mon.ordered.df[,"ADM1_EN"], numbers = T.huss.mon.ordered.df[,"numbers"], dec = means.dec.v)
+
+jan.combined = merge(means.jan.df, geography, by= "numbers")
+feb.combined = merge(means.feb.df, geography, by= "numbers")
+mar.combined = merge(means.mar.df, geography, by= "numbers")
+apr.combined = merge(means.apr.df, geography, by= "numbers")
+mai.combined = merge(means.mai.df, geography, by= "numbers")
+jun.combined = merge(means.jun.df, geography, by= "numbers")
+jul.combined = merge(means.jul.df, geography, by= "numbers")
+aug.combined = merge(means.aug.df, geography, by= "numbers")
+sep.combined = merge(means.sep.df, geography, by= "numbers")
+oct.combined = merge(means.oct.df, geography, by= "numbers")
+nov.combined = merge(means.nov.df, geography, by= "numbers")
+dec.combined = merge(means.dec.df, geography, by= "numbers")
+
+```
+
+### geoplot january
+
+```{r}
+library(dplyr)
+library(viridis)
+library(ggplot2)
+
+# anscheinend wird die spalte "numbers" durcheinandergeworfen
+ggplot(jan.combined, aes(geometry= geometry)) +
+  geom_sf (aes(fill = jan)) 
+  
+#ggplot(jan.combined, aes(geometry=geometry)) +
+  #geom_sf(aes(fill = jan)) +
+  #colorspace::scale_fill_continuous_sequential(palette= "viridis")
+  
+
+```
