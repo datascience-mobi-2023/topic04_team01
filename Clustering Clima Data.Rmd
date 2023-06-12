@@ -1,5 +1,5 @@
 ---
-title: "Clustering Clima Data"
+title: "Clustering_Clima_Data"
 author: "Manon Manddernach"
 date: "2023-06-08"
 output: html_document
@@ -7,5 +7,35 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(sp)
+library(sf)
+library(terra)
+library(dplyr)
+library(raster)
+library(ggplot2)
+library(exactextractr)
+```
+
+## 1) loading Vietnam Climadata
+
+```{r}
+library(readxl)
+
+sheet_names = excel_sheets("./era5_data_2006_2020_thailand_monmean.xlsx")
+
+#laden von den einzelnen sheets
+T.huss.mon = read_excel("./era5_data_2006_2020_thailand_monmean.xlsx", sheet="era5_huss_2006_2020_thailand_mo")
+T.tp.mon = read_excel("./era5_data_2006_2020_thailand_monmean.xlsx", sheet="era5_tp_2006_2020_thailand_monm")
+T.t2m.mon = read_excel("./era5_data_2006_2020_thailand_monmean.xlsx", sheet="era5_t2m_2006_2020_thailand_mon")
+
+```
+
+### 1) Getting an Overwiev over T.huss.mon
+```{r}
+View(T.huss.mon)
+View(T.huss.mon.ordered)
 ```
 
