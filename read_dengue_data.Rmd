@@ -16,22 +16,21 @@ install.packages("readxl")
 library(readxl)
 
 # Relativer Pfad zur Excel-Datei
-path2006 <- "./dengue_data_converted /2006_dengue_extracted.xlsx" 
-path2007 <- "./dengue_data_converted /2007_dengue_extracted.xlsx"
-path2008 <- "./dengue_data_converted /2008_dengue_extracted.xlsx" 
-path2009 <- "./dengue_data_converted /2009_dengue_extracted.xlsx"
-path2010 <- "./dengue_data_converted /2010_dengue_extracted.xlsx" 
-path2011 <- "./dengue_data_converted /2011_dengue_extracted.xlsx"
-path2012 <- "./dengue_data_converted /2012_dengue_extracted.xlsx" 
-path2013 <- "./dengue_data_converted /2013_dengue_extracted.xlsx"
-path2014 <- "./dengue_data_converted /2014_dengue_extracted.xlsx" 
-path2015 <- "./dengue_data_converted /2015_dengue_extracted.xlsx"
-path2016 <- "./dengue_data_converted /2016_dengue_extracted.xlsx" 
-path2017 <- "./dengue_data_converted /2017_dengue_extracted.xlsx"
-path2018 <- "./dengue_data_converted /2018_dengue_extracted.xlsx" 
-path2019 <- "./dengue_data_converted /2019_dengue_extracted.xlsx"
-path2020 <- "./dengue_data_converted /2010_dengue_extracted.xlsx" 
-
+path2006 <- "./dengue_data_converted/2006_dengue_extracted.xlsx" 
+path2007 <- "./dengue_data_converted/2007_dengue_extracted.xlsx"
+path2008 <- "./dengue_data_converted/2008_dengue_extracted.xlsx" 
+path2009 <- "./dengue_data_converted/2009_dengue_extracted.xlsx"
+path2010 <- "./dengue_data_converted/2010_dengue_extracted.xlsx" 
+path2011 <- "./dengue_data_converted/2011_dengue_extracted.xlsx"
+path2012 <- "./dengue_data_converted/2012_dengue_extracted.xlsx" 
+path2013 <- "./dengue_data_converted/2013_dengue_extracted.xlsx"
+path2014 <- "./dengue_data_converted/2014_dengue_extracted.xlsx" 
+path2015 <- "./dengue_data_converted/2015_dengue_extracted.xlsx"
+path2016 <- "./dengue_data_converted/2016_dengue_extracted.xlsx" 
+path2017 <- "./dengue_data_converted/2017_dengue_extracted.xlsx"
+path2018 <- "./dengue_data_converted/2018_dengue_extracted.xlsx" 
+path2019 <- "./dengue_data_converted/2019_dengue_extracted.xlsx"
+path2020 <- "./dengue_data_converted/2010_dengue_extracted.xlsx" 
 
 # Pfad zum Arbeitsverzeichnis setzen (wo die Excel-Datei liegt)
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
