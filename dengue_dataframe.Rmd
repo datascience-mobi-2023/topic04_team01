@@ -251,6 +251,11 @@ for (year in years) {
 # Das kombinierte DataFrame anzeigen
 print(combined_df)
 ```
+```{r}
+#locales Speichern der combinded_df ohne die Klimadaten
+filePath = paste(getwd(), "combined_dengue.csv",sep = "/")
+write.csv(combined_df, filePath)
+```
 
 ##Lets losd the realtive humidity data 
 ```{r}
