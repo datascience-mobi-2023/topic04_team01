@@ -1,0 +1,23 @@
+---
+title: "GAM"
+output: html_document
+date: "2023-06-14"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#load the dengue dataframe combined
+```{r}
+read.csv("")
+```
+
+
+```{r}
+library(mgcv)
+gam()
+```
+```{r}
+```
+
