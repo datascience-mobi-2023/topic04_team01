@@ -1,7 +1,6 @@
 ---
 title: "geodata"
 output: html_document
-date: "2023-06-01"
 ---
 
 ```{r setup, include=FALSE}
@@ -338,20 +337,214 @@ dec.combined = merge(means.dec.df, geography, by= "numbers")
 
 ```
 
-### geoplot january
+### geoplot january to december
 
 ```{r}
 library(dplyr)
+library(colorspace)
 library(viridis)
 library(ggplot2)
 
-# anscheinend wird die spalte "numbers" durcheinandergeworfen
-ggplot(jan.combined, aes(geometry= geometry)) +
-  geom_sf (aes(fill = jan)) 
-  
-#ggplot(jan.combined, aes(geometry=geometry)) +
-  #geom_sf(aes(fill = jan)) +
-  #colorspace::scale_fill_continuous_sequential(palette= "viridis")
-  
+#PLOT JANUARY---------------------------------------------------------------------------------
 
+#definieren als numeric
+class(jan.combined$jan)
+jan.num = as.numeric(jan.combined$jan)
+jan.combined$jan = jan.num
+
+#plotten
+ggplot(jan.combined, aes(geometry=geometry)) +
+  geom_sf (aes(fill = jan.num)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "mean relative humidity of jauary (2006 to 2020)")
+#purp geht auch als Farbpalette
+
+#PLOT FEBUARY--------------------------------------------------------------------------------
+
+#definieren als numeric
+class(feb.combined$feb)
+feb.num = as.numeric(feb.combined$feb)
+feb.combined$feb = feb.num
+
+#plotten
+ggplot(feb.combined, aes(geometry=geometry)) +
+  geom_sf (aes(fill = feb.num)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "mean relative humidity of february (2006 to 2020)")
+
+#PLOT MARCH-----------------------------------------------------------------------------------
+
+#definieren als numeric
+class(mar.combined$mar)
+mar.num = as.numeric(mar.combined$mar)
+mar.combined$mar = mar.num
+
+#plotten
+ggplot(mar.combined, aes(geometry=geometry)) +
+  geom_sf (aes(fill = mar.num)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")
+  labs(title = "mean relative humidity of march (2006 to 2020)")
+
+#PLOT APRIL-----------------------------------------------------------------------------------
+  
+  #definieren als numeric
+class(apr.combined$apr)
+apr.num = as.numeric(apr.combined$apr)
+apr.combined$apr = apr.num
+
+#plotten
+ggplot(apr.combined, aes(geometry=geometry)) +
+  geom_sf (aes(fill = apr.num)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "mean relative humidity of april (2006 to 2020)")
+
+#PLOT MAI-------------------------------------------------------------------------------------
+  
+#definieren als numeric
+class(mai.combined$mai)
+mai.num = as.numeric(mai.combined$mai)
+mai.combined$mai = mai.num
+
+#plotten
+ggplot(mai.combined, aes(geometry=geometry)) +
+  geom_sf (aes(fill = mai.num)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "mean relative humidity of mai (2006 to 2020)")
+
+#PLOT JUNE------------------------------------------------------------------------------------
+
+#definieren als numeric
+class(jun.combined$jun)
+jun.num = as.numeric(jun.combined$jun)
+jun.combined$jun = jun.num
+
+#plotten
+ggplot(jun.combined, aes(geometry=geometry)) +
+  geom_sf (aes(fill = jun.num)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "mean relative humidity of june (2006 to 2020)")
+
+#PLOT JULI------------------------------------------------------------------------------------
+
+#definieren als numeric
+class(jul.combined$jul)
+jul.num = as.numeric(jul.combined$jul)
+jul.combined$mai = jul.num
+
+#plotten
+ggplot(jul.combined, aes(geometry=geometry)) +
+  geom_sf (aes(fill = jul.num)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "mean relative humidity of juli (2006 to 2020)")
+#PLOT AUGUST-----------------------------------------------------------------------------------
+
+#definieren als numeric
+class(aug.combined$aug)
+aug.num = as.numeric(aug.combined$aug)
+aug.combined$mai = mai.num
+
+#plotten
+ggplot(aug.combined, aes(geometry=geometry)) +
+  geom_sf (aes(fill = aug.num)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "mean relative humidity of august (2006 to 2020)")
+
+#PLOT SEPTEMBER--------------------------------------------------------------------------------
+
+#definieren als numeric
+class(sep.combined$sep)
+sep.num = as.numeric(sep.combined$sep)
+sep.combined$sep = sep.num
+
+#plotten
+ggplot(sep.combined, aes(geometry=geometry)) +
+  geom_sf (aes(fill = sep.num)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "mean relative humidity of september (2006 to 2020)")
+
+#PLOT OCTOBER---------------------------------------------------------------------------------
+
+#definieren als numeric
+class(oct.combined$oct)
+oct.num = as.numeric(oct.combined$oct)
+oct.combined$oct = oct.num
+
+#plotten
+ggplot(oct.combined, aes(geometry=geometry)) +
+  geom_sf (aes(fill = oct.num)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "mean relative humidity of october (2006 to 2020)")
+
+#PLOT NOVEMBER--------------------------------------------------------------------------------
+
+#definieren als numeric
+class(nov.combined$nov)
+nov.num = as.numeric(nov.combined$nov)
+nov.combined$nov = nov.num
+
+#plotten
+ggplot(nov.combined, aes(geometry=geometry)) +
+  geom_sf (aes(fill = nov.num)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "mean relative humidity of november (2006 to 2020)")
+
+#PLOT DECEMBER---------------------------------------------------------------------------------
+
+#definieren als numeric
+class(dec.combined$dec)
+dec.num = as.numeric(dec.combined$dec)
+dec.combined$dec= dec.num
+
+#plotten
+ggplot(dec.combined, aes(geometry=geometry)) +
+  geom_sf (aes(fill = dec.num)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "mean relative humidity of december (2006 to 2020) ")
+
+```
+
+### goeplot february
+
+```{r}
+library(dplyr)
+library(colorspace)
+library(viridis)
+library(ggplot2)
+
+#definieren als numeric
+class(feb.combined$feb)
+feb.num = as.numeric(feb.combined$feb)
+feb.combined$feb = feb.num
+
+#plotten
+ggplot(feb.combined, aes(geometry=geometry)) +
+  geom_sf (aes(fill = feb.num)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "viridis")+
+  labs(title = "mean relative humidity of february")
 ```

@@ -1,0 +1,31 @@
+---
+title: "Dengue_cases_mapping_clustering"
+author: "Paula"
+date: "2023-06-13"
+output: html_document
+---
+```{r}
+#einlesen der dengue Daten 
+filePath = paste(getwd(), "dengue_data_com.csv",sep = "/")
+combined_df <- read.csv("../dengue_data/dengue_data_com.csv")
+print(combined_df)
+#convertieren der dengue cases zu zahlen statt charaktern
+combined_df$dengue_cases <- as.integer(combined_df$dengue_cases)
+print(combined_df)
+```
+```{r}
+#ersetzen von NA values mit 0
+## Frage hier: sollen wir NA values als 0 annehmen oder lieber Mittelwert oder sonst irgendwie??
+combined_df[is.na(combined_df)] <- 0
+print(combined_df)
+```
+```{r}
+#packages öffnen
+library(sp)
+library(sf)
+library(terra)
+library(raster)
+library(ggplot2)
+library(exactextractr)
+```
+

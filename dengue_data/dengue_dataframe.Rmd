@@ -69,22 +69,22 @@ dengue2020 = rbind(dengue2020,Bungkan)
 
 ```{r}
 # Benötigte Bibliothek laden
-library(readxl)
+#library(readxl)
 
 # Liste der Dateinamen
-file_names <- c("2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020")
+#file_names <- c("2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020")
 
 # Pfad zum Arbeitsverzeichnis setzen (wo die Excel-Dateien liegen)
-setwd(dirname(rstudioapi::getSourceEditorContext()$path))
+#setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 
 # Excel-Dateien einlesen und als Liste von Dataframes speichern
-dengue_data <- lapply(file_names, function(file_name) {
-  file_path <- paste0("./dengue_data/", file_name, "_dengue_extracted.xlsx")
-  read_excel(file_path)
-})
+#dengue_data <- lapply(file_names, function(file_name) {
+  #file_path <- paste0("./dengue_data/", file_name, "_dengue_extracted.xlsx")
+  #read_excel(file_path)
+#})
 
 # Die einzelnen Dataframes den entsprechenden Variablennamen zuweisen
-list2env(setNames(dengue_data, paste0("dengue", file_names)), envir = .GlobalEnv)
+#list2env(setNames(dengue_data, paste0("dengue", file_names)), envir = .GlobalEnv)
 ```
 
 #Calculate the total number of dengue cases for each region for the years 2012-2016
@@ -214,7 +214,7 @@ Prinzip: 4 spalten mit einteilung: Reporting area; Year; Month; cases; humidity 
 years <- c(2006:2020)
 
 # Leeres DataFrame für die kombinierten Daten erstellen
-combined_df <- data.frame(Reporting_area = character(),
+dengue_data_com <- data.frame(Reporting_area = character(),
                           Year = integer(),
                           Month = character(),
                           dengue_cases = integer(),
@@ -244,12 +244,17 @@ for (year in years) {
     month_data$Month <- month
     
     # Zeilen an das kombinierte DataFrame anhängen
-    combined_df <- rbind(combined_df, month_data)
+    dengue_data_com <- rbind(combined_df, month_data)
   }
 }
 
 # Das kombinierte DataFrame anzeigen
-print(combined_df)
+print(dengue_data_com)
+```
+```{r}
+#locales Speichern der combinded_df ohne die Klimadaten
+filePath = paste(getwd(), "combined_dengue.csv",sep = "/")
+write.csv(combined_df, filePath)
 ```
 
 ##Lets losd the realtive humidity data 
@@ -271,50 +276,50 @@ colnames(T.huss.mon)
 Versuchen wir jetzt die Klima daten hinzuzufügen zu dem bestehenden dataframe 
 ```{r}
 # Spaltennamen für relative Luftfeuchtigkeit extrahieren
-humidity_columns <- colnames(T.huss.mon)[5:ncol(T.huss.mon)]
+#humidity_columns <- colnames(T.huss.mon)[5:ncol(T.huss.mon)]
 
 # Leere Spalten für relative Luftfeuchtigkeit, Längen- und Breitengrad im kombinierten DataFrame hinzufügen
-combined_df$Relative_humidity <- NA
-combined_df$Longitude <- NA
-combined_df$Latitude <- NA
+#combined_df$Relative_humidity <- NA
+#combined_df$Longitude <- NA
+#combined_df$Latitude <- NA
 
 
 # Funktion zum Zuweisen der Werte für relative Luftfeuchtigkeit, Längen- und Breitengrad definieren
-assign_values <- function(row) {
+#assign_values <- function(row) {
   # Reporting Area für aktuelle Zeile extrahieren
-  reporting_area <- row["Reporting Area"]
+ # reporting_area <- row["Reporting Area"]
 
   # Zeile in T.huss.mon mit passender Reporting Area finden
-  climate_row <- T.huss.mon[T.huss.mon$Reporting_Area== reporting_area,]
+  #climate_row <- T.huss.mon[T.huss.mon$Reporting_Area== reporting_area,]
   
   # Überprüfen, ob eine passende Zeile gefunden wurde
-  if (nrow(climate_row) > 0) {
+  #if (nrow(climate_row) > 0) {
     # Relative Luftfeuchtigkeit, Längen- und Breitengrad für alle Monate aktualisieren
-    for (j in 1:length(humidity_columns)) {
+    #for (j in 1:length(humidity_columns)) {
       # Spaltennamen für relative Luftfeuchtigkeit, Längen- und Breitengrad extrahieren
-      humidity_col <- humidity_columns[j]
-      longitude_col <- "longitude"
-      latitude_col <- "latitude"
+     # humidity_col <- humidity_columns[j]
+      #longitude_col <- "longitude"
+      #latitude_col <- "latitude"
       
       # Werte aus T.huss.mon extrahieren
-      relative_humidity <- climate_row[[humidity_col]]
-      longitude <- climate_row[[longitude_col]]
-      latitude <- climate_row[[latitude_col]]
+      #relative_humidity <- climate_row[[humidity_col]]
+      #longitude <- climate_row[[longitude_col]]
+      #latitude <- climate_row[[latitude_col]]
       
       # Werte in den kombinierten DataFrame einfügen
-      row["Relative_humidity"] <- relative_humidity
-      row["Longitude"] <- longitude
-      row["Latitude"] <- latitude
-    }
-  }
+      #row["Relative_humidity"] <- relative_humidity
+      #row["Longitude"] <- longitude
+      #row["Latitude"] <- latitude
+   # }
+  #}
   
-  return(row)
-}
+ # return(row)
+#}
 
 # Werte für relative Luftfeuchtigkeit, Längen- und Breitengrad mit apply() zuweisen
-combined_df <- apply(combined_df, 1, assign_values)
+#combined_df <- apply(combined_df, 1, assign_values)
 
 # Das aktualisierte DataFrame anzeigen
-print(combined_df)
+#print(combined_df)
 ```
 
