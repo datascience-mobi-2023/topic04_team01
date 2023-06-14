@@ -24,12 +24,12 @@ library(exactextractr)
 ```{r}
 library(readxl)
 
-sheet_names = excel_sheets("./era5_data_2006_2020_thailand_monmean.xlsx")
+sheet_names = excel_sheets("../era5_data_2006_2020_thailand_monmean.xlsx")
 
 #laden von den einzelnen sheets
-T.huss.mon = read_excel("./era5_data_2006_2020_thailand_monmean.xlsx", sheet="era5_huss_2006_2020_thailand_mo")
-T.tp.mon = read_excel("./era5_data_2006_2020_thailand_monmean.xlsx", sheet="era5_tp_2006_2020_thailand_monm")
-T.t2m.mon = read_excel("./era5_data_2006_2020_thailand_monmean.xlsx", sheet="era5_t2m_2006_2020_thailand_mon")
+T.huss.mon = read_excel("../era5_data_2006_2020_thailand_monmean.xlsx", sheet="era5_huss_2006_2020_thailand_mo")
+T.tp.mon = read_excel("../era5_data_2006_2020_thailand_monmean.xlsx", sheet="era5_tp_2006_2020_thailand_monm")
+T.t2m.mon = read_excel("../era5_data_2006_2020_thailand_monmean.xlsx", sheet="era5_t2m_2006_2020_thailand_mon")
 
 ```
 
@@ -213,7 +213,7 @@ View(T.huss.2006)
 
 T.huss.mean.2006  = as.data.frame(apply(T.huss.2006[-c(1,2)], 1, mean))
 T.huss.mean.2006['numbers'] = c(1:77)
-T.huss.mean.2006=right_join(T.huss.mean.2006,geography,by)
+T.huss.mean.2006=right_join(T.huss.mean.2006,geography,by=NULL)
 
 View(T.huss.mean.2006)
 
@@ -271,3 +271,5 @@ ggplot() +
   labs(title = "Clusters of mean Humidity in 2006 k=3 ") +
   scale_fill_viridis()+
   labs(x="Longitude", y= "Latitude")
+
+```
