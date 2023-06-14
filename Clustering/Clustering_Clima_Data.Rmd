@@ -33,9 +33,241 @@ T.t2m.mon = read_excel("./era5_data_2006_2020_thailand_monmean.xlsx", sheet="era
 
 ```
 
-### 1) Getting an Overwiev over T.huss.mon
+
+### 1.1. Getting an Overwiev over T.huss.mon
+
 ```{r}
 View(T.huss.mon)
 View(T.huss.mon.ordered)
+View(centroids.ordered)
 ```
 
+
+### 1.2. Creating a map of Thailand
+
+```{r}
+# Code adds geometric layer of polygons stored in the data object
+
+ggplot() +
+  geom_sf(data = centroids.geography, aes(geometry=geometry),col = "black", fill = NA)+ labs(x= "Longitude",y= "Latitude" )
+
+# ggplot () adds an empty ggplot Object , which can be layerd with different geometric layers
+# genom_sf()verwendet geografische Daten , um im Simple Features Format zu plotten  
+# aes(geometry= .. ) stellt sicher , das die Geometriedaten (Longlituda und Latitude an)
+```
+
+
+```{r}
+
+# Code adds geometric layer of polygons stored in the data object
+
+ggplot() +
+  geom_sf(data = centroids.geography, aes(geometry=geometry),col = "black", fill = NA)+ labs(x= "Longitude",y= "Latitude" )
+
+# ggplot () adds an empty ggplot Object , which can be layerd with different geometric layers
+# genom_sf()verwendet geografische Daten , um im Simple Features Format zu plotten  
+# aes(geometry= .. ) stellt sicher , das die Geometriedaten (Longlituda und Latitude an)
+
+```
+
+# 2. Try Clustering the means of each province over the whole time intervall
+
+### 2.1 Plotten einer Map für die Means aller Provinzen über diee Jahre 2006 bis 2020
+
+### 2.1.1 Prepearing the Province Mean Data for ggplot
+
+```{r}
+# 1.using monthlx data of each province as a mean over all reported months
+
+mean.huss.prov.orderd= apply(T.huss.mon.ordered[-c(1,4)], 1, mean)
+
+mean.huss.prov.orderd.df = as.data.frame(mean.huss.prov.orderd)
+
+# 2.adding another column of numberst to merge the dataframes
+mean.huss.prov.orderd.df['numbers'] = c(1:77)
+
+# 3.merging the two dataframes of the mean relative humidtiy and geography
+mean.huss.prov.geography = merge(mean.huss.prov.orderd.df, geography, by= "numbers")
+
+View(mean.huss.prov.geography)
+```
+
+
+### 2.1.2 Printing the ggplot for mean humidity of Provinces from 2006 to 2020
+
+```{r}
+ggplot() +
+  geom_sf(data = mean.huss.prov.geography,aes(geometry = geometry), fill= mean.huss.prov.orderd) +
+  coord_sf() +  
+  theme_minimal() +
+  labs(title = "Mean humidity of Provinces from 2006 to 2020") +
+  scale_fill_viridis()+
+  labs(x="Longitude", y= "Latitude")
+  
+```
+
+## 2.2 GGPlotten von den Clustern auf die Map von Thailand ; Ziel jeder Cluster hat eine andere Farbe
+
+### 2.2.1. Clustern für K=3
+
+```{r}
+k <-3
+mean.huss.prov.orderd.clusterd <-kmeans(mean.huss.prov.orderd.matrix, centers = k )
+
+## print the results 
+print(mean.huss.prov.orderd.clusterd$cluster)
+print(mean.huss.prov.orderd.clusterd$centers)
+
+## Wichtig! Umwandeln in Data Frame 
+mean.huss.prov.orderd.clusters = as.data.frame(mean.huss.prov.orderd.clusterd$cluster)
+
+## Vorbereiten zum Plotten :
+
+View(mean.huss.prov.orderd.clusters)
+
+# adding another column of numberst to merge the dataframes
+mean.huss.prov.orderd.clusters['numbers'] = c(1:77)
+
+#merging the two dataframes of the mean relative humidtiy and geography
+mean.huss.prov.orderd.clusters.geography = merge(mean.huss.prov.orderd.clusters, geography, by= "numbers")
+
+```
+
+
+```{r}
+View(mean.huss.prov.orderd.clusters)
+
+```
+
+```{r}
+## ggPlotting the clusters (k=3)von den Mittelwertwn aller Provinzen von 2006 bis 2020
+
+ggplot() +
+  geom_sf(data = mean.huss.prov.orderd.clusters.geography ,aes(geometry = geometry), fill= mean.huss.prov.orderd.clusterd$cluster) +
+  coord_sf() +  
+  theme_minimal() +
+  labs(title = "kmeans K = 3  humidity of Provinces from 2006 to 2020") +
+  scale_fill_viridis()+
+  labs(x="Longitude", y= "Latitude")
+```
+
+###  2.2.2 für k= 4
+
+```{r}
+class(mean.huss.prov.orderd.matrix)
+```
+
+```{r}
+## Commuting forkmeans  k=4
+k <-4
+mean.huss.prov.orderd.clusterd.4 <-kmeans(mean.huss.prov.orderd.matrix, centers = k )
+
+## print the results 
+print(mean.huss.prov.orderd.clusterd.4$cluster)
+print(mean.huss.prov.orderd.clusterd.4$centers)
+
+## Wichtig! Umwandeln in Data Frame 
+mean.huss.prov.orderd.clusters.4 = as.data.frame(mean.huss.prov.orderd.clusterd.4$cluster)
+
+## Vorbereiten zum Plotten :
+
+View(mean.huss.prov.orderd.clusters.4)
+
+# adding another column of numberst to merge the dataframes
+mean.huss.prov.orderd.clusters.4['numbers'] = c(1:77)
+
+#merging the two dataframes of the mean relative humidtiy and geography
+mean.huss.prov.orderd.clusters.geography.4 = merge(mean.huss.prov.orderd.clusters.4, geography, by= "numbers")
+```
+
+```{r}
+## ggPlotting the clusters (k=4)von den Mittelwertwn aller Provinzen von 2006 bis 2020
+
+ggplot() +
+  geom_sf(data = mean.huss.prov.orderd.clusters.geography.4 ,aes(geometry = geometry), fill= mean.huss.prov.orderd.clusterd.4$cluster) +
+  coord_sf() +  
+  theme_minimal() +
+  labs(title = "kmeans K = 4  humidity of Provinces from 2006 to 2020") +
+  scale_fill_viridis()+
+  labs(x="Longitude", y= "Latitude")
+```
+
+
+## 2.3 Kreieren einer Liste mit den Werten über alle Jahre 
+
+```{r}
+numbers <- c(1:77)
+T.huss.2006 <- as.data.frame(numbers)
+T.huss.2006['ADM1_EN'] = T.huss.mon.ordered$ADM1_EN
+
+# View(T.huss.2006)
+
+T.6 = as.data.frame(T.huss.mon.ordered[,4:15])
+T.6['numbers'] = c(1:77)
+
+# View(T.6)
+
+T.huss.2006 =left_join(x=T.huss.2006, y=T.6 , by=NULL)
+
+View(T.huss.2006)
+
+T.huss.mean.2006  = as.data.frame(apply(T.huss.2006[-c(1,2)], 1, mean))
+T.huss.mean.2006['numbers'] = c(1:77)
+T.huss.mean.2006=right_join(T.huss.mean.2006,geography,by)
+
+View(T.huss.mean.2006)
+
+```
+
+## 2.3.
+
+```{r}
+ggplot() +
+  geom_sf(data = T.huss.mean.2006, aes(geometry = geometry), fill= apply(T.huss.2006[-c(1,2)], 1, mean)) +
+  coord_sf() +  
+  theme_minimal() +
+  labs(title = "Mean Humidity in 2006") +
+  scale_fill_viridis()+
+  labs(x="Longitude", y= "Latitude")
+```
+
+## 2.3.2 Clustering von 2006 K=3
+
+```{r}
+## Commuting forkmeans  k=3
+
+## Um zu Clustern benötigt man eine Matrix 
+
+T.huss.mean.2006  = as.data.frame(apply(T.huss.2006[-c(1,2)], 1, mean))
+
+class(T.huss.mean.2006)
+
+k <- 3
+T.huss.mean.2006.clusterd.3 <- kmeans(T.huss.mean.2006, centers = k )
+
+
+## print the results 
+print(T.huss.mean.2006.clusterd.3$cluster)
+print(T.huss.mean.2006.clusterd.3$centers)
+
+T.huss.mean.2006.clusters.3= as.data.frame(T.huss.mean.2006.clusterd.3$cluster)
+
+## Vorbereiten zum Plotten :
+
+#View(T.huss.mean.2006.clusters.3)
+
+# adding another column of numbers to merge the dataframes
+T.huss.mean.2006.clusters.3['numbers'] = c(1:77)
+
+#merging the two dataframes of the mean relative humidtiy and geography
+T.huss.mean.2006.clusters.3 = merge(T.huss.mean.2006.clusters.3, geography, by= "numbers")
+
+#View(T.huss.mean.2006.clusters.3)
+
+ggplot() +
+  geom_sf(T.huss.mean.2006.clusters.3, mapping=aes(geometry = geometry), fill= T.huss.mean.2006.clusterd.3$cluster) +
+  coord_sf() +  
+  theme_minimal() +
+  labs(title = "Clusters of mean Humidity in 2006 k=3 ") +
+  scale_fill_viridis()+
+  labs(x="Longitude", y= "Latitude")
