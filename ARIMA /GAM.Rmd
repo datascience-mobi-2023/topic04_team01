@@ -10,9 +10,18 @@ knitr::opts_chunk$set(echo = TRUE)
 
 #load the dengue dataframe combined
 ```{r}
-read.csv("")
-```
+#laden aus dem github repository mit relativen path 
+dengue_data_com = read.csv("../dengue_data/dengue_data_com.csv")
 
+#umwandeln der dengue_cases von chr in dbl 
+dengue_data_com$dengue_cases = as.numeric(dengue_data_com$dengue_cases)
+
+#umwandeln der fehlenden Werte = NA's in 0
+dengue_data_com[is.na(dengue_data_com)] = 0
+
+head(dengue_data_com)
+
+```
 
 ```{r}
 library(mgcv)
