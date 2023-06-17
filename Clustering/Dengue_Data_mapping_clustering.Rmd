@@ -1,26 +1,32 @@
 ---
 title: "Dengue_cases_mapping_clustering"
-author: "Paula"
+author: "Paula, Lea"
 date: "2023-06-13"
 output: html_document
 ---
+
+# 1) loading the data
+
 ```{r}
-#einlesen der dengue Daten 
+#loading dengue data 
 filePath = paste(getwd(), "dengue_data_com.csv",sep = "/")
 combined_df <- read.csv("../dengue_data/dengue_data_com.csv")
 print(combined_df)
-#convertieren der dengue cases zu zahlen statt charaktern
+
+#converting dengue cases into numbers
 combined_df$dengue_cases <- as.integer(combined_df$dengue_cases)
 print(combined_df)
 ```
+
 ```{r}
-#ersetzen von NA values mit 0
+#replacing NA with 0
 ## Frage hier: sollen wir NA values als 0 annehmen oder lieber Mittelwert oder sonst irgendwie??
-combined_df[is.na(combined_df)] <- 0
-print(combined_df)
+#combined_df[is.na(combined_df)] <- 0
+#print(combined_df)
 ```
+
 ```{r}
-#packages öffnen
+#opening packages
 library(sp)
 library(sf)
 library(terra)
@@ -29,3 +35,208 @@ library(ggplot2)
 library(exactextractr)
 ```
 
+```{r}
+#loading geo data
+library(sf)
+geography <- st_read("/Users/leamrowiec/Desktop/Datenanalyse SS23/other data/gadm36_THA_shp")
+```
+
+# 2) basic plots
+
+## 2.1) defining variables for each time span
+
+```{r}
+# the defined variables always refer to the chosen rows
+tot_2006 = which(combined_df$Year=="2006" & combined_df$Month == "Total")
+tot_2007 = which(combined_df$Year=="2007" & combined_df$Month == "Total")
+tot_2008 = which(combined_df$Year=="2008" & combined_df$Month == "Total")
+tot_2009 = which(combined_df$Year=="2009" & combined_df$Month == "Total")
+tot_2010 = which(combined_df$Year=="2010" & combined_df$Month == "Total")
+## 77 provinces
+tot_2011 = which(combined_df$Year=="2011" & combined_df$Month == "Total")
+tot_2012 = which(combined_df$Year=="2012" & combined_df$Month == "Total")
+tot_2013 = which(combined_df$Year=="2013" & combined_df$Month == "Total")
+tot_2014 = which(combined_df$Year=="2014" & combined_df$Month == "Total")
+tot_2015 = which(combined_df$Year=="2015" & combined_df$Month == "Total")
+tot_2016 = which(combined_df$Year=="2016" & combined_df$Month == "Total")
+tot_2017 = which(combined_df$Year=="2017" & combined_df$Month == "Total")
+tot_2018 = which(combined_df$Year=="2018" & combined_df$Month == "Total")
+tot_2019 = which(combined_df$Year=="2019" & combined_df$Month == "Total")
+tot_2020 = which(combined_df$Year=="2020" & combined_df$Month == "Total")
+
+jan_2006 = which(combined_df$Year=="2006" & combined_df$Month == "Jan")
+jan_2007 = which(combined_df$Year=="2007" & combined_df$Month == "Jan")
+jan_2008 = which(combined_df$Year=="2008" & combined_df$Month == "Jan")
+jan_2009 = which(combined_df$Year=="2009" & combined_df$Month == "Jan")
+jan_2019 = which(combined_df$Year=="2010" & combined_df$Month == "Jan")
+jan_2011 = which(combined_df$Year=="2011" & combined_df$Month == "Jan")
+jan_2012 = which(combined_df$Year=="2012" & combined_df$Month == "Jan")
+jan_2013 = which(combined_df$Year=="2013" & combined_df$Month == "Jan")
+jan_2014 = which(combined_df$Year=="2014" & combined_df$Month == "Jan")
+jan_2015 = which(combined_df$Year=="2015" & combined_df$Month == "Jan")
+jan_2016 = which(combined_df$Year=="2016" & combined_df$Month == "Jan")
+jan_2017 = which(combined_df$Year=="2017" & combined_df$Month == "Jan")
+jan_2018 = which(combined_df$Year=="2018" & combined_df$Month == "Jan")
+jan_2019 = which(combined_df$Year=="2019" & combined_df$Month == "Jan")
+jan_2020 = which(combined_df$Year=="2020" & combined_df$Month == "Jan")
+
+feb_2006 = which(combined_df$Year=="2006" & combined_df$Month == "Jan")
+jan_2007 = which(combined_df$Year=="2007" & combined_df$Month == "Jan")
+jan_2008 = which(combined_df$Year=="2008" & combined_df$Month == "Jan")
+jan_2009 = which(combined_df$Year=="2009" & combined_df$Month == "Jan")
+jan_2019 = which(combined_df$Year=="2010" & combined_df$Month == "Jan")
+jan_2011 = which(combined_df$Year=="2011" & combined_df$Month == "Jan")
+jan_2012 = which(combined_df$Year=="2012" & combined_df$Month == "Jan")
+jan_2013 = which(combined_df$Year=="2013" & combined_df$Month == "Jan")
+jan_2014 = which(combined_df$Year=="2014" & combined_df$Month == "Jan")
+jan_2015 = which(combined_df$Year=="2015" & combined_df$Month == "Jan")
+jan_2016 = which(combined_df$Year=="2016" & combined_df$Month == "Jan")
+jan_2017 = which(combined_df$Year=="2017" & combined_df$Month == "Jan")
+jan_2018 = which(combined_df$Year=="2018" & combined_df$Month == "Jan")
+jan_2019 = which(combined_df$Year=="2019" & combined_df$Month == "Jan")
+jan_2020 = which(combined_df$Year=="2020" & combined_df$Month == "Jan")
+
+
+#tot_2006 = combined_df[1:76,]
+#jan_2006 = combined_df[77:152,]
+#feb_2006 = combined_df[153:228,]
+#mar_2006 = combined_df[229:304,]
+#apr_2006 = combined_df[307:383]
+  
+```
+
+# 3) plotting mean dengue cases of 2006 to 2020
+
+```{r}
+#2006------------------------------------------------------------------------------------------
+# coosing the lines that show total data fpr each district 2006 to 2020
+dengue.tot.2006 = combined_df[1:77,]
+
+
+# merging the dataframe with the geodata (geography is ordered in alphabetical order, dengue data too)
+geography["X"] = c(1:77)
+dengue.tot.2006.geo = merge(dengue.tot.2006, geography, by= "X")
+
+ggplot(dengue.tot.geo, aes(geometry=geometry)) +
+  geom_sf (aes(fill = dengue_cases)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "viridis")+
+  labs(title = "total reported dengue cases in 2006", fill = "total reported dengue cases")
+ 
+#2007------------------------------------------------------------------------------------------
+# coosing the lines that show total data fpr each district 2006 to 2020
+dengue.tot.2007 = combined_df[989:1064,]
+
+
+# merging the dataframe with the geodata (geography is ordered in alphabetical order, dengue data too)
+geography["X"] = c(1:77)
+dengue.tot.2007.geo = merge(dengue.tot.2007, geography, by= "X")
+
+ggplot(dengue.tot.2007.geo, aes(geometry=geometry)) +
+  geom_sf (aes(fill = dengue_cases)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "viridis")+
+  labs(title = "total reported dengue cases in 2007", fill = "total reported dengue cases")
+
+#2008------------------------------------------------------------------------------------------
+# coosing the lines that show total data fpr each district 2006 to 2020
+dengue.tot.2008 = combined_df[1977:2052,]
+
+# merging the dataframe with the geodata (geography is ordered in alphabetical order, dengue data too)
+geography["X"] = c(1:77)
+dengue.tot.2008.geo = merge(dengue.tot.2008, geography, by= "X")
+
+ggplot(dengue.tot.2008.geo, aes(geometry=geometry)) +
+  geom_sf (aes(fill = dengue_cases)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "viridis")+
+  labs(title = "total reported dengue cases in 2008", fill = "total reported dengue cases")
+
+# problem: geo daten und engue daten haben nicht die gleiche länge
+
+#2009------------------------------------------------------------------------------------------
+# coosing the lines that show total data fpr each district 2006 to 2020
+dengue.tot.2009 = combined_df[2956:3040,]
+
+
+# merging the dataframe with the geodata (geography is ordered in alphabetical order, dengue data too)
+geography["X"] = c(1:77)
+dengue.tot.2009.geo = merge(dengue.tot.2009, geography, by= "X")
+
+ggplot(dengue.tot.2009.geo, aes(geometry=geometry)) +
+  geom_sf (aes(fill = dengue_cases)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "viridis")+
+  labs(title = "total reported dengue cases in 2009", fill = "total reported dengue cases")
+
+#2010-----------------------------------------------------------------------------------------
+# coosing the lines that show total data fpr each district 2006 to 2020
+dengue.tot.2010 = combined_df[3953:4028,]
+
+# merging the dataframe with the geodata (geography is ordered in alphabetical order, dengue data too)
+geography["X"] = c(1:77)
+dengue.tot.2010.geo = merge(dengue.tot.2010, geography, by= "X")
+
+ggplot(dengue.tot.2010.geo, aes(geometry=geometry)) +
+  geom_sf (aes(fill = dengue_cases)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "viridis")+
+  labs(title = "total reported dengue cases in 2010", fill = "total reported dengue cases")
+
+#2011------------------------------------------------------------------------------------------
+# coosing the lines that show total data fpr each district 2006 to 2020
+dengue.tot.2011 = combined_df[4941:5017,]
+
+# merging the dataframe with the geodata (geography is ordered in alphabetical order, dengue data too)
+geography["X"] = c(1:77)
+dengue.tot.2011.geo = merge(dengue.tot.2011, geography, by= "X")
+
+ggplot(dengue.tot.2011.geo, aes(geometry=geometry)) +
+  geom_sf (aes(fill = dengue_cases)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "viridis")+
+  labs(title = "total reported dengue cases in 2011", fill = "total reported dengue cases")
+
+#2012------------------------------------------------------------------------------------------
+# coosing the lines that show total data fpr each district 2006 to 2020
+dengue.tot.2012 = combined_df[5942:6017,]
+
+# merging the dataframe with the geodata (geography is ordered in alphabetical order, dengue data too)
+geography["X"] = c(1:77)
+dengue.tot.2012.geo = merge(dengue.tot.2012, geography, by= "X")
+
+ggplot(dengue.tot.2012.geo, aes(geometry=geometry)) +
+  geom_sf (aes(fill = dengue_cases)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "viridis")+
+  labs(title = "total reported dengue cases in 2012", fill = "total reported dengue cases")
+
+#2013------------------------------------------------------------------------------------------
+# coosing the lines that show total data fpr each district 2006 to 2020
+dengue.tot.2013 = combined_df[6943:7019,]
+
+# merging the dataframe with the geodata (geography is ordered in alphabetical order, dengue data too)
+geography["X"] = c(1:77)
+dengue.tot.2013.geo = merge(dengue.tot.2013, geography, by= "X")
+
+ggplot(dengue.tot.2013.geo, aes(geometry=geometry)) +
+  geom_sf (aes(fill = dengue_cases)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "viridis")+
+  labs(title = "total reported dengue cases in 2010", fill = "total reported dengue cases")
+
+```
+
+# 3) plotting dengue cases of each month (mean of all years)
+
+```{r}
+#making dataframe that contains geodata and data of each month
+```
