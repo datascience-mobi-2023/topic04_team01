@@ -8,25 +8,61 @@ date: "2023-06-14"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-#load the dengue dataframe combined
+#load the dengue dataframe combined -> dengue_data_com
 ```{r}
 #laden aus dem github repository mit relativen path 
 dengue_data_com = read.csv("../dengue_data/dengue_data_com.csv")
 
-#umwandeln der dengue_cases von chr in dbl 
-dengue_data_com$dengue_cases = as.numeric(dengue_data_com$dengue_cases)
-
-#umwandeln der fehlenden Werte = NA's in 0
-dengue_data_com[is.na(dengue_data_com)] = 0
-
 head(dengue_data_com)
 
 ```
+#get the data into a diffrent shape we need for time series analysis 
+```{r}
+#überlegung: dengue daten erstmal auf ganz thailand bezogen also für jeden monat der Jahre 2006-2020 die summer der dengue cases im ganzen land thailand berechnen 
 
-```{r}
-library(mgcv)
-gam()
+# Benötigt die tidyverse-Pakete
+library(tidyverse)
+
+# Gruppiere den DataFrame nach Jahr, Monat und berechne die Summe der Dengue-Fälle
+dengue_sum <- dengue_data_com %>%
+  group_by(Year, Month) %>%
+  summarise(`Dengue_Total` = sum(`dengue_cases`))
+
+# Gib den neuen DataFrame aus
+print(df_sum)
+
+#neuen dataframe generien nur mit den spalten year, month und dengue cases 
+ts_dengue = data.frame 
 ```
+# die total werte noch raus filtrieren 
 ```{r}
+# entfernen wir jetzt die Total values aus dem dengue_sum
+i.remove = which(dengue_sum$Month %in% c("Total"))
+i.remove 
+
+dengue_sum = dengue_sum[-i.remove,]
+print(dengue_sum)
+
+#lets turn the months into numerics 
+
+# Definiere die Umwandlung der Monatsnamen
+monat_umwandlung <- c(Jan = "01", Feb = "02", Mar = "03", Apr = "04", May = "05", June = "06",
+                      July = "07", Aug = "08", Sept = "09", Oct = "10", Nov = "11", Dec = "12")
+
+# Wandele die Monate in numerische Werte um
+dengue_sum <- dengue_sum %>%
+  mutate(Month = recode(Month, !!!monat_umwandlung))
+
+#umwandeln von month von chr in dbl 
+dengue_sum$Month = as.numeric(dengue_sum$Month)
+```
+# now lets convetr the dataframe into a ts 
+```{r}
+# Convert to time series object
+myTs <- ts(dengue_sum$dengue_cases, frequency = 12, start = c(2006, 1))
+class(myTs) # ts"  (if you don't just feed in one but more data points per time point e.g. env then it is mts)
+
+# Plot time series
+TSstudio::ts_plot(myTs)
 ```
 

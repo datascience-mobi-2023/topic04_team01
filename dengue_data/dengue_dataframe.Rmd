@@ -385,7 +385,7 @@ library(dplyr)
 
 # Annahme: DataFrame heißt "T.huss_reshaped" und die Spalte mit den Jahren heißt "year"
 
-# Lösche die Zeilen mit den Jahren 2006 bis 2010
+# Lösche die Zeilen mit den Jahren 2006 bis 2010 für bungkan 
 T.huss_reshaped <- T.huss_reshaped %>%
   filter(!(Reporting_Area == "Bungkan" & year >= 2006 & year <= 2010))
 
