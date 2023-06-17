@@ -16,21 +16,21 @@ install.packages("readxl")
 library(readxl)
 
 # Relativer Pfad zur Excel-Datei
-path2006 <- "./dengue_data/2006_dengue_extracted.xlsx" 
-path2007 <- "./dengue_data/2007_dengue_extracted.xlsx"
-path2008 <- "./dengue_data/2008_dengue_extracted.xlsx" 
-path2009 <- "./dengue_data/2009_dengue_extracted.xlsx"
-path2010 <- "./dengue_data/2010_dengue_extracted.xlsx" 
-path2011 <- "./dengue_data/2011_dengue_extracted.xlsx"
-path2012 <- "./dengue_data/2012_dengue_extracted.xlsx" 
-path2013 <- "./dengue_data/2013_dengue_extracted.xlsx"
-path2014 <- "./dengue_data/2014_dengue_extracted.xlsx" 
-path2015 <- "./dengue_data/2015_dengue_extracted.xlsx"
-path2016 <- "./dengue_data/2016_dengue_extracted.xlsx" 
-path2017 <- "./dengue_data/2017_dengue_extracted.xlsx"
-path2018 <- "./dengue_data/2018_dengue_extracted.xlsx" 
-path2019 <- "./dengue_data/2019_dengue_extracted.xlsx"
-path2020 <- "./dengue_data/2010_dengue_extracted.xlsx" 
+path2006 <- "2006_dengue_extracted.xlsx" 
+path2007 <- "2007_dengue_extracted.xlsx"
+path2008 <- "2008_dengue_extracted.xlsx" 
+path2009 <- "2009_dengue_extracted.xlsx"
+path2010 <- "2010_dengue_extracted.xlsx" 
+path2011 <- "2011_dengue_extracted.xlsx"
+path2012 <- "2012_dengue_extracted.xlsx" 
+path2013 <- "2013_dengue_extracted.xlsx"
+path2014 <- "2014_dengue_extracted.xlsx" 
+path2015 <- "2015_dengue_extracted.xlsx"
+path2016 <- "2016_dengue_extracted.xlsx" 
+path2017 <- "2017_dengue_extracted.xlsx"
+path2018 <- "2018_dengue_extracted.xlsx" 
+path2019 <- "2019_dengue_extracted.xlsx"
+path2020 <- "2010_dengue_extracted.xlsx" 
 
 # Pfad zum Arbeitsverzeichnis setzen (wo die Excel-Datei liegt)
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
@@ -248,16 +248,24 @@ for (year in years) {
   }
 }
 
-# Das kombinierte DataFrame anzeigen
+# Das kombinierte DataFrame anzeigen und alle fehlenden Values in 0 verwandeln
 print(dengue_data_com)
 ```
 ```{r}
-#locales Speichern der combinded_df ohne die Klimadaten
-filePath = paste(getwd(), "combined_dengue.csv",sep = "/")
+#umwandeln der dengue_cases von chr in dbl 
+dengue_data_com$dengue_cases = as.numeric(dengue_data_com$dengue_cases)
+
+#umwandeln der fehlenden Werte = NA's in 0
+dengue_data_com[is.na(dengue_data_com)] = 0
+
+print(dengue_data_com)
+
+#locales Speichern der dengue_data_com ohne die Klimadaten
+filePath = paste(getwd(), "dengue_data_com.csv",sep = "/")
 write.csv(dengue_data_com, filePath)
 ```
 
-##Lets losd the realtive humidity data 
+##Lets load the realtive humidity data 
 ```{r}
 library(readxl)
 
@@ -276,6 +284,7 @@ colnames(T.huss.mon)[2] <- "Reporting_Area"
 T.huss.mon.com =T.huss.mon
 ```
 
+#formatieren wir den datensatz um in das gleiche formt wie die dengue data 
 ```{r}
 library(tidyverse)
 
@@ -318,7 +327,7 @@ print(dengue_data_com_2)
 ```
 #nummerieren wir jetzt die dengue_data_com.2 neu
 ```{r}
-dengue_data_com_2 = dengue_data_com_2[,2:5]
+dengue_data_com_2
 
 #ordnen wir den dataframe alpahbetisch
 
@@ -337,35 +346,121 @@ rownames(dengue_data_com_2) = dengue_data_com_2$row_number
 print(dengue_data_com_2)
 
 ```
+
+#umbennenung von Bueng Kan in T.huss_reshaped into Bungkan from dengue_data_com_2
+```{r}
+library(dplyr)
+
+#ÄNDERN DES CHARACTERS IN JEDER SPALte die ihn enthält 
+T.huss_reshaped <- T.huss_reshaped %>% 
+  mutate (Reporting_Area = ifelse(Reporting_Area == "Bueng Kan", "Bungkan", Reporting_Area))
+print(T.huss_reshaped)
+
+dengue_data_com_2 <- dengue_data_com_2 %>% 
+  mutate (Reporting_area = ifelse(Reporting_area == "P.Nakhon S.Ayutthaya", "Phra Nakhon Si Ayutthaya", Reporting_area))
+print(dengue_data_com_2)
+
+dengue_data_com_2 <- dengue_data_com_2 %>% 
+  mutate (Reporting_area = ifelse(Reporting_area == "Kalisin", "Kalasin", Reporting_area))
+print(dengue_data_com_2)
+```
+
 #jetzt können wir beide dataframes mergen
 #aber davor vergleichen wir ob die datensätze gleich groß sind 
 
 ```{r}
 
-vergleich = which(T.huss_reshaped$'Reporting_Area' %in% dengue_data_com_2$Reporting_area)
+#vergleich = which(T.huss_reshaped$'Reporting_Area' %in% dengue_data_com_2$Reporting_area)
 
-zuviel = T.huss_reshaped[-vergleich,]
-zuviel
-#vergleich = which(dengue2019$`Reporting areas` %in% dengue2020$`Reporting areas`)
+#zuviel = T.huss_reshaped[-vergleich,]
+#zuviel
 
-#dengue_zeilezuviel= dengue2019[-vergleich,] 
-
-#print (dengue_zeilezuviel)
-vv = which(dengue_data_com_2$Reporting_area %in% T.huss_reshaped$'Reporting_Area')
-zz = dengue_data_com_2[-vv,]
-zz
+#vv = which(dengue_data_com_2$Reporting_area %in% T.huss_reshaped$'Reporting_Area')
+#zz = dengue_data_com_2[-vv,]
+#zz
 ```
-#umbennenung von Bueng Kan in T.huss_reshaped into Bungkan from dengue_data_com_2
+#exclude Bungkan 2006 - 2010 data from T.huss_reshaped since there are no dengue data available for this timeframe 
 ```{r}
 library(dplyr)
 
-# Annahme: DataFrame heißt "T.huss_reshaped" und die Spalte mit den Reporting Areas heißt "Reporting_area"
+# Annahme: DataFrame heißt "T.huss_reshaped" und die Spalte mit den Jahren heißt "year"
 
-# Ändere den Namen der gewünschten Reporting Areas
-T.huss_reshaped <- T.huss_reshaped %>% 
-  mutate(reporting_area = ifelse(reporting_area == "Bueng Kan", "Bungkan", reporting_area))
+# Lösche die Zeilen mit den Jahren 2006 bis 2010 für bungkan 
+T.huss_reshaped <- T.huss_reshaped %>%
+  filter(!(Reporting_Area == "Bungkan" & year >= 2006 & year <= 2010))
 
-# Überprüfe den DataFrame mit den umbenannten Reporting Areas
+# Überprüfe den DataFrame nach dem Löschen der Zeilen
 print(T.huss_reshaped)
+```
+#gleichen wir die spaltenbezeichung der beiden dataframes noch an vor dem merge 
+```{r} 
+#als ertes die monatsnamen aus dengue data in zahlen umwandeln
+library(dplyr)
+
+# Annahme: DataFrame heißt "dengue_data_com_2" und die Spalte mit den Monaten heißt "Month"
+
+# Definiere die Umwandlung der Monatsnamen
+monat_umwandlung <- c(Jan = "01", Feb = "02", Mar = "03", Apr = "04", May = "05", June = "06",
+                      July = "07", Aug = "08", Sept = "09", Oct = "10", Nov = "11", Dec = "12")
+
+# Wandele die Monate in numerische Werte um
+dengue_data_com_2 <- dengue_data_com_2 %>%
+  mutate(Month = recode(Month, !!!monat_umwandlung))
+
+# Überprüfe den DataFrame nach der Umwandlung der Monate
+print(dengue_data_com_2)
+
+# Ändere den Spaltennamen
+colnames(dengue_data_com_2)[colnames(dengue_data_com_2) == "Reporting_area"] <- "Reporting_Area"
+colnames(dengue_data_com_2)[colnames(dengue_data_com_2) == "dengue_cases"] <- "Dengue_Cases"
+colnames(T.huss_reshaped)[colnames(T.huss_reshaped) == "year"] <- "Year"
+colnames(T.huss_reshaped)[colnames(T.huss_reshaped) == "month"] <- "Month"
+colnames(T.huss_reshaped)[colnames(T.huss_reshaped) == "relative_humidity"] <- "Relative_Humidity"
+# Überprüfe den DataFrame nach der Umbenennung
+print(dengue_data_com_2)
+print(T.huss_reshaped)
+```
+#lets save the new climat data format 
+```{r}
+#locales Speichern der dengue_hum 
+filePath = paste(getwd(), "T.huss_reshaped.csv",sep = "/")
+write.csv(T.huss_reshaped, filePath)
+```
+
+#lets merge the two dataframes by the shared column (row_number) 
+```{r}
+dengue_hum = merge(dengue_data_com_2, T.huss_reshaped, by = "row_number")
+
+#let`s remove the total Zone numbers and Regions 
+c.remove = which(colnames(dengue_hum) %in% c("Year.y","Reporting_Area.y", "Month.y"))
+
+#let´s remove the lines 
+dengue_hum = dengue_hum[,- c.remove]
+
+print(dengue_hum)
+
+#umbennen der Spalten 
+colnames(dengue_hum)[colnames(dengue_hum) == "Reporting_Area.x"] <- "Reporting_Area"
+colnames(dengue_hum)[colnames(dengue_hum) == "Month.x"] <- "Month"
+colnames(dengue_hum)[colnames(dengue_hum) == "Year.x"] <- "Year"
+
+#reorder the columns 
+dengue_hum = dengue_hum[,c(1,2,6,7,5,4,3,8)]
+
+#umwandeln der dengue_cases von chr in dbl 
+dengue_hum$Dengue_Cases = as.numeric(dengue_hum$Dengue_Cases)
+
+#umwandeln der fehlenden Werte = NA's in 0
+dengue_hum[is.na(dengue_hum)] = 0
+
+#umwandeln von month von chr in dbl 
+dengue_hum$Month = as.numeric(dengue_hum$Month)
+
+```
+#speichern 
+```{r}
+#locales Speichern der dengue_hum 
+filePath = paste(getwd(), "dengue_hum.csv",sep = "/")
+write.csv(dengue_hum, filePath)
 ```
 
