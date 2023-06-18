@@ -1,0 +1,1038 @@
+---
+title: "Dengue_cases_mapping_clustering"
+author: "Paula, Lea"
+date: "2023-06-13"
+output: html_document
+---
+
+# 1) loading the data
+
+```{r}
+#loading dengue data 
+filePath = paste(getwd(), "dengue_data_com.csv",sep = "/")
+combined_df <- read.csv("../dengue_data/dengue_data_com.csv")
+print(combined_df)
+
+#converting dengue cases into numbers
+combined_df$dengue_cases <- as.integer(combined_df$dengue_cases)
+print(combined_df)
+```
+
+```{r}
+#replacing NA with 0
+## Frage hier: sollen wir NA values als 0 annehmen oder lieber Mittelwert oder sonst irgendwie??
+#combined_df[is.na(combined_df)] <- 0
+#print(combined_df)
+```
+
+```{r}
+#opening packages
+library(sp)
+library(sf)
+library(terra)
+library(raster)
+library(ggplot2)
+library(exactextractr)
+```
+
+```{r}
+#loading geo data
+library(sf)
+geography <- st_read("/Users/leamrowiec/Desktop/Datenanalyse SS23/other data/gadm36_THA_shp")
+```
+
+# 2) basic plots
+
+## 2.1) defining variables for each time span
+
+```{r}
+# the defined variables always refer to the chosen rows
+
+tot_2006 = which(combined_df$Year=="2006" & combined_df$Month == "Total")
+tot_2007 = which(combined_df$Year=="2007" & combined_df$Month == "Total")
+tot_2008 = which(combined_df$Year=="2008" & combined_df$Month == "Total")
+tot_2009 = which(combined_df$Year=="2009" & combined_df$Month == "Total")
+tot_2010 = which(combined_df$Year=="2010" & combined_df$Month == "Total")
+## 77 provinces
+tot_2011 = which(combined_df$Year=="2011" & combined_df$Month == "Total")
+tot_2012 = which(combined_df$Year=="2012" & combined_df$Month == "Total")
+tot_2013 = which(combined_df$Year=="2013" & combined_df$Month == "Total")
+tot_2014 = which(combined_df$Year=="2014" & combined_df$Month == "Total")
+tot_2015 = which(combined_df$Year=="2015" & combined_df$Month == "Total")
+tot_2016 = which(combined_df$Year=="2016" & combined_df$Month == "Total")
+tot_2017 = which(combined_df$Year=="2017" & combined_df$Month == "Total")
+tot_2018 = which(combined_df$Year=="2018" & combined_df$Month == "Total")
+tot_2019 = which(combined_df$Year=="2019" & combined_df$Month == "Total")
+tot_2020 = which(combined_df$Year=="2020" & combined_df$Month == "Total")
+
+jan_2006 = which(combined_df$Year=="2006" & combined_df$Month == "Jan")
+jan_2007 = which(combined_df$Year=="2007" & combined_df$Month == "Jan")
+jan_2008 = which(combined_df$Year=="2008" & combined_df$Month == "Jan")
+jan_2009 = which(combined_df$Year=="2009" & combined_df$Month == "Jan")
+jan_2010 = which(combined_df$Year=="2010" & combined_df$Month == "Jan")
+jan_2011 = which(combined_df$Year=="2011" & combined_df$Month == "Jan")
+jan_2012 = which(combined_df$Year=="2012" & combined_df$Month == "Jan")
+jan_2013 = which(combined_df$Year=="2013" & combined_df$Month == "Jan")
+jan_2014 = which(combined_df$Year=="2014" & combined_df$Month == "Jan")
+jan_2015 = which(combined_df$Year=="2015" & combined_df$Month == "Jan")
+jan_2016 = which(combined_df$Year=="2016" & combined_df$Month == "Jan")
+jan_2017 = which(combined_df$Year=="2017" & combined_df$Month == "Jan")
+jan_2018 = which(combined_df$Year=="2018" & combined_df$Month == "Jan")
+jan_2019 = which(combined_df$Year=="2019" & combined_df$Month == "Jan")
+jan_2020 = which(combined_df$Year=="2020" & combined_df$Month == "Jan")
+
+feb_2006 = which(combined_df$Year=="2006" & combined_df$Month == "Feb")
+feb_2007 = which(combined_df$Year=="2007" & combined_df$Month == "Feb")
+feb_2008 = which(combined_df$Year=="2008" & combined_df$Month == "Feb")
+feb_2009 = which(combined_df$Year=="2009" & combined_df$Month == "Feb")
+feb_2010 = which(combined_df$Year=="2010" & combined_df$Month == "Feb")
+feb_2011 = which(combined_df$Year=="2011" & combined_df$Month == "Feb")
+feb_2012 = which(combined_df$Year=="2012" & combined_df$Month == "Feb")
+feb_2013 = which(combined_df$Year=="2013" & combined_df$Month == "Feb")
+feb_2014 = which(combined_df$Year=="2014" & combined_df$Month == "Feb")
+feb_2015 = which(combined_df$Year=="2015" & combined_df$Month == "Feb")
+feb_2016 = which(combined_df$Year=="2016" & combined_df$Month == "Feb")
+feb_2017 = which(combined_df$Year=="2017" & combined_df$Month == "Feb")
+feb_2018 = which(combined_df$Year=="2018" & combined_df$Month == "Feb")
+feb_2019 = which(combined_df$Year=="2019" & combined_df$Month == "Feb")
+feb_2020 = which(combined_df$Year=="2020" & combined_df$Month == "Feb")
+
+mar_2006 = which(combined_df$Year=="2006" & combined_df$Month == "Mar")
+mar_2007 = which(combined_df$Year=="2007" & combined_df$Month == "Mar")
+mar_2008 = which(combined_df$Year=="2008" & combined_df$Month == "Mar")
+mar_2009 = which(combined_df$Year=="2009" & combined_df$Month == "Mar")
+mar_2010 = which(combined_df$Year=="2010" & combined_df$Month == "Mar")
+mar_2011 = which(combined_df$Year=="2011" & combined_df$Month == "Mar")
+mar_2012 = which(combined_df$Year=="2012" & combined_df$Month == "Mar")
+mar_2013 = which(combined_df$Year=="2013" & combined_df$Month == "Mar")
+mar_2014 = which(combined_df$Year=="2014" & combined_df$Month == "Mar")
+mar_2015 = which(combined_df$Year=="2015" & combined_df$Month == "Mar")
+mar_2016 = which(combined_df$Year=="2016" & combined_df$Month == "Mar")
+mar_2017 = which(combined_df$Year=="2017" & combined_df$Month == "Mar")
+mar_2018 = which(combined_df$Year=="2018" & combined_df$Month == "Mar")
+mar_2019 = which(combined_df$Year=="2019" & combined_df$Month == "Mar")
+mar_2020 = which(combined_df$Year=="2020" & combined_df$Month == "Mar")
+
+apr_2006 = which(combined_df$Year=="2006" & combined_df$Month == "Apr")
+apr_2007 = which(combined_df$Year=="2007" & combined_df$Month == "Apr")
+apr_2008 = which(combined_df$Year=="2008" & combined_df$Month == "Apr")
+apr_2009 = which(combined_df$Year=="2009" & combined_df$Month == "Apr")
+apr_2010 = which(combined_df$Year=="2010" & combined_df$Month == "Apr")
+apr_2011 = which(combined_df$Year=="2011" & combined_df$Month == "Apr")
+apr_2012 = which(combined_df$Year=="2012" & combined_df$Month == "Apr")
+apr_2013 = which(combined_df$Year=="2013" & combined_df$Month == "Apr")
+apr_2014 = which(combined_df$Year=="2014" & combined_df$Month == "Apr")
+apr_2015 = which(combined_df$Year=="2015" & combined_df$Month == "Apr")
+apr_2016 = which(combined_df$Year=="2016" & combined_df$Month == "Apr")
+apr_2017 = which(combined_df$Year=="2017" & combined_df$Month == "Apr")
+apr_2018 = which(combined_df$Year=="2018" & combined_df$Month == "Apr")
+apr_2019 = which(combined_df$Year=="2019" & combined_df$Month == "Apr")
+apr_2020 = which(combined_df$Year=="2020" & combined_df$Month == "Apr")
+
+may_2006 = which(combined_df$Year=="2006" & combined_df$Month == "May")
+may_2007 = which(combined_df$Year=="2007" & combined_df$Month == "May")
+may_2008 = which(combined_df$Year=="2008" & combined_df$Month == "May")
+may_2009 = which(combined_df$Year=="2009" & combined_df$Month == "May")
+may_2010 = which(combined_df$Year=="2010" & combined_df$Month == "May")
+may_2011 = which(combined_df$Year=="2011" & combined_df$Month == "May")
+may_2012 = which(combined_df$Year=="2012" & combined_df$Month == "May")
+may_2013 = which(combined_df$Year=="2013" & combined_df$Month == "May")
+may_2014 = which(combined_df$Year=="2014" & combined_df$Month == "May")
+may_2015 = which(combined_df$Year=="2015" & combined_df$Month == "May")
+may_2016 = which(combined_df$Year=="2016" & combined_df$Month == "May")
+may_2017 = which(combined_df$Year=="2017" & combined_df$Month == "May")
+may_2018 = which(combined_df$Year=="2018" & combined_df$Month == "May")
+may_2019 = which(combined_df$Year=="2019" & combined_df$Month == "May")
+may_2020 = which(combined_df$Year=="2020" & combined_df$Month == "May")
+
+jun_2006 = which(combined_df$Year=="2006" & combined_df$Month == "June")
+jun_2007 = which(combined_df$Year=="2007" & combined_df$Month == "June")
+jun_2008 = which(combined_df$Year=="2008" & combined_df$Month == "June")
+jun_2009 = which(combined_df$Year=="2009" & combined_df$Month == "June")
+jun_2010 = which(combined_df$Year=="2010" & combined_df$Month == "June")
+jun_2011 = which(combined_df$Year=="2011" & combined_df$Month == "June")
+jun_2012 = which(combined_df$Year=="2012" & combined_df$Month == "June")
+jun_2013 = which(combined_df$Year=="2013" & combined_df$Month == "June")
+jun_2014 = which(combined_df$Year=="2014" & combined_df$Month == "June")
+jun_2015 = which(combined_df$Year=="2015" & combined_df$Month == "June")
+jun_2016 = which(combined_df$Year=="2016" & combined_df$Month == "June")
+jun_2017 = which(combined_df$Year=="2017" & combined_df$Month == "June")
+jun_2018 = which(combined_df$Year=="2018" & combined_df$Month == "June")
+jun_2019 = which(combined_df$Year=="2019" & combined_df$Month == "June")
+jun_2020 = which(combined_df$Year=="2020" & combined_df$Month == "June")
+
+jul_2006 = which(combined_df$Year=="2006" & combined_df$Month == "July")
+jul_2007 = which(combined_df$Year=="2007" & combined_df$Month == "July")
+jul_2008 = which(combined_df$Year=="2008" & combined_df$Month == "July")
+jul_2009 = which(combined_df$Year=="2009" & combined_df$Month == "July")
+jul_2010 = which(combined_df$Year=="2010" & combined_df$Month == "July")
+jul_2011 = which(combined_df$Year=="2011" & combined_df$Month == "July")
+jul_2012 = which(combined_df$Year=="2012" & combined_df$Month == "July")
+jul_2013 = which(combined_df$Year=="2013" & combined_df$Month == "July")
+jul_2014 = which(combined_df$Year=="2014" & combined_df$Month == "July")
+jul_2015 = which(combined_df$Year=="2015" & combined_df$Month == "July")
+jul_2016 = which(combined_df$Year=="2016" & combined_df$Month == "July")
+jul_2017 = which(combined_df$Year=="2017" & combined_df$Month == "July")
+jul_2018 = which(combined_df$Year=="2018" & combined_df$Month == "July")
+jul_2019 = which(combined_df$Year=="2019" & combined_df$Month == "July")
+jul_2020 = which(combined_df$Year=="2020" & combined_df$Month == "July")
+
+aug_2006 = which(combined_df$Year=="2006" & combined_df$Month == "Aug")
+aug_2007 = which(combined_df$Year=="2007" & combined_df$Month == "Aug")
+aug_2008 = which(combined_df$Year=="2008" & combined_df$Month == "Aug")
+aug_2009 = which(combined_df$Year=="2009" & combined_df$Month == "Aug")
+aug_2010 = which(combined_df$Year=="2010" & combined_df$Month == "Aug")
+aug_2011 = which(combined_df$Year=="2011" & combined_df$Month == "Aug")
+aug_2012 = which(combined_df$Year=="2012" & combined_df$Month == "Aug")
+aug_2013 = which(combined_df$Year=="2013" & combined_df$Month == "Aug")
+aug_2014 = which(combined_df$Year=="2014" & combined_df$Month == "Aug")
+aug_2015 = which(combined_df$Year=="2015" & combined_df$Month == "Aug")
+aug_2016 = which(combined_df$Year=="2016" & combined_df$Month == "Aug")
+aug_2017 = which(combined_df$Year=="2017" & combined_df$Month == "Aug")
+aug_2018 = which(combined_df$Year=="2018" & combined_df$Month == "Aug")
+aug_2019 = which(combined_df$Year=="2019" & combined_df$Month == "Aug")
+aug_2020 = which(combined_df$Year=="2020" & combined_df$Month == "Aug")
+
+sep_2006 = which(combined_df$Year=="2006" & combined_df$Month == "Sept")
+sep_2007 = which(combined_df$Year=="2007" & combined_df$Month == "Sept")
+sep_2008 = which(combined_df$Year=="2008" & combined_df$Month == "Sept")
+sep_2009 = which(combined_df$Year=="2009" & combined_df$Month == "Sept")
+sep_2010 = which(combined_df$Year=="2010" & combined_df$Month == "Sept")
+sep_2011 = which(combined_df$Year=="2011" & combined_df$Month == "Sept")
+sep_2012 = which(combined_df$Year=="2012" & combined_df$Month == "Sept")
+sep_2013 = which(combined_df$Year=="2013" & combined_df$Month == "Sept")
+sep_2014 = which(combined_df$Year=="2014" & combined_df$Month == "Sept")
+sep_2015 = which(combined_df$Year=="2015" & combined_df$Month == "Sept")
+sep_2016 = which(combined_df$Year=="2016" & combined_df$Month == "Sept")
+sep_2017 = which(combined_df$Year=="2017" & combined_df$Month == "Sept")
+sep_2018 = which(combined_df$Year=="2018" & combined_df$Month == "Sept")
+sep_2019 = which(combined_df$Year=="2019" & combined_df$Month == "Sept")
+sep_2020 = which(combined_df$Year=="2020" & combined_df$Month == "Sept")
+
+oct_2006 = which(combined_df$Year=="2006" & combined_df$Month == "Oct")
+oct_2007 = which(combined_df$Year=="2007" & combined_df$Month == "Oct")
+oct_2008 = which(combined_df$Year=="2008" & combined_df$Month == "Oct")
+oct_2009 = which(combined_df$Year=="2009" & combined_df$Month == "Oct")
+oct_2010 = which(combined_df$Year=="2010" & combined_df$Month == "Oct")
+oct_2011 = which(combined_df$Year=="2011" & combined_df$Month == "Oct")
+oct_2012 = which(combined_df$Year=="2012" & combined_df$Month == "Oct")
+oct_2013 = which(combined_df$Year=="2013" & combined_df$Month == "Oct")
+oct_2014 = which(combined_df$Year=="2014" & combined_df$Month == "Oct")
+oct_2015 = which(combined_df$Year=="2015" & combined_df$Month == "Oct")
+oct_2016 = which(combined_df$Year=="2016" & combined_df$Month == "Oct")
+oct_2017 = which(combined_df$Year=="2017" & combined_df$Month == "Oct")
+oct_2018 = which(combined_df$Year=="2018" & combined_df$Month == "Oct")
+oct_2019 = which(combined_df$Year=="2019" & combined_df$Month == "Oct")
+oct_2020 = which(combined_df$Year=="2020" & combined_df$Month == "Oct")
+
+nov_2006 = which(combined_df$Year=="2006" & combined_df$Month == "Nov")
+nov_2007 = which(combined_df$Year=="2007" & combined_df$Month == "Nov")
+nov_2008 = which(combined_df$Year=="2008" & combined_df$Month == "Nov")
+nov_2009 = which(combined_df$Year=="2009" & combined_df$Month == "Nov")
+nov_2010 = which(combined_df$Year=="2010" & combined_df$Month == "Nov")
+nov_2011 = which(combined_df$Year=="2011" & combined_df$Month == "Nov")
+nov_2012 = which(combined_df$Year=="2012" & combined_df$Month == "Nov")
+nov_2013 = which(combined_df$Year=="2013" & combined_df$Month == "Nov")
+nov_2014 = which(combined_df$Year=="2014" & combined_df$Month == "Nov")
+nov_2015 = which(combined_df$Year=="2015" & combined_df$Month == "Nov")
+nov_2016 = which(combined_df$Year=="2016" & combined_df$Month == "Nov")
+nov_2017 = which(combined_df$Year=="2017" & combined_df$Month == "Nov")
+nov_2018 = which(combined_df$Year=="2018" & combined_df$Month == "Nov")
+nov_2019 = which(combined_df$Year=="2019" & combined_df$Month == "Nov")
+nov_2020 = which(combined_df$Year=="2020" & combined_df$Month == "Nov")
+
+dec_2006 = which(combined_df$Year=="2006" & combined_df$Month == "Dec")
+dec_2007 = which(combined_df$Year=="2007" & combined_df$Month == "Dec")
+dec_2008 = which(combined_df$Year=="2008" & combined_df$Month == "Dec")
+dec_2009 = which(combined_df$Year=="2009" & combined_df$Month == "Dec")
+dec_2010 = which(combined_df$Year=="2010" & combined_df$Month == "Dec")
+dec_2011 = which(combined_df$Year=="2011" & combined_df$Month == "Dec")
+dec_2012 = which(combined_df$Year=="2012" & combined_df$Month == "Dec")
+dec_2013 = which(combined_df$Year=="2013" & combined_df$Month == "Dec")
+dec_2014 = which(combined_df$Year=="2014" & combined_df$Month == "Dec")
+dec_2015 = which(combined_df$Year=="2015" & combined_df$Month == "Dec")
+dec_2016 = which(combined_df$Year=="2016" & combined_df$Month == "Dec")
+dec_2017 = which(combined_df$Year=="2017" & combined_df$Month == "Dec")
+dec_2018 = which(combined_df$Year=="2018" & combined_df$Month == "Dec")
+dec_2019 = which(combined_df$Year=="2019" & combined_df$Month == "Dec")
+dec_2020 = which(combined_df$Year=="2020" & combined_df$Month == "Dec")
+
+#tot_2006 = combined_df[1:76,]
+#tot_2006 = combined_df[1:76,]
+#jan_2006 = combined_df[77:152,]
+#feb_2006 = combined_df[153:228,]
+#mar_2006 = combined_df[229:304,]
+#apr_2006 = combined_df[307:383]
+  
+```
+
+## 
+
+# 3) plotting mean dengue cases of each year of 2006 to 2020
+
+## 3.1) defining new columns
+
+the province Bueng Kan separated from Nong Khain in 2011 \--\> 2011 to 2020: 77 provinces, before: 76 provinces
+
+```{r}
+# setting dengue data cases of Bueng Kan and Nong Khain in 2006 to 2010 to "NA"
+
+new_row_tot_2006 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2006", Month= "Total")
+new_row_tot_2007 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2007", Month= "Total")
+new_row_tot_2008 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2008", Month= "Total")
+new_row_tot_2009 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2009", Month= "Total")
+new_row_tot_2010 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2010", Month= "Total")
+
+new_row_jan_2006 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2006", Month= "Jan")
+new_row_feb_2006 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2006", Month= "Feb")
+new_row_mar_2006 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2006", Month= "Mar")
+new_row_apr_2006 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2006", Month= "Apr")
+new_row_may_2006 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2006", Month= "May")
+new_row_jun_2006 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2006", Month= "June")
+new_row_jul_2006 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2006", Month= "July")
+new_row_aug_2006 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2006", Month= "Aug")
+new_row_sep_2006 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2006", Month= "Sept")
+new_row_oct_2006 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2006", Month= "Oct")
+new_row_nov_2006 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2006", Month= "Nov")
+new_row_dec_2006 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2006", Month= "Dec")
+
+
+new_row_jan_2007 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2007", Month= "Jan")
+new_row_feb_2007 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2007", Month= "Feb")
+new_row_mar_2007 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2007", Month= "Mar")
+new_row_apr_2007 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2007", Month= "Apr")
+new_row_may_2007 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2007", Month= "May")
+new_row_jun_2007 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2007", Month= "June")
+new_row_jul_2007 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2007", Month= "July")
+new_row_aug_2007 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2007", Month= "Aug")
+new_row_sep_2007 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2007", Month= "Sept")
+new_row_oct_2007 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2007", Month= "Oct")
+new_row_nov_2007 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2007", Month= "Nov")
+new_row_dec_2007 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2007", Month= "Dec")
+
+
+new_row_jan_2008 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2008", Month= "Jan")
+new_row_feb_2008 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2008", Month= "Feb")
+new_row_mar_2008 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2008", Month= "Mar")
+new_row_apr_2008 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2008", Month= "Apr")
+new_row_may_2008 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2008", Month= "May")
+new_row_jun_2008 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2008", Month= "June")
+new_row_jul_2008 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2008", Month= "July")
+new_row_aug_2008 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2008", Month= "Aug")
+new_row_sep_2008 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2008", Month= "Sept")
+new_row_oct_2008 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2008", Month= "Oct")
+new_row_nov_2008 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2008", Month= "Nov")
+new_row_dec_2008 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2008", Month= "Dec")
+
+
+new_row_jan_2009 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2009", Month= "Jan")
+new_row_feb_2009 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2009", Month= "Feb")
+new_row_mar_2009 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2009", Month= "Mar")
+new_row_apr_2009 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2009", Month= "Apr")
+new_row_may_2009 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2009", Month= "May")
+new_row_jun_2009 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2009", Month= "June")
+new_row_jul_2009 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2009", Month= "July")
+new_row_aug_2009 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2009", Month= "Aug")
+new_row_sep_2009 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2009", Month= "Sept")
+new_row_oct_2009 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2009", Month= "Oct")
+new_row_nov_2009 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2009", Month= "Nov")
+new_row_dec_2009 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2009", Month= "Dec")
+
+new_row_jan_2010 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2010", Month= "Jan")
+new_row_feb_2010 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2010", Month= "Feb")
+new_row_mar_2010 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2010", Month= "Mar")
+new_row_apr_2010 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2010", Month= "Apr")
+new_row_may_2010 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2010", Month= "May")
+new_row_jun_2010 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2010", Month= "June")
+new_row_jul_2010 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2010", Month= "July")
+new_row_aug_2010 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2010", Month= "Aug")
+new_row_sep_2010 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2010", Month= "Sept")
+new_row_oct_2010 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2010", Month= "Oct")
+new_row_nov_2010 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2010", Month= "Nov")
+new_row_dec_2010 = data.frame(X=0, Reporting_area= "Bueng Kan", dengue_cases= NA, Year ="2010", Month= "Dec")
+```
+
+## 3.2) plotting dengue cases of each month (mean of all years)
+
+```{r}
+#2006------------------------------------------------------------------------------------------
+#coosing the lines that show total data for each district 2006 to 2020
+dengue.tot.2006 = combined_df[tot_2006,]
+# adding row of the new province
+dengue.tot.2006.1 <- rbind(dengue.tot.2006[1:(4-1), ], new_row_tot_2006, dengue.tot.2006[4:nrow(dengue.tot.2006), ])
+
+# merging the dataframe with the geodata (geography is ordered in alphabetical order, dengue data too)
+geography["X"] = c(tot_2006, length(tot_2006)+1)
+dengue.tot.2006.geo = merge(dengue.tot.2006.1, geography, by= "X")
+
+ggplot(dengue.tot.2006.geo, aes(geometry=geometry)) +
+  geom_sf (aes(fill = dengue_cases)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "total reported dengue cases in 2006", fill = "total reported dengue cases")
+
+#2007------------------------------------------------------------------------------------------
+#coosing the lines that show total data for each district 2006 to 2020
+dengue.tot.2007 = combined_df[tot_2007,]
+# adding row of the new province
+dengue.tot.2007.1 <- rbind(dengue.tot.2007[1:(4-1), ], new_row_tot_2007, dengue.tot.2007[4:nrow(dengue.tot.2007), ])
+
+# merging the dataframe with the geodata (geography is ordered in alphabetical order, dengue data too)
+geography["X"] = c(tot_2007, length(tot_2007)+1)
+dengue.tot.2007.geo = merge(dengue.tot.2007.1, geography, by= "X")
+
+ggplot(dengue.tot.2007.geo, aes(geometry=geometry)) +
+  geom_sf (aes(fill = dengue_cases)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "total reported dengue cases in 2007", fill = "total reported dengue cases")
+
+#2008------------------------------------------------------------------------------------------
+#coosing the lines that show total data for each district 2006 to 2020
+dengue.tot.2008 = combined_df[tot_2008,]
+# adding row of the new province
+dengue.tot.2008.1 <- rbind(dengue.tot.2006[1:(4-1), ], new_row_tot_2008, dengue.tot.2008[4:nrow(dengue.tot.2008), ])
+
+# merging the dataframe with the geodata (geography is ordered in alphabetical order, dengue data too)
+geography["X"] = c(tot_2008, length(tot_2008)+1)
+dengue.tot.2008.geo = merge(dengue.tot.2008.1, geography, by= "X")
+
+ggplot(dengue.tot.2008.geo, aes(geometry=geometry)) +
+  geom_sf (aes(fill = dengue_cases)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "total reported dengue cases in 2008", fill = "total reported dengue cases")
+
+#2009------------------------------------------------------------------------------------------
+#coosing the lines that show total data for each district 2006 to 2020
+dengue.tot.2009 = combined_df[tot_2009,]
+# adding row of the new province
+dengue.tot.2009.1 <- rbind(dengue.tot.2009[1:(4-1), ], new_row_tot_2009, dengue.tot.2009[4:nrow(dengue.tot.2009), ])
+
+# merging the dataframe with the geodata (geography is ordered in alphabetical order, dengue data too)
+geography["X"] = c(tot_2009, length(tot_2009)+1)
+dengue.tot.2009.geo = merge(dengue.tot.2009.1, geography, by= "X")
+
+ggplot(dengue.tot.2009.geo, aes(geometry=geometry)) +
+  geom_sf (aes(fill = dengue_cases)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "total reported dengue cases in 2009", fill = "total reported dengue cases")
+
+#2010------------------------------------------------------------------------------------------
+#coosing the lines that show total data for each district 2006 to 2020
+dengue.tot.2010 = combined_df[tot_2010,]
+# adding row of the new province
+dengue.tot.2010.1 <- rbind(dengue.tot.2010[1:(4-1), ], new_row_tot_2010, dengue.tot.2010[4:nrow(dengue.tot.2010), ])
+
+# merging the dataframe with the geodata (geography is ordered in alphabetical order, dengue data too)
+geography["X"] = c(tot_2010, length(tot_2010)+1)
+dengue.tot.2010.geo = merge(dengue.tot.2010.1, geography, by= "X")
+
+ggplot(dengue.tot.2010.geo, aes(geometry=geometry)) +
+  geom_sf (aes(fill = dengue_cases)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "total reported dengue cases in 2010", fill = "total reported dengue cases")
+
+
+
+
+
+
+
+
+
+
+#2011------------------------------------------------------------------------------------------
+#coosing the lines that show total data for each district 2006 to 2020
+dengue.tot.2011 = combined_df[tot_2011,]
+
+# merging the dataframe with the geodata (geography is ordered in alphabetical order, dengue data too)
+geography["X"] = c(tot_2011)
+dengue.tot.2011.geo = merge(dengue.tot.2011, geography, by= "X")
+
+ggplot(dengue.tot.2011.geo, aes(geometry=geometry)) +
+  geom_sf (aes(fill = dengue_cases)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "total reported dengue cases in 2011", fill = "total reported dengue cases")
+
+#2012------------------------------------------------------------------------------------------
+#coosing the lines that show total data for each district 2006 to 2020
+dengue.tot.2012 = combined_df[tot_2012,]
+
+# merging the dataframe with the geodata (geography is ordered in alphabetical order, dengue data too)
+geography["X"] = c(tot_2012)
+dengue.tot.2012.geo = merge(dengue.tot.2012, geography, by= "X")
+
+ggplot(dengue.tot.2012.geo, aes(geometry=geometry)) +
+  geom_sf (aes(fill = dengue_cases)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "total reported dengue cases in 2012", fill = "total reported dengue cases")
+
+#2013------------------------------------------------------------------------------------------
+#coosing the lines that show total data for each district 2006 to 2020
+dengue.tot.2013 = combined_df[tot_2013,]
+
+# merging the dataframe with the geodata (geography is ordered in alphabetical order, dengue data too)
+geography["X"] = c(tot_2013)
+dengue.tot.2013.geo = merge(dengue.tot.2013, geography, by= "X")
+
+ggplot(dengue.tot.2013.geo, aes(geometry=geometry)) +
+  geom_sf (aes(fill = dengue_cases)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "total reported dengue cases in 2013", fill = "total reported dengue cases")
+
+#2014------------------------------------------------------------------------------------------
+#coosing the lines that show total data for each district 2006 to 2020
+dengue.tot.2014 = combined_df[tot_2014,]
+
+# merging the dataframe with the geodata (geography is ordered in alphabetical order, dengue data too)
+geography["X"] = c(tot_2014)
+dengue.tot.2014.geo = merge(dengue.tot.2014, geography, by= "X")
+
+ggplot(dengue.tot.2014.geo, aes(geometry=geometry)) +
+  geom_sf (aes(fill = dengue_cases)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "total reported dengue cases in 2014", fill = "total reported dengue cases")
+
+#2015------------------------------------------------------------------------------------------
+#coosing the lines that show total data for each district 2006 to 2020
+dengue.tot.2015 = combined_df[tot_2015,]
+
+# merging the dataframe with the geodata (geography is ordered in alphabetical order, dengue data too)
+geography["X"] = c(tot_2015)
+dengue.tot.2015.geo = merge(dengue.tot.2015, geography, by= "X")
+
+ggplot(dengue.tot.2015.geo, aes(geometry=geometry)) +
+  geom_sf (aes(fill = dengue_cases)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "total reported dengue cases in 2015", fill = "total reported dengue cases")
+
+
+#2016------------------------------------------------------------------------------------------
+#coosing the lines that show total data for each district 2006 to 2020
+dengue.tot.2016 = combined_df[tot_2016,]
+
+# merging the dataframe with the geodata (geography is ordered in alphabetical order, dengue data too)
+geography["X"] = c(tot_2016)
+dengue.tot.2016.geo = merge(dengue.tot.2016, geography, by= "X")
+
+ggplot(dengue.tot.2016.geo, aes(geometry=geometry)) +
+  geom_sf (aes(fill = dengue_cases)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "total reported dengue cases in 2016", fill = "total reported dengue cases")
+
+#2017------------------------------------------------------------------------------------------
+#coosing the lines that show total data for each district 2006 to 2020
+dengue.tot.2017 = combined_df[tot_2017,]
+
+# merging the dataframe with the geodata (geography is ordered in alphabetical order, dengue data too)
+geography["X"] = c(tot_2017)
+dengue.tot.2017.geo = merge(dengue.tot.2017, geography, by= "X")
+
+ggplot(dengue.tot.2017.geo, aes(geometry=geometry)) +
+  geom_sf (aes(fill = dengue_cases)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "total reported dengue cases in 2017", fill = "total reported dengue cases")
+
+#2018------------------------------------------------------------------------------------------
+#coosing the lines that show total data for each district 2006 to 2020
+dengue.tot.2018 = combined_df[tot_2018,]
+
+# merging the dataframe with the geodata (geography is ordered in alphabetical order, dengue data too)
+geography["X"] = c(tot_2018)
+dengue.tot.2018.geo = merge(dengue.tot.2018, geography, by= "X")
+
+ggplot(dengue.tot.2018.geo, aes(geometry=geometry)) +
+  geom_sf (aes(fill = dengue_cases)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "total reported dengue cases in 2018", fill = "total reported dengue cases")
+
+#2019------------------------------------------------------------------------------------------
+#coosing the lines that show total data for each district 2006 to 2020
+dengue.tot.2019 = combined_df[tot_2019,]
+
+# merging the dataframe with the geodata (geography is ordered in alphabetical order, dengue data too)
+geography["X"] = c(tot_2019)
+dengue.tot.2019.geo = merge(dengue.tot.2019, geography, by= "X")
+
+ggplot(dengue.tot.2019.geo, aes(geometry=geometry)) +
+  geom_sf (aes(fill = dengue_cases)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "total reported dengue cases in 2019", fill = "total reported dengue cases")
+
+#2020------------------------------------------------------------------------------------------
+#coosing the lines that show total data for each district 2006 to 2020
+dengue.tot.2020 = combined_df[tot_2020,]
+
+# merging the dataframe with the geodata (geography is ordered in alphabetical order, dengue data too)
+geography["X"] = c(tot_2020)
+dengue.tot.2020.geo = merge(dengue.tot.2020, geography, by= "X")
+
+ggplot(dengue.tot.2020.geo, aes(geometry=geometry)) +
+  geom_sf (aes(fill = dengue_cases)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "total reported dengue cases in 2020", fill = "total reported dengue cases")
+
+```
+
+-\> Bankok is very dark because population density is very high -\> overlay with population density
+
+# 4) plotting time series
+
+## 4.1) plotting mean dengue cases of the whole country in a time series
+
+preparing a dataframe containing mean value of each month over all provinces (2006 to 2020)
+
+```{r}
+print(combined_df)
+
+mean_jan_2006 = mean(combined_df$dengue_cases[jan_2006])
+mean_feb_2006 = mean(combined_df$dengue_cases[feb_2006])
+mean_mar_2006 = mean(combined_df$dengue_cases[mar_2006])
+mean_apr_2006 = mean(combined_df$dengue_cases[apr_2006])
+mean_may_2006 = mean(combined_df$dengue_cases[may_2006])
+mean_jun_2006 = mean(combined_df$dengue_cases[jun_2006])
+mean_jul_2006 = mean(combined_df$dengue_cases[jul_2006])
+mean_aug_2006 = mean(combined_df$dengue_cases[aug_2006])
+mean_sep_2006 = mean(combined_df$dengue_cases[sep_2006])
+mean_oct_2006 = mean(combined_df$dengue_cases[oct_2006])
+mean_nov_2006 = mean(combined_df$dengue_cases[nov_2006])
+mean_dec_2006 = mean(combined_df$dengue_cases[dec_2006])
+
+mean_jan_2007 = mean(combined_df$dengue_cases[jan_2007])
+mean_feb_2007 = mean(combined_df$dengue_cases[feb_2007])
+mean_mar_2007 = mean(combined_df$dengue_cases[mar_2007])
+mean_apr_2007 = mean(combined_df$dengue_cases[apr_2007])
+mean_may_2007 = mean(combined_df$dengue_cases[may_2007])
+mean_jun_2007 = mean(combined_df$dengue_cases[jun_2007])
+mean_jul_2007 = mean(combined_df$dengue_cases[jul_2007])
+mean_aug_2007 = mean(combined_df$dengue_cases[aug_2007])
+mean_sep_2007 = mean(combined_df$dengue_cases[sep_2007])
+mean_oct_2007 = mean(combined_df$dengue_cases[oct_2007])
+mean_nov_2007 = mean(combined_df$dengue_cases[nov_2007])
+mean_dec_2007 = mean(combined_df$dengue_cases[dec_2007])
+
+mean_jan_2008 = mean(combined_df$dengue_cases[jan_2008])
+mean_feb_2008 = mean(combined_df$dengue_cases[feb_2008])
+mean_mar_2008 = mean(combined_df$dengue_cases[mar_2008])
+mean_apr_2008 = mean(combined_df$dengue_cases[apr_2008])
+mean_may_2008 = mean(combined_df$dengue_cases[may_2008])
+mean_jun_2008 = mean(combined_df$dengue_cases[jun_2008])
+mean_jul_2008 = mean(combined_df$dengue_cases[jul_2008])
+mean_aug_2008 = mean(combined_df$dengue_cases[aug_2008])
+mean_sep_2008 = mean(combined_df$dengue_cases[sep_2008])
+mean_oct_2008 = mean(combined_df$dengue_cases[oct_2008])
+mean_nov_2008 = mean(combined_df$dengue_cases[nov_2008])
+mean_dec_2008 = mean(combined_df$dengue_cases[dec_2008])
+
+mean_jan_2009 = mean(combined_df$dengue_cases[jan_2009])
+mean_feb_2009 = mean(combined_df$dengue_cases[feb_2009])
+mean_mar_2009 = mean(combined_df$dengue_cases[mar_2009])
+mean_apr_2009 = mean(combined_df$dengue_cases[apr_2009])
+mean_may_2009 = mean(combined_df$dengue_cases[may_2009])
+mean_jun_2009 = mean(combined_df$dengue_cases[jun_2009])
+mean_jul_2009 = mean(combined_df$dengue_cases[jul_2009])
+mean_aug_2009 = mean(combined_df$dengue_cases[aug_2009])
+mean_sep_2009 = mean(combined_df$dengue_cases[sep_2009])
+mean_oct_2009 = mean(combined_df$dengue_cases[oct_2009])
+mean_nov_2009 = mean(combined_df$dengue_cases[nov_2009])
+mean_dec_2009 = mean(combined_df$dengue_cases[dec_2009])
+
+mean_jan_2010 = mean(combined_df$dengue_cases[jan_2010])
+mean_feb_2010 = mean(combined_df$dengue_cases[feb_2010])
+mean_mar_2010 = mean(combined_df$dengue_cases[mar_2010])
+mean_apr_2010 = mean(combined_df$dengue_cases[apr_2010])
+mean_may_2010 = mean(combined_df$dengue_cases[may_2010])
+mean_jun_2010 = mean(combined_df$dengue_cases[jun_2010])
+mean_jul_2010 = mean(combined_df$dengue_cases[jul_2010])
+mean_aug_2010 = mean(combined_df$dengue_cases[aug_2010])
+mean_sep_2010 = mean(combined_df$dengue_cases[sep_2010])
+mean_oct_2010 = mean(combined_df$dengue_cases[oct_2010])
+mean_nov_2010 = mean(combined_df$dengue_cases[nov_2010])
+mean_dec_2010 = mean(combined_df$dengue_cases[dec_2010])
+
+mean_jan_2011 = mean(combined_df$dengue_cases[jan_2011])
+mean_feb_2011 = mean(combined_df$dengue_cases[feb_2011])
+mean_mar_2011 = mean(combined_df$dengue_cases[mar_2011])
+mean_apr_2011 = mean(combined_df$dengue_cases[apr_2011])
+mean_may_2011 = mean(combined_df$dengue_cases[may_2011])
+mean_jun_2011 = mean(combined_df$dengue_cases[jun_2011])
+mean_jul_2011 = mean(combined_df$dengue_cases[jul_2011])
+mean_aug_2011 = mean(combined_df$dengue_cases[aug_2011])
+mean_sep_2011 = mean(combined_df$dengue_cases[sep_2011])
+mean_oct_2011 = mean(combined_df$dengue_cases[oct_2011])
+mean_nov_2011 = mean(combined_df$dengue_cases[nov_2011])
+mean_dec_2011 = mean(combined_df$dengue_cases[dec_2011])
+
+mean_jan_2012 = mean(combined_df$dengue_cases[jan_2012])
+mean_feb_2012 = mean(combined_df$dengue_cases[feb_2012])
+mean_mar_2012 = mean(combined_df$dengue_cases[mar_2012])
+mean_apr_2012 = mean(combined_df$dengue_cases[apr_2012])
+mean_may_2012 = mean(combined_df$dengue_cases[may_2012])
+mean_jun_2012 = mean(combined_df$dengue_cases[jun_2012])
+mean_jul_2012 = mean(combined_df$dengue_cases[jul_2012])
+mean_aug_2012 = mean(combined_df$dengue_cases[aug_2012])
+mean_sep_2012 = mean(combined_df$dengue_cases[sep_2012])
+mean_oct_2012 = mean(combined_df$dengue_cases[oct_2012])
+mean_nov_2012 = mean(combined_df$dengue_cases[nov_2012])
+mean_dec_2012 = mean(combined_df$dengue_cases[dec_2012])
+
+mean_jan_2013 = mean(combined_df$dengue_cases[jan_2013])
+mean_feb_2013 = mean(combined_df$dengue_cases[feb_2013])
+mean_mar_2013 = mean(combined_df$dengue_cases[mar_2013])
+mean_apr_2013 = mean(combined_df$dengue_cases[apr_2013])
+mean_may_2013 = mean(combined_df$dengue_cases[may_2013])
+mean_jun_2013 = mean(combined_df$dengue_cases[jun_2013])
+mean_jul_2013 = mean(combined_df$dengue_cases[jul_2013])
+mean_aug_2013 = mean(combined_df$dengue_cases[aug_2013])
+mean_sep_2013 = mean(combined_df$dengue_cases[sep_2013])
+mean_oct_2013 = mean(combined_df$dengue_cases[oct_2013])
+mean_nov_2013 = mean(combined_df$dengue_cases[nov_2013])
+mean_dec_2013 = mean(combined_df$dengue_cases[dec_2013])
+
+mean_jan_2014 = mean(combined_df$dengue_cases[jan_2014])
+mean_feb_2014 = mean(combined_df$dengue_cases[feb_2014])
+mean_mar_2014 = mean(combined_df$dengue_cases[mar_2014])
+mean_apr_2014 = mean(combined_df$dengue_cases[apr_2014])
+mean_may_2014 = mean(combined_df$dengue_cases[may_2014])
+mean_jun_2014 = mean(combined_df$dengue_cases[jun_2014])
+mean_jul_2014 = mean(combined_df$dengue_cases[jul_2014])
+mean_aug_2014 = mean(combined_df$dengue_cases[aug_2014])
+mean_sep_2014 = mean(combined_df$dengue_cases[sep_2014])
+mean_oct_2014 = mean(combined_df$dengue_cases[oct_2014])
+mean_nov_2014 = mean(combined_df$dengue_cases[nov_2014])
+mean_dec_2014 = mean(combined_df$dengue_cases[dec_2014])
+
+mean_jan_2015 = mean(combined_df$dengue_cases[jan_2015])
+mean_feb_2015 = mean(combined_df$dengue_cases[feb_2015])
+mean_mar_2015 = mean(combined_df$dengue_cases[mar_2015])
+mean_apr_2015 = mean(combined_df$dengue_cases[apr_2015])
+mean_may_2015 = mean(combined_df$dengue_cases[may_2015])
+mean_jun_2015 = mean(combined_df$dengue_cases[jun_2015])
+mean_jul_2015 = mean(combined_df$dengue_cases[jul_2015])
+mean_aug_2015 = mean(combined_df$dengue_cases[aug_2015])
+mean_sep_2015 = mean(combined_df$dengue_cases[sep_2015])
+mean_oct_2015 = mean(combined_df$dengue_cases[oct_2015])
+mean_nov_2015 = mean(combined_df$dengue_cases[nov_2015])
+mean_dec_2015 = mean(combined_df$dengue_cases[dec_2015])
+
+mean_jan_2016 = mean(combined_df$dengue_cases[jan_2016])
+mean_feb_2016 = mean(combined_df$dengue_cases[feb_2016])
+mean_mar_2016 = mean(combined_df$dengue_cases[mar_2016])
+mean_apr_2016 = mean(combined_df$dengue_cases[apr_2016])
+mean_may_2016 = mean(combined_df$dengue_cases[may_2016])
+mean_jun_2016 = mean(combined_df$dengue_cases[jun_2016])
+mean_jul_2016 = mean(combined_df$dengue_cases[jul_2016])
+mean_aug_2016 = mean(combined_df$dengue_cases[aug_2016])
+mean_sep_2016 = mean(combined_df$dengue_cases[sep_2016])
+mean_oct_2016 = mean(combined_df$dengue_cases[oct_2016])
+mean_nov_2016 = mean(combined_df$dengue_cases[nov_2016])
+mean_dec_2016 = mean(combined_df$dengue_cases[dec_2016])
+
+mean_jan_2017 = mean(combined_df$dengue_cases[jan_2017])
+mean_feb_2017 = mean(combined_df$dengue_cases[feb_2017])
+mean_mar_2017 = mean(combined_df$dengue_cases[mar_2017])
+mean_apr_2017 = mean(combined_df$dengue_cases[apr_2017])
+mean_may_2017 = mean(combined_df$dengue_cases[may_2017])
+mean_jun_2017 = mean(combined_df$dengue_cases[jun_2017])
+mean_jul_2017 = mean(combined_df$dengue_cases[jul_2017])
+mean_aug_2017 = mean(combined_df$dengue_cases[aug_2017])
+mean_sep_2017 = mean(combined_df$dengue_cases[sep_2017])
+mean_oct_2017 = mean(combined_df$dengue_cases[oct_2017])
+mean_nov_2017 = mean(combined_df$dengue_cases[nov_2017])
+mean_dec_2017 = mean(combined_df$dengue_cases[dec_2017])
+
+mean_jan_2018 = mean(combined_df$dengue_cases[jan_2018])
+mean_feb_2018 = mean(combined_df$dengue_cases[feb_2018])
+mean_mar_2018 = mean(combined_df$dengue_cases[mar_2018])
+mean_apr_2018 = mean(combined_df$dengue_cases[apr_2018])
+mean_may_2018 = mean(combined_df$dengue_cases[may_2018])
+mean_jun_2018 = mean(combined_df$dengue_cases[jun_2018])
+mean_jul_2018 = mean(combined_df$dengue_cases[jul_2018])
+mean_aug_2018 = mean(combined_df$dengue_cases[aug_2018])
+mean_sep_2018 = mean(combined_df$dengue_cases[sep_2018])
+mean_oct_2018 = mean(combined_df$dengue_cases[oct_2018])
+mean_nov_2018 = mean(combined_df$dengue_cases[nov_2018])
+mean_dec_2018 = mean(combined_df$dengue_cases[dec_2018])
+
+mean_jan_2019 = mean(combined_df$dengue_cases[jan_2019])
+mean_feb_2019 = mean(combined_df$dengue_cases[feb_2019])
+mean_mar_2019 = mean(combined_df$dengue_cases[mar_2019])
+mean_apr_2019 = mean(combined_df$dengue_cases[apr_2019])
+mean_may_2019 = mean(combined_df$dengue_cases[may_2019])
+mean_jun_2019 = mean(combined_df$dengue_cases[jun_2019])
+mean_jul_2019 = mean(combined_df$dengue_cases[jul_2019])
+mean_aug_2019 = mean(combined_df$dengue_cases[aug_2019])
+mean_sep_2019 = mean(combined_df$dengue_cases[sep_2019])
+mean_oct_2019 = mean(combined_df$dengue_cases[oct_2019])
+mean_nov_2019 = mean(combined_df$dengue_cases[nov_2019])
+mean_dec_2019 = mean(combined_df$dengue_cases[dec_2019])
+
+mean_jan_2020 = mean(combined_df$dengue_cases[jan_2020])
+mean_feb_2020 = mean(combined_df$dengue_cases[feb_2020])
+mean_mar_2020 = mean(combined_df$dengue_cases[mar_2020])
+mean_apr_2020 = mean(combined_df$dengue_cases[apr_2020])
+mean_may_2020 = mean(combined_df$dengue_cases[may_2020])
+mean_jun_2020 = mean(combined_df$dengue_cases[jun_2020])
+mean_jul_2020 = mean(combined_df$dengue_cases[jul_2020])
+mean_aug_2020 = mean(combined_df$dengue_cases[aug_2020])
+mean_sep_2020 = mean(combined_df$dengue_cases[sep_2020])
+mean_oct_2020 = mean(combined_df$dengue_cases[oct_2020])
+mean_nov_2020 = mean(combined_df$dengue_cases[nov_2020])
+mean_dec_2020 = mean(combined_df$dengue_cases[dec_2020])
+```
+
+```{r}
+#assembling dataframe
+combined_df_mean = rbind(
+  "1.2006" = mean_jan_2006,
+  "2.2006" = mean_feb_2006, 
+  "3.2006" = mean_mar_2006, 
+  "4.2006" = mean_apr_2006,
+  "5.2006" = mean_may_2006, 
+  "6.2006" = mean_jun_2006,
+  "7.2006" = mean_jul_2006,
+  "8.2006" = mean_aug_2006, 
+  "9.2006" = mean_sep_2006, 
+  "10.2006" = mean_oct_2006, 
+  "11.2006" = mean_nov_2006, 
+  "12.2006" = mean_dec_2006, 
+
+"1.2007" = mean_jan_2007, 
+"2.2007" = mean_feb_2007, 
+"3.2007" = mean_mar_2007, 
+"4.2007" = mean_apr_2007, 
+"5.2007" = mean_may_2007, 
+"6.2007" = mean_jun_2007, 
+"7.2007" = mean_jul_2007, 
+"8.2007" = mean_aug_2007, 
+"9.2007" = mean_sep_2007, 
+"10.2007" = mean_oct_2007, 
+"11.2007" = mean_nov_2007, 
+"12.2007" = mean_dec_2007, 
+
+"1.2008" = mean_jan_2008, 
+"2.2008" = mean_feb_2008, 
+"3.2008" = mean_mar_2008, 
+"4.2008" = mean_apr_2008, 
+"5.2008" = mean_may_2008, 
+"6.2008" = mean_jun_2008, 
+"7.2008" = mean_jul_2008, 
+"8.2008" = mean_aug_2008, 
+"9.2008" = mean_sep_2008, 
+"10.2008" = mean_oct_2008, 
+"11.2008" = mean_nov_2008, 
+"12.2008" = mean_dec_2008, 
+
+"1.2009" = mean_jan_2009, 
+"2.2009" = mean_feb_2009,
+"3.2009" = mean_mar_2009, 
+"4.2009" = mean_apr_2009, 
+"5.2009" = mean_may_2009, 
+"6.2009" = mean_jun_2009, 
+"7.2009" = mean_jul_2009,
+"8.2009" = mean_aug_2009, 
+"9.2009" = mean_sep_2009, 
+"10.2009" = mean_oct_2009,
+"11.2009" = mean_nov_2009, 
+"12.2009" = mean_dec_2009, 
+
+"1.2010" = mean_jan_2010, 
+"2.2010" = mean_feb_2010,
+"3.2010" = mean_mar_2010,
+"4.2010" = mean_apr_2010,
+"5.2010" = mean_may_2010,
+"6.2010" = mean_jun_2010,
+"7.2010" = mean_jul_2010,
+"8.2010" = mean_aug_2010,
+"9.2010" = mean_sep_2010,
+"10.2010" = mean_oct_2010,
+"11.2010" = mean_nov_2010,
+"12.2010" = mean_dec_2010,
+
+"1.2011" = mean_jan_2011, 
+"2.2011" = mean_feb_2011, 
+"3.2011" = mean_mar_2011,
+"4.2011" = mean_apr_2011, 
+"5.2011" = mean_may_2011,
+"6.2011" = mean_jun_2011,
+"7.2011" = mean_jul_2011,
+"8.2011" = mean_aug_2011,
+"9.2011" = mean_sep_2011,
+"10.2011" = mean_oct_2011,
+"11.2011" = mean_nov_2011,
+"12.2011" = mean_dec_2011,
+
+"1.2012" = mean_jan_2012, 
+"2.2012" = mean_feb_2012, 
+"3.2012" = mean_mar_2012, 
+"4.2012" = mean_apr_2012, 
+"5.2012" = mean_may_2012, 
+"6.2012" = mean_jun_2012, 
+"7.2012" = mean_jul_2012, 
+"8.2012" = mean_aug_2012, 
+"9.2012" = mean_sep_2012, 
+"10.2012" = mean_oct_2012, 
+"11.2012" = mean_nov_2012, 
+"12.2012" = mean_dec_2012, 
+
+"1.2013" = mean_jan_2013, 
+"2.2013" = mean_feb_2013, 
+"3.2013" = mean_mar_2013, 
+"4.2013" = mean_apr_2013, 
+"5.2013" = mean_may_2013, 
+"6.2013" = mean_jun_2013, 
+"7.2013" = mean_jul_2013, 
+"8.2013" = mean_aug_2013, 
+"9.2013" = mean_sep_2013, 
+"10.2013" = mean_oct_2013, 
+"11.2013" = mean_nov_2013, 
+"12.2013" = mean_dec_2013, 
+
+"1.2014" = mean_jan_2014, 
+"2.2014" = mean_feb_2014, 
+"3.2014" = mean_mar_2014, 
+"4.2014" = mean_apr_2014, 
+"5.2014" = mean_may_2014, 
+"6.2014" = mean_jun_2014, 
+"7.2014" = mean_jul_2014, 
+"8.2014" = mean_aug_2014, 
+"9.2014" = mean_sep_2014, 
+"10.2014" = mean_oct_2014, 
+"11.2014" = mean_nov_2014, 
+"12.2014" = mean_dec_2014, 
+
+"1.2015" = mean_jan_2015, 
+"2.2015" = mean_feb_2015, 
+"3.2015" = mean_mar_2015, 
+"4.2015" = mean_apr_2015, 
+"5.015" = mean_may_2015, 
+"6.2015" = mean_jun_2015, 
+"7.2015" = mean_jul_2015, 
+"8.2015" = mean_aug_2015, 
+"9.2015" = mean_sep_2015, 
+"10.2015" = mean_oct_2015, 
+"11.2015" = mean_nov_2015, 
+"12.2015" = mean_dec_2015, 
+
+"1.2016" = mean_jan_2016, 
+"2.2016" = mean_feb_2016, 
+"3.2016" = mean_mar_2016, 
+"4.2016" = mean_apr_2016, 
+"5.2016" = mean_may_2016, 
+"6.2016" = mean_jun_2016, 
+"7.2016" = mean_jul_2016,
+"8.2016" = mean_aug_2016, 
+"9.2016" = mean_sep_2016, 
+"10.2016" = mean_oct_2016, 
+"11.2016" = mean_nov_2016, 
+"12.2016" = mean_dec_2016, 
+
+"1.2017" = mean_jan_2017, 
+"2.2017" = mean_feb_2017, 
+"3.2017" = mean_mar_2017, 
+"4.2017" = mean_apr_2017, 
+"5.2017" = mean_may_2017, 
+"6.2017" = mean_jun_2017, 
+"7.2017" = mean_jul_2017, 
+"8.2017" = mean_aug_2017, 
+"9.2017" = mean_sep_2017, 
+"10.2017" = mean_oct_2017, 
+"11.2017" = mean_nov_2017, 
+"12.2017" = mean_dec_2017, 
+
+"1.2018" = mean_jan_2018, 
+"2.2018" = mean_feb_2018, 
+"3.2018" = mean_mar_2018, 
+"4.2018" = mean_apr_2018, 
+"5.2018" = mean_may_2018, 
+"6.2018" = mean_jun_2018, 
+"7.2018" = mean_jul_2018, 
+"8.2018" = mean_aug_2018, 
+"9.2018" = mean_sep_2018, 
+"10.2018" = mean_oct_2018, 
+"11.2018" = mean_nov_2018, 
+"12.2018" = mean_dec_2018, 
+
+"1.2019" = mean_jan_2019, 
+"2.2019" = mean_feb_2019, 
+"3.2019" = mean_mar_2019, 
+"4.2019" = mean_apr_2019, 
+"5.2019" = mean_may_2019, 
+"6.2019" = mean_jun_2019, 
+"7.2019" = mean_jul_2019, 
+"8.2019" = mean_aug_2019, 
+"9.2019" = mean_sep_2019, 
+"10.2019" = mean_oct_2019, 
+"11.2019" = mean_nov_2019, 
+"12.2019" = mean_dec_2019, 
+
+"2.2020" = mean_jan_2020,
+"2.2020" = mean_feb_2020, 
+"3.2020" = mean_mar_2020, 
+"4.2020" = mean_apr_2020, 
+"5.2020" = mean_may_2020, 
+"6.2020" = mean_jun_2020, 
+"7.2020" = mean_jul_2020, 
+"8.2020" = mean_aug_2020, 
+"9.2020" = mean_sep_2020, 
+"10.2020" = mean_oct_2020, 
+"11.2020" = mean_nov_2020, 
+"12.2020" = mean_dec_2020)
+
+
+colnames(combined_df_mean) = c("average_dengue_cases")
+print(combined_df_mean)
+```
+
+```{r}
+plot.ts(combined_df_mean$average_dengue_cases,
+        main= "mean dengue cases of all provinces (2006 to 2020)", 
+        ylab= "mean dengue cases",
+        xlab= "time",
+        ylim = c(0,2500)
+        ) +
+  abline(v= c(0,12,24,36,48,60,72,84,96,108,120,132,144,156,168), col="violet")
+
+```
+
+```{r}
+sns.lineplot(data=combined_df_mean, 
+             x='month', 
+             y='passengers', 
+             hue='year', 
+             legend='full')
+
+# add title
+plt.title('Seasonal plot')
+
+# move the legend outside of the main figure
+plt.legend(bbox_to_anchor=(1.05, 1), loc=2);
+```
