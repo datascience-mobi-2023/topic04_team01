@@ -14,12 +14,12 @@ knitr::opts_chunk$set(echo = TRUE)
 #install.packages("readxl")
 library(readxl)
 
-sheet_names = excel_sheets("/Users/leamrowiec/Desktop/Datenanalyse SS23/era5_data_2006_2020_thailand_monmean.xlsx")
+sheet_names = excel_sheets("../era5_data_2006_2020_thailand_monmean.xlsx")
 
 #laden von den einzelnen sheets
-T.huss.mon = read_excel("/Users/leamrowiec/Desktop/Datenanalyse SS23/era5_data_2006_2020_thailand_monmean.xlsx", sheet="era5_huss_2006_2020_thailand_mo")
-T.tp.mon = read_excel("/Users/leamrowiec/Desktop/Datenanalyse SS23/era5_data_2006_2020_thailand_monmean.xlsx", sheet="era5_tp_2006_2020_thailand_monm")
-T.t2m.mon = read_excel("/Users/leamrowiec/Desktop/Datenanalyse SS23/era5_data_2006_2020_thailand_monmean.xlsx", sheet="era5_t2m_2006_2020_thailand_mon")
+T.huss.mon = read_excel("../era5_data_2006_2020_thailand_monmean.xlsx", sheet="era5_huss_2006_2020_thailand_mo")
+T.tp.mon = read_excel("../era5_data_2006_2020_thailand_monmean.xlsx", sheet="era5_tp_2006_2020_thailand_monm")
+T.t2m.mon = read_excel("../era5_data_2006_2020_thailand_monmean.xlsx", sheet="era5_t2m_2006_2020_thailand_mon")
 
 ```
 
@@ -479,7 +479,7 @@ ggplot(sep.combined, aes(geometry=geometry)) +
   coord_sf() +
   theme_minimal()+
   colorspace::scale_fill_continuous_sequential(palette= "plasma")+
-  labs(title = "mean relative humidity of september (2006 to 2020)" fill = "mean relative humidity")
+  labs(title = "mean relative humidity of september (2006 to 2020)", fill = "mean relative humidity")
 
 #PLOT OCTOBER---------------------------------------------------------------------------------
 
