@@ -10,7 +10,7 @@ output: html_document
 ```{r}
 #loading dengue data 
 filePath = paste(getwd(), "dengue_data_com.csv",sep = "/")
-combined_df <- read.csv("../dengue_data/dengue_data_com.csv")
+combined_df <- read.csv("./dengue_data/dengue_data_com.csv")
 print(combined_df)
 
 #converting dengue cases into numbers
@@ -38,7 +38,13 @@ library(exactextractr)
 ```{r}
 #loading geo data
 library(sf)
-geography <- st_read("/Users/leamrowiec/Desktop/Datenanalyse SS23/other data/gadm36_THA_shp")
+
+
+# Der Path funktioniert leider nicht da er direkt auf Leas Laptop führt. Da die Datei schon auf Github ist , synchronisiert sie alle Funktionen aus dem Enviornment und diese Datei kann kanz einfach unter " geography " Abgerufen werden , ohne neu definiert zu werden:)
+
+
+#View(geography)
+#geography <- st_read("/Users/leamrowiec/Desktop/Datenanalyse SS23/other data/gadm36_THA_shp")
 ```
 
 # 2) basic plots
