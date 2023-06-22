@@ -170,6 +170,7 @@ ggplot(huss.goegraphy.max.rmv.1, aes(geometry=geometry)) +
   colorspace::scale_fill_continuous_sequential(palette= "viridis")
 
 # wieso geht es immernoch nicht? sieht aus, als ob es latitude plottet, obwohl nicht mehr im dataframe???
+print(huss.goegraphy.max.rmv.1)
 ```
 
 ```{r}
@@ -193,7 +194,8 @@ library(ggplot2)
 ggplot(huss.goegraphy.min.1, aes(geometry=geometry)) +
   geom_sf (aes(fill = mon.min)) +
   colorspace::scale_fill_continuous_sequential(palette= "viridis")
-  
+
+
 ```
 
 ```{r}
@@ -219,7 +221,7 @@ ggplot(huss.goegraphy.median.1, aes(geometry=geometry)) +
   
 ```
 
-## c) geo plot of mean relative humidity of each month 
+## c) geo plot of mean relative humidity of each month
 
 ```{r}
 install.packages("RColorBrewer")
@@ -526,6 +528,12 @@ ggplot(dec.combined, aes(geometry=geometry)) +
   colorspace::scale_fill_continuous_sequential(palette= "plasma")+
   labs(title = "mean relative humidity of december (2006 to 2020) ", fill = "mean relative humidity")
 
+```
+
+### anormality plot 
+
+```{r}
+print(T.huss.mon)
 ```
 
 ### goeplot february
