@@ -97,11 +97,10 @@ View(mean.huss.prov.geography)
 
 ```{r}
 ggplot() +
-  geom_sf(data = mean.huss.prov.geography,aes(geometry = geometry), fill= mean.huss.prov.orderd) +
+  geom_sf(data = mean.huss.prov.geography,aes(geometry = geometry,fill=mean.huss.prov.orderd))+
   coord_sf() +  
   theme_minimal() +
   labs(title = "Mean humidity of Provinces from 2006 to 2020") +
-  scale_fill_viridis()+
   labs(x="Longitude", y= "Latitude")
   
 ```
@@ -143,7 +142,7 @@ View(mean.huss.prov.orderd.clusters)
 ## ggPlotting the clusters (k=3)von den Mittelwertwn aller Provinzen von 2006 bis 2020
 
 ggplot() +
-  geom_sf(data = mean.huss.prov.orderd.clusters.geography ,aes(geometry = geometry), fill= mean.huss.prov.orderd.clusterd$cluster) +
+  geom_sf(data = mean.huss.prov.orderd.clusters.geography ,aes(geometry = geometry, fill= mean.huss.prov.orderd.clusterd$cluster)) +
   coord_sf() +  
   theme_minimal() +
   labs(title = "kmeans K = 3  humidity of Provinces from 2006 to 2020") +
@@ -184,11 +183,11 @@ mean.huss.prov.orderd.clusters.geography.4 = merge(mean.huss.prov.orderd.cluster
 ## ggPlotting the clusters (k=4)von den Mittelwertwn aller Provinzen von 2006 bis 2020
 
 ggplot() +
-  geom_sf(data = mean.huss.prov.orderd.clusters.geography.4 ,aes(geometry = geometry), fill= mean.huss.prov.orderd.clusterd.4$cluster) +
+  geom_sf(data = mean.huss.prov.orderd.clusters.geography.4 ,aes(geometry = geometry,)) +
   coord_sf() +  
   theme_minimal() +
   labs(title = "kmeans K = 4  humidity of Provinces from 2006 to 2020") +
-  scale_fill_viridis()+
+ colorspace::scale_fill_continuous_sequential(palette= "plasma")+
   labs(x="Longitude", y= "Latitude")
 ```
 
@@ -223,12 +222,12 @@ View(T.huss.mean.2006)
 
 ```{r}
 ggplot() +
-  geom_sf(data = T.huss.mean.2006, aes(geometry = geometry), fill= apply(T.huss.2006[-c(1,2)], 1, mean)) +
+  geom_sf(data = T.huss.mean.2006, aes(geometry = geometry, fill= apply(T.huss.2006[-c(1,2)], 1, mean))) +
   coord_sf() +  
   theme_minimal() +
   labs(title = "Mean Humidity in 2006") +
-  scale_fill_viridis()+
-  labs(x="Longitude", y= "Latitude")
+  labs(x="Longitude", y= "Latitude")+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")
 ```
 
 ## 2.3.2 Clustering von 2006 K=3
@@ -246,10 +245,11 @@ k <- 3
 T.huss.mean.2006.clusterd.3 <- kmeans(T.huss.mean.2006, centers = k )
 
 
-## print the results 
+## print the results to see which Clusters have Assigned 1,2,3
 print(T.huss.mean.2006.clusterd.3$cluster)
 print(T.huss.mean.2006.clusterd.3$centers)
 
+## Wichtig für weiteren Code : Als eigener Data Frame 
 T.huss.mean.2006.clusters.3= as.data.frame(T.huss.mean.2006.clusterd.3$cluster)
 
 ## Vorbereiten zum Plotten :
@@ -273,3 +273,14 @@ ggplot() +
   labs(x="Longitude", y= "Latitude")
 
 ```
+
+
+
+
+
+##Facette Plotting 
+
+```{r}
+
+```
+

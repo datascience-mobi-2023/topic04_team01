@@ -1,0 +1,159 @@
+---
+title: "GAM"
+output: html_document
+date: "2023-06-14"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#load the dengue dataframe combined -> dengue_data_com
+```{r}
+#laden aus dem github repository mit relativen path 
+dengue_data_com = read.csv("../dengue_data/dengue_data_com.csv")
+
+head(dengue_data_com)
+
+```
+#get the data into a diffrent shape we need for time series analysis 
+```{r}
+#überlegung: dengue daten erstmal auf ganz thailand bezogen also für jeden monat der Jahre 2006-2020 die summer der dengue cases im ganzen land thailand berechnen 
+
+# Benötigt die tidyverse-Pakete
+library(tidyverse)
+
+# Gruppiere den DataFrame nach Jahr, Monat und berechne die Summe der Dengue-Fälle
+dengue_sum <- dengue_data_com %>%
+  group_by(Year, Month) %>%
+  summarise(`Dengue_Total` = sum(`dengue_cases`))
+
+# Gib den neuen DataFrame aus
+print(df_sum)
+
+#neuen dataframe generien nur mit den spalten year, month und dengue cases 
+ts_dengue = data.frame 
+```
+# die total werte noch raus filtrieren 
+```{r}
+# entfernen wir jetzt die Total values aus dem dengue_sum
+i.remove = which(dengue_sum$Month %in% c("Total"))
+i.remove 
+
+dengue_sum = dengue_sum[-i.remove,]
+print(dengue_sum)
+
+#lets turn the months into numerics 
+
+# Definiere die Umwandlung der Monatsnamen
+monat_umwandlung <- c(Jan = "01", Feb = "02", Mar = "03", Apr = "04", May = "05", June = "06",
+                      July = "07", Aug = "08", Sept = "09", Oct = "10", Nov = "11", Dec = "12")
+
+# Wandele die Monate in numerische Werte um
+dengue_sum <- dengue_sum %>%
+  mutate(Month = recode(Month, !!!monat_umwandlung))
+
+#umwandeln von month von chr in dbl 
+dengue_sum$Month = as.numeric(dengue_sum$Month)
+```
+# now lets convert the dataframe into a ts 
+```{r}
+# Convert to time series object
+myTs <- ts(dengue_sum$Dengue_Total, frequency = 12, start = c(2006, 1))
+class(myTs) # ts"  (if you don't just feed in one but more data points per time point e.g. env then it is mts)
+
+# Plot time series
+TSstudio::ts_plot(myTs, title = "Dengue Cases in Thailand between the years 2006 - 2020", Xgrid = TRUE)
+
+```
+#lets have a look on the data 
+```{r}
+# Loess smoothing, A periodic decomposition
+# decompose() assumes the seasonal term to be fixed and repeating (constant throughout the entire time series)
+# stl() is more flexible and automatically determines the seasonal period from the data
+decomposedSeasonsal <- stl(myTs, s.window = "periodic")
+plot(decomposedSeasonsal, main = "Decomposition of a periodic time series", xaxt = "n")
+grid(lty = 2, col = "gray")
+
+?stl
+```
+```{r}
+# 02 TESTING THE TIME SERIES
+
+# Test for Stationarity
+# Stationarity is an important assumption in many statistical tests  and ts analysis models. 
+# A ts is stationary when the mean and variance, do not change over time. 
+
+# Augmented Dickey-Fuller (ADF)
+# includes additional lagged differences of the series in the regression equation, 
+# capturing different types of non-stationarity, identifying both trend and autoregressive components
+
+library(tseries)
+adf.test(myTs) # p-value < 0.05 indicates the TS is stationary --> suggests it is stationary !!!
+```
+#Test auf subset of myTS (differnet years) 
+```{r}
+# Annahme: Sie haben bereits eine Zeitreihenobjekt "myTs" definiert
+
+# Subset der Zeitreihe für bestimmte Jahre auswählen
+start_year <- 2010
+end_year <- 2020
+subset_ts <- window(myTs, start = c(start_year, 1), end = c(end_year, 12))
+
+# Dickey-Fuller-Test auf dem ausgewählten Subset durchführen
+ adf.test(subset_ts)
+```
+#Autocorr 
+```{r}
+# PACF & ACF: 
+# Which lag fits the data best? --> order
+# Autocorrelation is the correlation of a Time Series with lags of itself
+
+# autocorrelation
+# correlation of the time series with a lag of itself
+acfRes <- acf(dengue_sum$Dengue_Total)  # generates plots by default
+
+# partial autocorrelation
+# correlation of the time series with a lag of itself, 
+# with the linear dependence of all the lags between them removed
+pacfRes <- pacf(dengue_sum$Dengue_Total)  # generates plots by default
+```
+
+#Lets model 
+```{r}
+library(forecast)
+best_model_auto  <- auto.arima(myTs)
+best_model_auto
+```
+
+# 05 FORCASTING
+```{r}
+# Generate forecasts
+library(forecast)
+horizon <- 50 # number of units you want to forecast --> here days
+forecasted <- forecast(best_model_auto, h = horizon)
+class(forecasted) # forcast
+
+# Access forecasted values and intervals
+forecastedTs <- forecasted$mean
+forecastedTs  <- ts(forecastedTs, frequency = 12, start = c(2020, 12) )
+class(forecastedTs) 
+plot(forecastedTs)
+
+# some formatting for gglotting
+forecastDf <- as.data.frame(forecasted)
+forecastDf$time <- time(forecastedTs)
+names(forecastDf) <- c("point", "lo_80", "hi_80" , "lo_95", "hi_95", "time")
+class(forecastDf)
+
+# Plot both the original ts and the forecasts
+ggplot() +
+  geom_line(data = myTs, aes(x = time(myTs), y = myTs), color = "black") +
+  geom_ribbon(data = forecastDf, aes(x = time, ymin = lo_95, ymax = hi_95), fill = "gray80") +
+  geom_line(data = forecastDf, aes(x = time, y = point), color = "blue") +
+  labs(title = "Time Series Forecast") +
+  xlab("Year") +
+  ylab("Dengue Cases") +
+  theme_minimal()
+```
+
