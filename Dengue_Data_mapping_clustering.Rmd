@@ -1,6 +1,6 @@
 ---
 title: "Dengue_cases_mapping_clustering"
-author: "Paula, Lea"
+author: "Lea"
 date: "2023-06-13"
 output: html_document
 ---
@@ -38,13 +38,8 @@ library(exactextractr)
 ```{r}
 #loading geo data
 library(sf)
+geography <- st_read("/Users/leamrowiec/Desktop/Datenanalyse SS23/other data/gadm36_THA_shp")
 
-
-# Der Path funktioniert leider nicht da er direkt auf Leas Laptop führt. Da die Datei schon auf Github ist , synchronisiert sie alle Funktionen aus dem Enviornment und diese Datei kann kanz einfach unter " geography " Abgerufen werden , ohne neu definiert zu werden:)
-
-
-#View(geography)
-#geography <- st_read("/Users/leamrowiec/Desktop/Datenanalyse SS23/other data/gadm36_THA_shp")
 ```
 
 # 2) basic plots
@@ -263,13 +258,6 @@ dec_2018 = which(combined_df$Year=="2018" & combined_df$Month == "Dec")
 dec_2019 = which(combined_df$Year=="2019" & combined_df$Month == "Dec")
 dec_2020 = which(combined_df$Year=="2020" & combined_df$Month == "Dec")
 
-#tot_2006 = combined_df[1:76,]
-#tot_2006 = combined_df[1:76,]
-#jan_2006 = combined_df[77:152,]
-#feb_2006 = combined_df[153:228,]
-#mar_2006 = combined_df[229:304,]
-#apr_2006 = combined_df[307:383]
-  
 ```
 
 ## 
@@ -368,7 +356,7 @@ dengue.tot.2006 = combined_df[tot_2006,]
 dengue.tot.2006.1 <- rbind(dengue.tot.2006[1:(4-1), ], new_row_tot_2006, dengue.tot.2006[4:nrow(dengue.tot.2006), ])
 
 # merging the dataframe with the geodata (geography is ordered in alphabetical order, dengue data too)
-geography["X"] = c(tot_2006, length(tot_2006)+1)
+geography.1["X"] = c(tot_2006, length(tot_2006)+1)
 dengue.tot.2006.geo = merge(dengue.tot.2006.1, geography, by= "X")
 
 ggplot(dengue.tot.2006.geo, aes(geometry=geometry)) +
@@ -831,187 +819,187 @@ combined_df_mean = rbind(
   "11.2006" = mean_nov_2006, 
   "12.2006" = mean_dec_2006, 
 
-"1.2007" = mean_jan_2007, 
-"2.2007" = mean_feb_2007, 
-"3.2007" = mean_mar_2007, 
-"4.2007" = mean_apr_2007, 
-"5.2007" = mean_may_2007, 
-"6.2007" = mean_jun_2007, 
-"7.2007" = mean_jul_2007, 
-"8.2007" = mean_aug_2007, 
-"9.2007" = mean_sep_2007, 
-"10.2007" = mean_oct_2007, 
-"11.2007" = mean_nov_2007, 
-"12.2007" = mean_dec_2007, 
+  "1.2007" = mean_jan_2007, 
+  "2.2007" = mean_feb_2007, 
+  "3.2007" = mean_mar_2007, 
+  "4.2007" = mean_apr_2007, 
+  "5.2007" = mean_may_2007, 
+  "6.2007" = mean_jun_2007, 
+  "7.2007" = mean_jul_2007, 
+  "8.2007" = mean_aug_2007, 
+  "9.2007" = mean_sep_2007, 
+  "10.2007" = mean_oct_2007, 
+  "11.2007" = mean_nov_2007, 
+  "12.2007" = mean_dec_2007, 
 
-"1.2008" = mean_jan_2008, 
-"2.2008" = mean_feb_2008, 
-"3.2008" = mean_mar_2008, 
-"4.2008" = mean_apr_2008, 
-"5.2008" = mean_may_2008, 
-"6.2008" = mean_jun_2008, 
-"7.2008" = mean_jul_2008, 
-"8.2008" = mean_aug_2008, 
-"9.2008" = mean_sep_2008, 
-"10.2008" = mean_oct_2008, 
-"11.2008" = mean_nov_2008, 
-"12.2008" = mean_dec_2008, 
+  "1.2008" = mean_jan_2008, 
+  "2.2008" = mean_feb_2008, 
+  "3.2008" = mean_mar_2008, 
+  "4.2008" = mean_apr_2008, 
+  "5.2008" = mean_may_2008, 
+  "6.2008" = mean_jun_2008, 
+  "7.2008" = mean_jul_2008, 
+  "8.2008" = mean_aug_2008, 
+  "9.2008" = mean_sep_2008, 
+  "10.2008" = mean_oct_2008, 
+  "11.2008" = mean_nov_2008, 
+  "12.2008" = mean_dec_2008, 
 
-"1.2009" = mean_jan_2009, 
-"2.2009" = mean_feb_2009,
-"3.2009" = mean_mar_2009, 
-"4.2009" = mean_apr_2009, 
-"5.2009" = mean_may_2009, 
-"6.2009" = mean_jun_2009, 
-"7.2009" = mean_jul_2009,
-"8.2009" = mean_aug_2009, 
-"9.2009" = mean_sep_2009, 
-"10.2009" = mean_oct_2009,
-"11.2009" = mean_nov_2009, 
-"12.2009" = mean_dec_2009, 
+  "1.2009" = mean_jan_2009, 
+  "2.2009" = mean_feb_2009,
+  "3.2009" = mean_mar_2009, 
+  "4.2009" = mean_apr_2009, 
+  "5.2009" = mean_may_2009, 
+  "6.2009" = mean_jun_2009, 
+  "7.2009" = mean_jul_2009,
+  "8.2009" = mean_aug_2009, 
+  "9.2009" = mean_sep_2009, 
+  "10.2009" = mean_oct_2009,
+  "11.2009" = mean_nov_2009, 
+  "12.2009" = mean_dec_2009, 
 
-"1.2010" = mean_jan_2010, 
-"2.2010" = mean_feb_2010,
-"3.2010" = mean_mar_2010,
-"4.2010" = mean_apr_2010,
-"5.2010" = mean_may_2010,
-"6.2010" = mean_jun_2010,
-"7.2010" = mean_jul_2010,
-"8.2010" = mean_aug_2010,
-"9.2010" = mean_sep_2010,
-"10.2010" = mean_oct_2010,
-"11.2010" = mean_nov_2010,
-"12.2010" = mean_dec_2010,
+  "1.2010" = mean_jan_2010, 
+  "2.2010" = mean_feb_2010,
+  "3.2010" = mean_mar_2010,
+  "4.2010" = mean_apr_2010,
+  "5.2010" = mean_may_2010,
+  "6.2010" = mean_jun_2010,
+  "7.2010" = mean_jul_2010,
+  "8.2010" = mean_aug_2010,
+  "9.2010" = mean_sep_2010,
+  "10.2010" = mean_oct_2010,
+  "11.2010" = mean_nov_2010,
+  "12.2010" = mean_dec_2010,
 
-"1.2011" = mean_jan_2011, 
-"2.2011" = mean_feb_2011, 
-"3.2011" = mean_mar_2011,
-"4.2011" = mean_apr_2011, 
-"5.2011" = mean_may_2011,
-"6.2011" = mean_jun_2011,
-"7.2011" = mean_jul_2011,
-"8.2011" = mean_aug_2011,
-"9.2011" = mean_sep_2011,
-"10.2011" = mean_oct_2011,
-"11.2011" = mean_nov_2011,
-"12.2011" = mean_dec_2011,
+  "1.2011" = mean_jan_2011, 
+  "2.2011" = mean_feb_2011, 
+  "3.2011" = mean_mar_2011,
+  "4.2011" = mean_apr_2011, 
+  "5.2011" = mean_may_2011,
+  "6.2011" = mean_jun_2011,
+  "7.2011" = mean_jul_2011,
+  "8.2011" = mean_aug_2011,
+  "9.2011" = mean_sep_2011,
+  "10.2011" = mean_oct_2011,
+  "11.2011" = mean_nov_2011,
+  "12.2011" = mean_dec_2011,
 
-"1.2012" = mean_jan_2012, 
-"2.2012" = mean_feb_2012, 
-"3.2012" = mean_mar_2012, 
-"4.2012" = mean_apr_2012, 
-"5.2012" = mean_may_2012, 
-"6.2012" = mean_jun_2012, 
-"7.2012" = mean_jul_2012, 
-"8.2012" = mean_aug_2012, 
-"9.2012" = mean_sep_2012, 
-"10.2012" = mean_oct_2012, 
-"11.2012" = mean_nov_2012, 
-"12.2012" = mean_dec_2012, 
+  "1.2012" = mean_jan_2012, 
+  "2.2012" = mean_feb_2012, 
+  "3.2012" = mean_mar_2012, 
+  "4.2012" = mean_apr_2012, 
+  "5.2012" = mean_may_2012, 
+  "6.2012" = mean_jun_2012, 
+  "7.2012" = mean_jul_2012, 
+  "8.2012" = mean_aug_2012, 
+  "9.2012" = mean_sep_2012, 
+  "10.2012" = mean_oct_2012, 
+  "11.2012" = mean_nov_2012, 
+  "12.2012" = mean_dec_2012, 
 
-"1.2013" = mean_jan_2013, 
-"2.2013" = mean_feb_2013, 
-"3.2013" = mean_mar_2013, 
-"4.2013" = mean_apr_2013, 
-"5.2013" = mean_may_2013, 
-"6.2013" = mean_jun_2013, 
-"7.2013" = mean_jul_2013, 
-"8.2013" = mean_aug_2013, 
-"9.2013" = mean_sep_2013, 
-"10.2013" = mean_oct_2013, 
-"11.2013" = mean_nov_2013, 
-"12.2013" = mean_dec_2013, 
+  "1.2013" = mean_jan_2013, 
+  "2.2013" = mean_feb_2013, 
+  "3.2013" = mean_mar_2013, 
+  "4.2013" = mean_apr_2013, 
+  "5.2013" = mean_may_2013, 
+  "6.2013" = mean_jun_2013, 
+  "7.2013" = mean_jul_2013, 
+  "8.2013" = mean_aug_2013, 
+  "9.2013" = mean_sep_2013, 
+  "10.2013" = mean_oct_2013, 
+  "11.2013" = mean_nov_2013, 
+  "12.2013" = mean_dec_2013, 
 
-"1.2014" = mean_jan_2014, 
-"2.2014" = mean_feb_2014, 
-"3.2014" = mean_mar_2014, 
-"4.2014" = mean_apr_2014, 
-"5.2014" = mean_may_2014, 
-"6.2014" = mean_jun_2014, 
-"7.2014" = mean_jul_2014, 
-"8.2014" = mean_aug_2014, 
-"9.2014" = mean_sep_2014, 
-"10.2014" = mean_oct_2014, 
-"11.2014" = mean_nov_2014, 
-"12.2014" = mean_dec_2014, 
+  "1.2014" = mean_jan_2014, 
+  "2.2014" = mean_feb_2014, 
+  "3.2014" = mean_mar_2014, 
+  "4.2014" = mean_apr_2014, 
+  "5.2014" = mean_may_2014, 
+  "6.2014" = mean_jun_2014, 
+  "7.2014" = mean_jul_2014, 
+  "8.2014" = mean_aug_2014, 
+  "9.2014" = mean_sep_2014, 
+  "10.2014" = mean_oct_2014, 
+  "11.2014" = mean_nov_2014, 
+  "12.2014" = mean_dec_2014, 
 
-"1.2015" = mean_jan_2015, 
-"2.2015" = mean_feb_2015, 
-"3.2015" = mean_mar_2015, 
-"4.2015" = mean_apr_2015, 
-"5.015" = mean_may_2015, 
-"6.2015" = mean_jun_2015, 
-"7.2015" = mean_jul_2015, 
-"8.2015" = mean_aug_2015, 
-"9.2015" = mean_sep_2015, 
-"10.2015" = mean_oct_2015, 
-"11.2015" = mean_nov_2015, 
-"12.2015" = mean_dec_2015, 
+  "1.2015" = mean_jan_2015, 
+  "2.2015" = mean_feb_2015, 
+  "3.2015" = mean_mar_2015, 
+  "4.2015" = mean_apr_2015, 
+  "5.015" = mean_may_2015, 
+  "6.2015" = mean_jun_2015, 
+  "7.2015" = mean_jul_2015, 
+  "8.2015" = mean_aug_2015, 
+  "9.2015" = mean_sep_2015, 
+  "10.2015" = mean_oct_2015, 
+  "11.2015" = mean_nov_2015, 
+  "12.2015" = mean_dec_2015, 
 
-"1.2016" = mean_jan_2016, 
-"2.2016" = mean_feb_2016, 
-"3.2016" = mean_mar_2016, 
-"4.2016" = mean_apr_2016, 
-"5.2016" = mean_may_2016, 
-"6.2016" = mean_jun_2016, 
-"7.2016" = mean_jul_2016,
-"8.2016" = mean_aug_2016, 
-"9.2016" = mean_sep_2016, 
-"10.2016" = mean_oct_2016, 
-"11.2016" = mean_nov_2016, 
-"12.2016" = mean_dec_2016, 
+  "1.2016" = mean_jan_2016, 
+  "2.2016" = mean_feb_2016, 
+  "3.2016" = mean_mar_2016, 
+  "4.2016" = mean_apr_2016, 
+  "5.2016" = mean_may_2016, 
+  "6.2016" = mean_jun_2016, 
+  "7.2016" = mean_jul_2016,
+  "8.2016" = mean_aug_2016, 
+  "9.2016" = mean_sep_2016, 
+  "10.2016" = mean_oct_2016, 
+  "11.2016" = mean_nov_2016, 
+  "12.2016" = mean_dec_2016, 
 
-"1.2017" = mean_jan_2017, 
-"2.2017" = mean_feb_2017, 
-"3.2017" = mean_mar_2017, 
-"4.2017" = mean_apr_2017, 
-"5.2017" = mean_may_2017, 
-"6.2017" = mean_jun_2017, 
-"7.2017" = mean_jul_2017, 
-"8.2017" = mean_aug_2017, 
-"9.2017" = mean_sep_2017, 
-"10.2017" = mean_oct_2017, 
-"11.2017" = mean_nov_2017, 
-"12.2017" = mean_dec_2017, 
+  "1.2017" = mean_jan_2017, 
+  "2.2017" = mean_feb_2017, 
+  "3.2017" = mean_mar_2017, 
+  "4.2017" = mean_apr_2017, 
+  "5.2017" = mean_may_2017, 
+  "6.2017" = mean_jun_2017, 
+  "7.2017" = mean_jul_2017, 
+  "8.2017" = mean_aug_2017, 
+  "9.2017" = mean_sep_2017, 
+  "10.2017" = mean_oct_2017, 
+  "11.2017" = mean_nov_2017, 
+  "12.2017" = mean_dec_2017, 
 
-"1.2018" = mean_jan_2018, 
-"2.2018" = mean_feb_2018, 
-"3.2018" = mean_mar_2018, 
-"4.2018" = mean_apr_2018, 
-"5.2018" = mean_may_2018, 
-"6.2018" = mean_jun_2018, 
-"7.2018" = mean_jul_2018, 
-"8.2018" = mean_aug_2018, 
-"9.2018" = mean_sep_2018, 
-"10.2018" = mean_oct_2018, 
-"11.2018" = mean_nov_2018, 
-"12.2018" = mean_dec_2018, 
+  "1.2018" = mean_jan_2018, 
+  "2.2018" = mean_feb_2018, 
+  "3.2018" = mean_mar_2018, 
+  "4.2018" = mean_apr_2018, 
+  "5.2018" = mean_may_2018, 
+  "6.2018" = mean_jun_2018, 
+  "7.2018" = mean_jul_2018, 
+  "8.2018" = mean_aug_2018, 
+  "9.2018" = mean_sep_2018, 
+  "10.2018" = mean_oct_2018, 
+  "11.2018" = mean_nov_2018, 
+  "12.2018" = mean_dec_2018, 
 
-"1.2019" = mean_jan_2019, 
-"2.2019" = mean_feb_2019, 
-"3.2019" = mean_mar_2019, 
-"4.2019" = mean_apr_2019, 
-"5.2019" = mean_may_2019, 
-"6.2019" = mean_jun_2019, 
-"7.2019" = mean_jul_2019, 
-"8.2019" = mean_aug_2019, 
-"9.2019" = mean_sep_2019, 
-"10.2019" = mean_oct_2019, 
-"11.2019" = mean_nov_2019, 
-"12.2019" = mean_dec_2019, 
+  "1.2019" = mean_jan_2019, 
+  "2.2019" = mean_feb_2019, 
+  "3.2019" = mean_mar_2019, 
+  "4.2019" = mean_apr_2019, 
+  "5.2019" = mean_may_2019, 
+  "6.2019" = mean_jun_2019, 
+  "7.2019" = mean_jul_2019, 
+  "8.2019" = mean_aug_2019, 
+  "9.2019" = mean_sep_2019, 
+  "10.2019" = mean_oct_2019, 
+  "11.2019" = mean_nov_2019, 
+  "12.2019" = mean_dec_2019, 
 
-"2.2020" = mean_jan_2020,
-"2.2020" = mean_feb_2020, 
-"3.2020" = mean_mar_2020, 
-"4.2020" = mean_apr_2020, 
-"5.2020" = mean_may_2020, 
-"6.2020" = mean_jun_2020, 
-"7.2020" = mean_jul_2020, 
-"8.2020" = mean_aug_2020, 
-"9.2020" = mean_sep_2020, 
-"10.2020" = mean_oct_2020, 
-"11.2020" = mean_nov_2020, 
-"12.2020" = mean_dec_2020)
+  "1.2020" = mean_jan_2020,
+  "2.2020" = mean_feb_2020, 
+  "3.2020" = mean_mar_2020, 
+  "4.2020" = mean_apr_2020, 
+  "5.2020" = mean_may_2020, 
+  "6.2020" = mean_jun_2020, 
+  "7.2020" = mean_jul_2020, 
+  "8.2020" = mean_aug_2020, 
+  "9.2020" = mean_sep_2020, 
+  "10.2020" = mean_oct_2020, 
+  "11.2020" = mean_nov_2020, 
+  "12.2020" = mean_dec_2020)
 
 
 colnames(combined_df_mean) = c("average_dengue_cases")
@@ -1019,6 +1007,17 @@ print(combined_df_mean)
 ```
 
 ```{r}
+
+combined_df_mean1= cbind(combined_df_mean, rownames(combined_df_mean))
+print(combined_df_mean1)
+
+ggplot(data=combined_df_mean1, aes(x=rownames(combined_df_mean), y=mean_dengue_cases, group=2)) +
+  geom_line()+
+  geom_point()+
+  ylab("monthl ymean dengue cases (2006 to 2020)")+
+  xlab("time")+
+  theme(axis.text.x=element_text(angle=60, hjust=1))
+
 plot.ts(combined_df_mean$average_dengue_cases,
         main= "mean dengue cases of all provinces (2006 to 2020)", 
         ylab= "mean dengue cases",
@@ -1026,7 +1025,6 @@ plot.ts(combined_df_mean$average_dengue_cases,
         ylim = c(0,2500)
         ) +
   abline(v= c(0,12,24,36,48,60,72,84,96,108,120,132,144,156,168), col="violet")
-
 ```
 
 ## 4.2) plotting sum of dengue cases of the whole country in a time series
@@ -1415,7 +1413,7 @@ combined_df_sum = rbind(
 "11.2019" = sum_nov_2019, 
 "12.2019" = sum_dec_2019, 
 
-"2.2020" = sum_jan_2020,
+"1.2020" = sum_jan_2020,
 "2.2020" = sum_feb_2020, 
 "3.2020" = sum_mar_2020, 
 "4.2020" = sum_apr_2020, 
@@ -1429,6 +1427,89 @@ combined_df_sum = rbind(
 "12.2020" = sum_dec_2020)
 
 
-colnames(combined_df_sum) = c("sum_dengue_cases")
-print(combined_df_sum)
+#colnames(combined_df_sum) = c("sum_dengue_cases")
+#dengue_cases = as.numeric(combined_df_sum$sum_dengue_cases) 
+#combined_df_sum = cbind(dengue_cases, rownames(combined_df_sum))
+#print(combined_df_sum)
+```
+
+```{r}
+combined_df_sum=as.data.frame(combined_df_sum)
+
+
+ggplot(data=combined_df_sum, aes(x=rownames(combined_df_sum), y=sum_dengue_cases, group=2)) +
+  geom_line()+
+  geom_point()+
+  ylab("mean dengue cases (2006 to 2020)")+
+  xlab("time")+
+  theme(axis.text.x=element_text(angle=60, hjust=1))
+```
+
+## 4.3) plotting mean of dengue cases of all provinces for one year
+
+to do this the mean of all januaries etc. over all provinces have to be computed
+
+```{r}
+mean.jan = mean(mean_jan_2006, mean_jan_2007, mean_jan_2008, mean_jan_2009, mean_jan_2010, mean_jan_2011, mean_jan_2012, mean_jan_2013, mean_jan_2014, mean_jan_2015, mean_jan_2016, mean_jan_2017, mean_jan_2018, mean_jan_2019, mean_jan_2020)
+
+mean.feb = mean(mean_feb_2006, mean_feb_2007, mean_feb_2008, mean_feb_2009, mean_feb_2010, mean_feb_2011, mean_feb_2012, mean_feb_2013, mean_feb_2014, mean_feb_2015, mean_feb_2016, mean_feb_2017, mean_feb_2018, mean_feb_2019, mean_feb_2020)
+
+mean.mar = mean(mean_mar_2006, mean_mar_2007, mean_mar_2008, mean_mar_2009, mean_mar_2010, mean_mar_2011, mean_mar_2012, mean_mar_2013, mean_mar_2014, mean_mar_2015, mean_mar_2016, mean_mar_2017, mean_mar_2018, mean_mar_2019, mean_mar_2020)
+
+mean.apr = mean(mean_apr_2006, mean_apr_2007, mean_apr_2008, mean_apr_2009, mean_apr_2010, mean_apr_2011, mean_apr_2012, mean_apr_2013, mean_apr_2014, mean_apr_2015, mean_apr_2016, mean_apr_2017, mean_apr_2018, mean_apr_2019, mean_apr_2020)
+
+mean.may = mean(mean_may_2006, mean_may_2007, mean_may_2008, mean_may_2009, mean_may_2010, mean_may_2011, mean_may_2012, mean_may_2013, mean_may_2014, mean_may_2015, mean_may_2016, mean_may_2017, mean_may_2018, mean_may_2019, mean_may_2020)
+
+mean.jun = mean(mean_jun_2006, mean_jun_2007, mean_jun_2008, mean_jun_2009, mean_jun_2010, mean_jun_2011, mean_jun_2012, mean_jun_2013, mean_jun_2014, mean_jun_2015, mean_jun_2016, mean_jun_2017, mean_jun_2018, mean_jun_2019, mean_jun_2020)
+
+mean.jul = mean(mean_jul_2006, mean_jul_2007, mean_jul_2008, mean_jul_2009, mean_jul_2010, mean_jul_2011, mean_jul_2012, mean_jul_2013, mean_jul_2014, mean_jul_2015, mean_jul_2016, mean_jul_2017, mean_jul_2018, mean_jul_2019, mean_jul_2020)
+
+mean.aug = mean(mean_aug_2006, mean_aug_2007, mean_aug_2008, mean_aug_2009, mean_aug_2010, mean_aug_2011, mean_aug_2012, mean_aug_2013, mean_aug_2014, mean_aug_2015, mean_aug_2016, mean_aug_2017, mean_aug_2018, mean_aug_2019, mean_aug_2020)
+
+mean.sep = mean(mean_sep_2006, mean_sep_2007, mean_sep_2008, mean_sep_2009, mean_sep_2010, mean_sep_2011, mean_sep_2012, mean_sep_2013, mean_sep_2014, mean_sep_2015, mean_sep_2016, mean_sep_2017, mean_sep_2018, mean_sep_2019, mean_sep_2020)
+
+mean.oct = mean(mean_oct_2006, mean_oct_2007, mean_oct_2008, mean_oct_2009, mean_oct_2010, mean_oct_2011, mean_oct_2012, mean_oct_2013, mean_oct_2014, mean_oct_2015, mean_oct_2016, mean_oct_2017, mean_oct_2018, mean_oct_2019, mean_oct_2020)
+
+mean.nov = mean(mean_nov_2006, mean_nov_2007, mean_nov_2008, mean_nov_2009, mean_nov_2010, mean_nov_2011, mean_nov_2012, mean_nov_2013, mean_nov_2014, mean_nov_2015, mean_nov_2016, mean_nov_2017, mean_nov_2018, mean_nov_2019, mean_nov_2020)
+
+mean.dec = mean(mean_dec_2006, mean_dec_2007, mean_dec_2008, mean_dec_2009, mean_dec_2010, mean_dec_2011, mean_dec_2012, mean_dec_2013, mean_dec_2014, mean_dec_2015, mean_dec_2016, mean_dec_2017, mean_dec_2018, mean_dec_2019, mean_dec_2020)
+```
+
+creating dataframe
+
+```{r}
+combined_df_year2 = rbind("January"=mean.jan, "February"=mean.feb, "March"=mean.mar, "April"=mean.apr, "May"=mean.may, "June"=mean.jun, "July"=mean.jul, "August"=mean.aug, "September"=mean.sep, "October"=mean.oct, "November"=mean.nov, "December"=mean.dec)
+
+combined_df_year2= as.data.frame(combined_df_year2)
+
+colnames(combined_df_year2)= "mean_dengue_cases"
+print(combined_df_year2)
+```
+
+plotting the dataframe
+
+```{r}
+#install.packages("scales")
+library(dplyr)
+library(ggplot2)
+
+combined_df_year2=cbind(combined_df_year2,month=rownames(combined_df_year2))
+print(combined_df_year2)
+
+ggplot(data=combined_df_year2, aes(x=month, y=mean_dengue_cases, group=1)) +
+  geom_line()+
+  geom_point()+
+  ylab("mean dengue cases")+
+  xlab("time [months]")+
+  theme(axis.text.x=element_text(angle=60, hjust=1))+
+  labs(title= "mean dengue cases over one year (2006 to 2020)")
+  
+print(combined_df_year2)
+
+        
+```
+
+```{r}
+install.packages("ggfortify")
+library(ggfortify)
 ```
