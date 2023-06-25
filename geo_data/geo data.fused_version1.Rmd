@@ -567,6 +567,7 @@ m.T.huss.2018= apply(T.huss.2018[,2:13], 1, mean)
 m.T.huss.2019= apply(T.huss.2019[,2:13], 1, mean)
 m.T.huss.2020= apply(T.huss.2020[,2:13], 1, mean)
 
+
 #merging the dataframes 
 m.T.huss= cbind(m.T.huss.2006, m.T.huss.2007,m.T.huss.2008,m.T.huss.2009, m.T.huss.2010, m.T.huss.2011, m.T.huss.2012,m.T.huss.2013,m.T.huss.2014,m.T.huss.2015,m.T.huss.2016,m.T.huss.2017,m.T.huss.2018,m.T.huss.2019,m.T.huss.2020)
 m.T.huss = as.data.frame(m.T.huss)
@@ -582,116 +583,142 @@ print(m.T.huss.tot)
 
 
 #starting to plot
-install.packages("tidyverse")
-install.packages("hrbrthemes")
+
+#install.packages("tidyverse")
+#install.packages("hrbrthemes")
 library(ggplot2)
 library(tidyverse)
 library(hrbrthemes)
 library(viridis)
-install.packages("cowplot")
+#install.packages("cowplot")
 library(cowplot)
 
+#just playing around
+ggplot(m.T.huss.tot, aes(y=`mean of 2006`))+
+  stat_boxplot(geom="errorbar")+
+  scale_x_discrete()+
+  geom_boxplot(outlier.color= "gray", outlier.size=2)+
+  labs(title= "2006", y= "   ")
+  coord_cartesian(ylim = c(75, 110))
+
+plot.2006 <- ggplot(m.T.huss.tot, aes(y = `mean of 2006`)) +
+  stat_boxplot(geom = "errorbar") +
+  scale_x_discrete()+
+  geom_boxplot(outlier.color = "gray", outlier.size = 2) +
+  labs(title = "2006", y = "") +
+  ylim(70, 90)
+
+plot.2007
+m.T.huss.tot$`mean of 2006`
+
 #plot
-plot.2006=ggplot(m.T.huss.tot, aes(y=m.T.huss$`mean of 2006`))+
+plot.2006=ggplot(m.T.huss.tot, aes(y=m.T.huss.tot$`mean of 2006`))+
         stat_boxplot(geom="errorbar")+
         scale_x_discrete()+
         geom_boxplot(outlier.color= "gray", outlier.size=2)+
-        labs( title=2006, y=" ")+
-        ylim(750,1100)
-plot.2007=ggplot(m.T.huss.tot, aes(y=m.T.huss$"mean of 2007"))+
+        labs(title=2006, y=" ")+
+        ylim(70, 90)
+plot.2007=ggplot(m.T.huss.tot, aes(y=m.T.huss.tot$"mean of 2007"))+
         stat_boxplot(geom="errorbar")+
         geom_boxplot(outlier.color= "gray", outlier.size=2)+
         scale_x_discrete()+
-        ylim(750,1100)+
+        ylim(70, 90)+
         labs(title=2007, y=" ")
 plot.2008=ggplot(m.T.huss.tot, aes(y=m.T.huss$"mean of 2008"))+
         stat_boxplot(geom="errorbar")+
         geom_boxplot(outlier.color= "gray", outlier.size=2)+
         scale_x_discrete()+
-        ylim(750,1100)+
+        ylim(70, 90)+
         labs(title=2008,y=" ")
 plot.2009=ggplot(m.T.huss.tot, aes(y=m.T.huss$"mean of 2009"))+
         stat_boxplot(geom="errorbar")+
         geom_boxplot(outlier.color= "gray", outlier.size=2)+
         scale_x_discrete()+
-        ylim(750,1100)+
+        ylim(70, 90)+
         labs(title=2009,y=" ")
 plot.2010=ggplot(m.T.huss.tot, aes(y=m.T.huss$"mean of 2010"))+
         stat_boxplot(geom="errorbar")+
         geom_boxplot(outlier.color= "gray", outlier.size=2)+
         scale_x_discrete()+
-        ylim(750,1100)+
+        ylim(70, 90)+
         labs(title=2010,y=" ")
 plot.2011=ggplot(m.T.huss.tot, aes(y=m.T.huss$"mean of 2011"))+
         stat_boxplot(geom="errorbar")+
         geom_boxplot(outlier.color= "gray", outlier.size=2)+
         scale_x_discrete()+
-        ylim(750,1100)+
+        ylim(70, 90)+
         labs(title=2011,y=" ")
 plot.2012=ggplot(m.T.huss.tot, aes(y=m.T.huss$"mean of 2012"))+
         stat_boxplot(geom="errorbar")+
         geom_boxplot(outlier.color= "gray", outlier.size=2)+
         scale_x_discrete()+
-        ylim(750,1100)+
+        ylim(70, 90)+
         labs(title=2012,y=" ")
 plot.2013=ggplot(m.T.huss.tot, aes(y=m.T.huss$"mean of 2013"))+
         stat_boxplot(geom="errorbar")+
         geom_boxplot(outlier.color= "gray", outlier.size=2)+
         scale_x_discrete()+
-        ylim(750,1100)+
+        ylim(70, 90)+
         labs(title=2013,y=" ")
 plot.2014=ggplot(m.T.huss.tot, aes(y=m.T.huss$"mean of 2014"))+
         stat_boxplot(geom="errorbar")+
         geom_boxplot(outlier.color= "gray", outlier.size=2)+
         scale_x_discrete()+
-        ylim(750,1100)+
+        ylim(70, 90)+
         labs(title=2014,y=" ")
 plot.2015=ggplot(m.T.huss.tot, aes(y=m.T.huss$"mean of 2015"))+
         stat_boxplot(geom="errorbar")+
         geom_boxplot(outlier.color= "gray", outlier.size=2)+
         scale_x_discrete()+
-        ylim(750,1100)+
+        ylim(70, 90)+
         labs(title=2015,y=" ")
 plot.2016=ggplot(m.T.huss.tot, aes(y=m.T.huss$"mean of 2016"))+
         stat_boxplot(geom="errorbar")+
         geom_boxplot(outlier.color= "gray", outlier.size=2)+
         scale_x_discrete()+
-        ylim(750,1100)+
+        ylim(70, 90)+
         labs(title=2016,y=" ")
 plot.2017=ggplot(m.T.huss.tot, aes(y=m.T.huss$"mean of 2017"))+
         stat_boxplot(geom="errorbar")+
         geom_boxplot(outlier.color= "gray", outlier.size=2)+
         scale_x_discrete()+
-        ylim(750,1100)+
+        ylim(70, 90)+
         labs(title=2017,y=" ")
 plot.2018=ggplot(m.T.huss.tot, aes(y=m.T.huss$"mean of 2018"))+
         stat_boxplot(geom="errorbar")+
         geom_boxplot(outlier.color= "gray", outlier.size=2)+
         scale_x_discrete()+
-        ylim(750,1100)+
+        ylim(70, 90)+
         labs(title=2018,y=" ")
 plot.2019=ggplot(m.T.huss.tot, aes(y=m.T.huss$"mean of 2019"))+
         stat_boxplot(geom="errorbar")+
         geom_boxplot(outlier.color= "gray", outlier.size=2)+
         scale_x_discrete()+
-        ylim(750,1100)+
+        ylim(70, 900)+
         labs(title=2019,y=" ")
 plot.2020=ggplot(m.T.huss.tot, aes(y=m.T.huss$"mean of 2020"))+
         stat_boxplot(geom="errorbar")+
         geom_boxplot(outlier.color= "gray", outlier.size=2)+
         scale_x_discrete()+
-        ylim(750,1100)+
+        ylim(70, 90)+
         labs(title=2020,y=" ")
-      m.T.huss$`mean of 2009`
 
+#combining the plots into one big plot makes problems -> arrangement in word dokument   
 plot_grid(plot.2006, plot.2007, plot.2008, plot.2009, plot.2010, plot.2011, plot.2012, plot.2013,  nrow = 2, align = "h")
 
 plot_grid(plot.2014, plot.2015, plot.2016, plot.2017, plot.2018, plot.2019, plot.2020, nrow=2, align="h")
  
+#install.packages("patchwork")
+#library(patchwork)
+#plot1 = plot.2006 + plot.2007 + plot.2008 + plot.2009 + plot.2010 + plot.2011 
+#plot1  
 
-
-
-        
+install.packages("gridExtra")
+library(gridExtra)
+grid.arrange(plot.2006, plot.2007, plot.2008, plot.2009, nrow=1)  
+grid.arrange(plot.2010, plot.2011, plot.2012, plot.2013, nrow=1)  
+grid.arrange(plot.2014, plot.2015, plot.2016, plot.2017, nrow=1)  
+grid.arrange(plot.2018, plot.2019, plot.2020, nrow=1)
         
 #overview of box plots
 boxplot(m.T.huss.tot[,-1], 
