@@ -41,7 +41,6 @@ i.remove = which(dengue_sum$Month %in% c("Total"))
 i.remove 
 
 dengue_sum = dengue_sum[-i.remove,]
-print(dengue_sum)
 
 #lets turn the months into numerics 
 
@@ -55,6 +54,8 @@ dengue_sum <- dengue_sum %>%
 
 #umwandeln von month von chr in dbl 
 dengue_sum$Month = as.numeric(dengue_sum$Month)
+print(dengue_sum)
+
 ```
 # now lets convert the dataframe into a ts 
 ```{r}
@@ -155,5 +156,43 @@ ggplot() +
   xlab("Year") +
   ylab("Dengue Cases") +
   theme_minimal()
+```
+
+# PREDICTION EVALUATION
+```{r}
+# Here are some evaluation metrics to compare our predicted and our actual data
+original <- ts(dengue_sum$Dengue_Total[474:525], frequency = 12 , start = c(2020,1) ) # create an object containing the original ts of 2020
+
+keep = which(dengue_sum$Year %in% c("2020"))
+
+dengue_sum_test = dengue_sum[keep,]
+
+head(dengue_sum_test)
+
+
+
+predicted <- forecastedTs
+
+library(Metrics)
+# lower values indicate better accuracy:
+
+plot(abs(original-predicted)) # absolute difference
+
+# Mean Absolute Error (MAE):
+mae_value <- mae(predicted, original)
+# mean(abs(predicted - original))
+# -> on average, the forecasted cases deviate from the actual case number by approximately 25.44 cases
+
+# Root Mean Squared Error (RMSE):
+rmse_value <- rmse(predicted, original)
+# sqrt(mean((predicted - original)^2))
+# -> a typical magnitude of the forecast errors was 33 cases
+
+# Mean Absolute Percentage Error (MAPE):
+mape <- mape(predicted, original)*100
+# mean(abs((predicted - original) / original)) * 100
+# -> the average percentage difference between the predicted values and the actual values was 47%
+
+
 ```
 
