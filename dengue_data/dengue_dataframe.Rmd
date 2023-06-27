@@ -464,3 +464,90 @@ filePath = paste(getwd(), "dengue_hum.csv",sep = "/")
 write.csv(dengue_hum, filePath)
 ```
 
+#Datafrem in der Form der Klima daten erstellen 
+```{r}
+#ausgangsdataframe sind die einzelmnen von 2006 - 2020 
+#zuerst müssen wir alle Spalten umbennen
+
+#neue dataframecopy 
+
+dengue2020_2 = dengue2020 
+
+# Jahr für die Umbenennung festlegen
+jahr <- 2020
+
+# Spaltennamen umformatieren
+colnames(dengue2020_2)[2:14] <- c(paste(jahr, "total", sep = "."), paste(jahr, sprintf('%02d', 1:12), sep = "."))
+
+# Überprüfung der neuen Spaltennamen
+print(colnames(dengue2020_2))
+
+# Datenrahmen für die Jahre 2006 bis 2019 kopieren und umbenennen
+dengue2006 <- dengue2020_2
+colnames(dengue2006)[2:14] <- c(paste(2006, "total", sep = "."), paste(2006, sprintf('%02d', 1:12), sep = "."))
+dengue2007 <- dengue2020_2
+colnames(dengue2007)[2:14] <- c(paste(2007, "total", sep = "."), paste(2007, sprintf('%02d', 1:12), sep = "."))
+dengue2008 <- dengue2020_2
+colnames(dengue2008)[2:14] <- c(paste(2008, "total", sep = "."), paste(2008, sprintf('%02d', 1:12), sep = "."))
+dengue2009 <- dengue2020_2
+colnames(dengue2009)[2:14] <- c(paste(2009, "total", sep = "."), paste(2009, sprintf('%02d', 1:12), sep = "."))
+dengue2010 <- dengue2020_2
+colnames(dengue2010)[2:14] <- c(paste(2010, "total", sep = "."), paste(2010, sprintf('%02d', 1:12), sep = "."))
+dengue2011 <- dengue2020_2
+colnames(dengue2011)[2:14] <- c(paste(2011, "total", sep = "."), paste(2011, sprintf('%02d', 1:12), sep = "."))
+dengue2012 <- dengue2020_2
+colnames(dengue2012)[2:14] <- c(paste(2012, "total", sep = "."), paste(2012, sprintf('%02d', 1:12), sep = "."))
+dengue2013 <- dengue2020_2
+colnames(dengue2013)[2:14] <- c(paste(2013, "total", sep = "."), paste(2013, sprintf('%02d', 1:12), sep = "."))
+dengue2014 <- dengue2020_2
+colnames(dengue2014)[2:14] <- c(paste(2014, "total", sep = "."), paste(2014, sprintf('%02d', 1:12), sep = "."))
+dengue2015 <- dengue2020_2
+colnames(dengue2015)[2:14] <- c(paste(2015, "total", sep = "."), paste(2015, sprintf('%02d', 1:12), sep = "."))
+dengue2016 <- dengue2020_2
+colnames(dengue2016)[2:14] <- c(paste(2016, "total", sep = "."), paste(2016, sprintf('%02d', 1:12), sep = "."))
+dengue2017 <- dengue2020_2
+colnames(dengue2017)[2:14] <- c(paste(2017, "total", sep = "."), paste(2017, sprintf('%02d', 1:12), sep = "."))
+dengue2018 <- dengue2020_2
+colnames(dengue2018)[2:14] <- c(paste(2018, "total", sep = "."), paste(2018, sprintf('%02d', 1:12), sep = "."))
+dengue2019 <- dengue2020_2
+colnames(dengue2019)[2:14] <- c(paste(2019, "total", sep = "."), paste(2019, sprintf('%02d', 1:12), sep = "."))
+
+dengue2020 = dengue2020_2
+```
+
+#nummerierung hinzufügen 
+```{r}
+library(dplyr)
+dengue2020 <- dengue2020 %>% 
+  mutate(row_number = row_number())
+
+#lets set the row index to the row_numbers 
+rownames(dengue2020) = dengue2020$row_number
+
+# Überprüfe den DataFrame mit der hinzugefügten Nummerierung
+print(dengue2020)
+
+# Erzeuge eine Liste der Jahre von 2006 bis 2020
+jahre <- 2006:2019
+
+# Iteriere über die Jahre und erstelle die Dataframes
+for (jahr in jahre) {
+  # Erstelle den Namen des Dataframes basierend auf dem Jahr
+  df_name <- paste0("dengue", jahr)
+  
+  # Führe die Operationen auf dem entsprechenden Dataframe aus
+  assign(df_name, get(df_name) %>% mutate(row_number = row_number()))
+  assign(paste0("rownames(", df_name, ")"), get(df_name)$row_number)
+  
+  # Überprüfe den DataFrame mit der hinzugefügten Nummerierung
+  print(get(df_name))
+}
+
+```
+
+#anhand der spalte Reporting_area die datendätze zusammenfügen 
+```{r}
+
+```
+
+
