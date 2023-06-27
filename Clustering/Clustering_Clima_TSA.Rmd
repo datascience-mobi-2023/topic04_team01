@@ -21,6 +21,7 @@ library(exactextractr)
 library(readxl)
 library(colorspace)
 library(viridis)
+library(viridisLite)
 
 
 sheet_names = excel_sheets("../era5_data_2006_2020_thailand_monmean.xlsx")
@@ -43,6 +44,8 @@ a) jedes Jahr (mean)in Cluster einteile und Plotte
 b) 3 mal 5 Jahre 
 c) 5 mal 3 Jahre 
 d) Vergleiche Welche Provinzen sich geändert haben. 
+e) Plotten von den Centern der Cluster 1, 2 ,3 von 2006 bis 2020
+f) Ändern der Farbgebung , damit Cluster und Centren nicht unterschiedlich sind YAY Hab ich bhinbekommen mit 2 verschiedenen Methoden :)
 ```{r}
 View(T.huss.mon.ordered)
 ```
@@ -65,6 +68,162 @@ huss.2018<- as.data.frame(T.huss.mon.ordered[,149:150])
 huss.2019<- as.data.frame(T.huss.mon.ordered[,151:162])
 huss.2020<- as.data.frame(T.huss.mon.ordered[,163:174])
 ```
+
+
+
+```{r}
+## TRY OUT COLOR CODING THE CLUSTERS PART 1 
+##Clustering
+
+k <-3
+
+huss.2006
+huss.2006.mean<-as.data.frame(apply(huss.2006,1, mean))
+huss.2006.mean ['numbers'] = c(1:77)
+kmeans.2006 <-kmeans(huss.2006.mean$`apply(huss.2006, 1, mean)`, centers = k )
+
+print(kmeans.2006$cluster)
+print(kmeans.2006$centers)
+
+kmeans.2006.cluster = as.data.frame(kmeans.2006$cluster)
+kmeans.2006.cluster['numbers'] = c(1:77)
+kmeans.2006.clusters.geography = merge(kmeans.2006.cluster, geography, by= "numbers")
+
+colnames(kmeans.2006.clusters.geography)[colnames(kmeans.2006.clusters.geography) == "kmeans.2006$cluster"] <- "Clusters2006"
+kmeans.2006.clusters.geography$Clusters2006[kmeans.2006.clusters.geography$Clusters2006 == 1] <- 70.68727
+kmeans.2006.clusters.geography$Clusters2006[kmeans.2006.clusters.geography$Clusters2006 == 2] <- 75.06804
+kmeans.2006.clusters.geography$Clusters2006[kmeans.2006.clusters.geography$Clusters2006 == 3] <- 81.61583
+
+kmeans.2006.cluster['numbers'] = c(1:77)
+
+print(kmeans.2006$cluster)
+print(kmeans.2006$centers)
+
+
+ggplot() +
+  geom_sf(data = kmeans.2006.clusters.geography ,aes(geometry = geometry, fill= Clusters2006)) +
+  coord_sf() +  
+  theme_minimal() +
+  labs(title = "kmeans K = 3  humidity of Provinces 2006") +
+  scale_fill_viridis()+
+  labs(x="Longitude", y= "Latitude")
+
+```
+
+
+```{r}
+
+## TRY OUT COLOR CODING THE CLUSTERS PART 2 
+##Clustering
+
+k <-3
+
+huss.2006
+huss.2006.mean<-as.data.frame(apply(huss.2006,1, mean))
+huss.2006.mean ['numbers'] = c(1:77)
+kmeans.2006 <-kmeans(huss.2006.mean$`apply(huss.2006, 1, mean)`, centers = k )
+
+
+
+## Zuordnen aller original values  of cluster 1,2,3 their corresponding center 
+
+centers.2006 <- as.vector(kmeans.2006$centers)
+centers.clusters.2006 <- data.frame(Value = kmeans.2006$cluster, Center = NA)
+
+for (i in 1:length(kmeans.2006$cluster)) {
+  centers.clusters.2006$Center[i] <- centers.2006[kmeans.2006$cluster[i]]
+}
+
+centers.clusters.2006['numbers'] = c(1:77)
+centers.clusters.2006.geography = merge(centers.clusters.2006, geography, by= "numbers")
+
+
+## ggplot
+
+ggplot() +
+  geom_sf(data = centers.clusters.2006.geography ,aes(geometry = geometry, fill= Center)) +
+  coord_sf() +  
+  theme_minimal() +
+  labs(title = "kmeans K = 3  humidity of Provinces 2006") +
+  scale_fill_viridis()+
+  labs(x="Longitude", y= "Latitude")
+
+
+```
+
+
+
+
+
+## Plotten von den Centern der Cluster 1, 2 ,3 von 2006 bis 2020
+
+```{r}
+
+##Rausgefunden: 
+  
+#print(kmeans.2006$cluster)
+print(kmeans.2006$centers)
+#as.data.frame(kmeans.2006$centers)
+#as.vector(kmeans.2006$centers)
+print(as.vector(kmeans.2006$centers))
+print(as.vector(sort(kmeans.2006$centers)))
+
+
+
+```
+
+```{r}
+## Creating a Data Frame of each year with a vector of the sorted centers 
+
+
+#centers.sorted.2006 <- c (as.vector(sort(kmeans.2006$centers)))
+#centers.sorted.2007 <- c (as.vector(sort(kmeans.2007$centers)))
+#centers.sorted.2008 <- c (as.vector(sort(kmeans.2008$centers)))
+#centers.sorted.2009 <- c (as.vector(sort(kmeans.2009$centers)))
+#centers.sorted.2010 <- c (as.vector(sort(kmeans.2010$centers)))
+#centers.sorted.2011 <- c (as.vector(sort(kmeans.2011$centers)))
+#centers.sorted.2012 <- c (as.vector(sort(kmeans.2012$centers)))
+#centers.sorted.2013 <- c (as.vector(sort(kmeans.2013$centers)))
+#centers.sorted.2014 <- c (as.vector(sort(kmeans.2014$centers)))
+#centers.sorted.2015 <- c (as.vector(sort(kmeans.2015$centers)))
+#centers.sorted.2015 <- c (as.vector(sort(kmeans.2015$centers)))
+#centers.sorted.2015 <- c (as.vector(sort(kmeans.2015$centers)))
+#centers.sorted.2016 <- c (as.vector(sort(kmeans.2016$centers)))
+#centers.sorted.2017 <- c (as.vector(sort(kmeans.2017$centers)))
+#centers.sorted.2018 <- c (as.vector(sort(kmeans.2018$centers)))
+
+#Yearly.Centers<- data.frame("2006" = centers.sorted.2006,"2007" = centers.sorted.2007,"2008" = centers.sorted.2008...)
+#print(df)
+```
+
+
+```{r}
+years <- c(2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018)
+
+Yearly.Centers <- data.frame()
+
+for (year in years) {
+  kmeans.obj <- get(paste0("kmeans.", year))  # Annahme: kmeans.2006, kmeans.2007, usw. existieren bereits
+  
+  centers.sorted <- sort(kmeans.obj$centers)
+  centers.sorted.vector <- as.vector(centers.sorted)
+  
+  if (ncol(Yearly.Centers) == 0) {
+    Yearly.Centers <- data.frame(centers.sorted.vector)
+  } else {
+    Yearly.Centers <- cbind(Yearly.Centers, centers.sorted.vector)
+  }
+}
+
+colnames(Yearly.Centers) <- years
+
+print(Yearly.Centers)
+```
+
+```{r}
+(Yearly.Centers)
+```
+
 
 ----------------------------------------------------------------------------------------------------------------------------------------
 ```{r}
@@ -498,8 +657,12 @@ ggplot() +
   scale_fill_viridis()+
   labs(x="Longitude", y= "Latitude")
 ```
+```{r}
+View(kmeans.2020.clusters.geography)
+```
 
 ## b) 3 mal 5 Jahre 
+
 
 ```{r}
 print(kmeans.2006$cluster)
