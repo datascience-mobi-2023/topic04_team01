@@ -515,39 +515,48 @@ colnames(dengue2019)[2:14] <- c(paste(2019, "total", sep = "."), paste(2019, spr
 dengue2020 = dengue2020_2
 ```
 
-#nummerierung hinzufügen 
-```{r}
-library(dplyr)
-dengue2020 <- dengue2020 %>% 
-  mutate(row_number = row_number())
-
-#lets set the row index to the row_numbers 
-rownames(dengue2020) = dengue2020$row_number
-
-# Überprüfe den DataFrame mit der hinzugefügten Nummerierung
-print(dengue2020)
-
-# Erzeuge eine Liste der Jahre von 2006 bis 2020
-jahre <- 2006:2019
-
-# Iteriere über die Jahre und erstelle die Dataframes
-for (jahr in jahre) {
-  # Erstelle den Namen des Dataframes basierend auf dem Jahr
-  df_name <- paste0("dengue", jahr)
-  
-  # Führe die Operationen auf dem entsprechenden Dataframe aus
-  assign(df_name, get(df_name) %>% mutate(row_number = row_number()))
-  assign(paste0("rownames(", df_name, ")"), get(df_name)$row_number)
-  
-  # Überprüfe den DataFrame mit der hinzugefügten Nummerierung
-  print(get(df_name))
-}
-
-```
 
 #anhand der spalte Reporting_area die datendätze zusammenfügen 
-```{r}
 
+```{r}
+ library(dplyr)
+
+merged_df <- left_join(x = dengue2006, y = dengue2007, by = c("Reporting areas"))
+
+merged_df <- left_join(x = merged_df, y = dengue2008, by = c("Reporting areas"))
+
+merged_df <- left_join(x = merged_df, y = dengue2009, by = c("Reporting areas"))
+
+merged_df <- left_join(x = merged_df, y = dengue2010, by = c("Reporting areas"))
+
+merged_df <- left_join(x = merged_df, y = dengue2011, by = c("Reporting areas"))
+
+merged_df <- left_join(x = merged_df, y = dengue2012, by = c("Reporting areas"))
+
+merged_df <- left_join(x = merged_df, y = dengue2013, by = c("Reporting areas"))
+
+merged_df <- left_join(x = merged_df, y = dengue2014, by = c("Reporting areas"))
+
+merged_df <- left_join(x = merged_df, y = dengue2015, by = c("Reporting areas"))
+
+merged_df <- left_join(x = merged_df, y = dengue2016, by = c("Reporting areas"))
+
+merged_df <- left_join(x = merged_df, y = dengue2017, by = c("Reporting areas"))
+
+merged_df <- left_join(x = merged_df, y = dengue2018, by = c("Reporting areas"))
+
+merged_df <- left_join(x = merged_df, y = dengue2019, by = c("Reporting areas"))
+
+merged_df <- left_join(x = merged_df, y = dengue2020, by = c("Reporting areas"))
+
+print(merged_df)
+
+dengue_data_com2 = merged_df
 ```
 
-
+#lets save the format for the dengue_data
+```{r}
+#locales Speichern der dengue_hum 
+filePath = paste(getwd(), "dengue_data_com2.csv",sep = "/")
+write.csv(dengue_data_com2, filePath)
+````
