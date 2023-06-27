@@ -22,6 +22,7 @@ library(readxl)
 library(colorspace)
 library(viridis)
 library(viridisLite)
+library(reshape2)
 
 
 sheet_names = excel_sheets("../era5_data_2006_2020_thailand_monmean.xlsx")
@@ -198,7 +199,7 @@ print(as.vector(sort(kmeans.2006$centers)))
 
 
 ```{r}
-years <- c(2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018)
+years <- c(2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020)
 
 Yearly.Centers <- data.frame()
 
@@ -219,10 +220,52 @@ colnames(Yearly.Centers) <- years
 
 print(Yearly.Centers)
 ```
+```{r}
+max(Yearly.Centers)
+min(Yearly.Centers)
+```
 
 ```{r}
-(Yearly.Centers)
+
+Humidity1<- Yearly.Centers[1,]
+#print(Humidity)
+#plot(years, Humidity1, type = "o", xlab = "Years", ylab = "Humidity ", main = " Yearly Clusters from 2006 to 2020", ylim = c(65, 85))
+
+Humidity2 <- Yearly.Centers[2,]
+#print(Humidity)
+#plot(years, Humidity2, type = "o", xlab = "Years", ylab = "Humidity ", main = " Yearly Clusters from 2006 to 2020", ylim = c(65, 85))
+
+Humidity3 <- Yearly.Centers[3,]
+#print(Humidity)
+#plot(years, Humidity3, type = "o", xlab = "Years", ylab = "Humidity ", main = " Yearly Clusters from 2006 to 2020", ylim = c(65, 85))
+
+ggplot() +
+  plot(years, Humidity1, type = "o", xlab = "Years", ylab = "Humidity ", main = " Yearly Clusters from 2006 to 2020", ylim = c(65, 85))+
+  plot(years, Humidity2, type = "o", xlab = "Years", ylab = "Humidity ", main = " Yearly Clusters from 2006 to 2020", ylim = c(65, 85))+
+  plot(years, Humidity3, type = "o", xlab = "Years", ylab = "Humidity ", main = " Yearly Clusters from 2006 to 2020", ylim = c(65, 85))
+  
+
+  
 ```
+```{r}
+library(ggplot2)
+
+
+ggplot.clusters <- data.frame(years, Humidity1, Humidity2, Humidity3)
+
+# Daten in lange Form umwandeln
+data_long <- reshape2::melt(ggplot.clusters, id.vars = "years", variable.name = "HumidityType", value.name = "Humidity")
+
+# Grafik erstellen
+ggplot(data_long, aes(x = years, y = Humidity, color = HumidityType)) +
+  geom_line(linetype = "solid") +
+  xlab("Years") +
+  ylab("Humidity") +
+  ggtitle("Yearly Clusters from 2006 to 2020") +
+  ylim(65, 85)
+
+```
+
 
 
 ----------------------------------------------------------------------------------------------------------------------------------------
