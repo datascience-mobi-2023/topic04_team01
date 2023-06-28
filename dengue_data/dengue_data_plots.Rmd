@@ -1,0 +1,474 @@
+---
+title: "dengue_data_plotting"
+output: html_document
+date: "2023-06-27"
+---
+
+```{r}
+#locales Speichern der dengue_hum 
+filePath = paste(getwd(), "dengue_hum.csv",sep = "/")
+write.csv(dengue_hum, filePath)
+dengue_hum
+```
+
+```{r}
+#loading dataframe with dengue data
+dengue_data_com2 = read.csv("/Users/leamrowiec/Desktop/Datenanalyse SS23/dengue_data_com2.csv")
+dengue_data_com2
+
+#loading geo data
+library(sf)
+geography <- st_read("/Users/leamrowiec/Desktop/Datenanalyse SS23/other data/gadm36_THA_shp")
+geography= as.data.frame(geography)
+geography
+```
+
+```{r}
+#mcombining the dataframes
+geo_dengue=cbind(dengue_data_com2, geography)
+geo_dengue
+```
+
+```{r}
+library(viridis)
+library(ggplot2)
+
+#2006--------------------------------------------------------------------------------------
+ggplot(geo_dengue, aes(geometry=geometry)) +
+  geom_sf (aes(fill = X2006.total)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "total dengue cases of 2006", fill = "mean of cases")
+
+#2007--------------------------------------------------------------------------------------
+ggplot(geo_dengue, aes(geometry=geometry)) +
+  geom_sf (aes(fill = X2007.total)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "total dengue cases of 2007", fill = "mean of cases")
+
+#2008--------------------------------------------------------------------------------------
+ggplot(geo_dengue, aes(geometry=geometry)) +
+  geom_sf (aes(fill = X2008.total)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "total dengue cases of 2008", fill = "mean of cases")
+
+#2009--------------------------------------------------------------------------------------
+ggplot(geo_dengue, aes(geometry=geometry)) +
+  geom_sf (aes(fill = X2009.total)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "total dengue cases of 2009", fill = "mean of cases")
+
+#2010--------------------------------------------------------------------------------------
+ggplot(geo_dengue, aes(geometry=geometry)) +
+  geom_sf (aes(fill = X2010.total)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "total dengue cases of 2010", fill = "mean of cases")
+
+#2011--------------------------------------------------------------------------------------
+ggplot(geo_dengue, aes(geometry=geometry)) +
+  geom_sf (aes(fill = X2011.total)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "total dengue cases of 2011", fill = "mean of cases")
+
+#2012--------------------------------------------------------------------------------------
+ggplot(geo_dengue, aes(geometry=geometry)) +
+  geom_sf (aes(fill = X2012.total)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "total dengue cases of 2012", fill = "mean of cases")
+
+#2013--------------------------------------------------------------------------------------
+ggplot(geo_dengue, aes(geometry=geometry)) +
+  geom_sf (aes(fill = X2013.total)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "total dengue cases of 2013", fill = "mean of cases")
+
+#2014--------------------------------------------------------------------------------------
+ggplot(geo_dengue, aes(geometry=geometry)) +
+  geom_sf (aes(fill = X2014.total)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "total dengue cases of 2014", fill = "mean of cases")
+
+#2015--------------------------------------------------------------------------------------
+ggplot(geo_dengue, aes(geometry=geometry)) +
+  geom_sf (aes(fill = X2015.total)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "total dengue cases of 2015", fill = "mean of cases")
+
+#2016--------------------------------------------------------------------------------------
+ggplot(geo_dengue, aes(geometry=geometry)) +
+  geom_sf (aes(fill = X2016.total)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "total dengue cases of 2016", fill = "mean of cases")
+
+#2017--------------------------------------------------------------------------------------
+ggplot(geo_dengue, aes(geometry=geometry)) +
+  geom_sf (aes(fill = X2017.total)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "total dengue cases of 2017", fill = "mean of cases")
+
+#2018--------------------------------------------------------------------------------------
+ggplot(geo_dengue, aes(geometry=geometry)) +
+  geom_sf (aes(fill = X2018.total)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "total dengue cases of 2018", fill = "mean of cases")
+
+#2019--------------------------------------------------------------------------------------
+ggplot(geo_dengue, aes(geometry=geometry)) +
+  geom_sf (aes(fill = X2019.total)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "total dengue cases of 2019", fill = "mean of cases")
+
+#2020--------------------------------------------------------------------------------------
+ggplot(geo_dengue, aes(geometry=geometry)) +
+  geom_sf (aes(fill = X2020.total)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "total dengue cases of 2020", fill = "mean of cases")
+
+
+## leider ist dataframe nicht korrekt, da für jedes jahr die werte gleich sind
+# --> ich arbeite mit den falschen werten weiter, um ein Skript zu bekommen
+```
+
+### geomaps of each month
+
+```{r}
+# 1) computing the mean values of each month over all years
+jan = geo_dengue[, c("X2006.01", "X2007.01", "X2008.01", "X2009.01", "X2010.01", "X2011.01", "X2012.01", "X2013.01", "X2014.01", "X2015.01", "X2016.01", "X2017.01", "X2018.01", "X2019.01", "X2020.01")]
+feb = geo_dengue[, c("X2006.02", "X2007.02", "X2008.02", "X2009.02", "X2010.02", "X2011.02", "X2012.02", "X2013.02", "X2014.02", "X2015.02", "X2016.02", "X2017.02", "X2018.02", "X2019.02", "X2020.02")]
+mar = geo_dengue[, c("X2006.03", "X2007.03", "X2008.03", "X2009.03", "X2010.03", "X2011.03", "X2012.03", "X2013.03", "X2014.03", "X2015.03", "X2016.03", "X2017.03", "X2018.03", "X2019.03", "X2020.03")]
+apr = geo_dengue[, c("X2006.04", "X2007.04", "X2008.04", "X2009.04", "X2010.04", "X2011.04", "X2012.04", "X2013.04", "X2014.04", "X2015.04", "X2016.04", "X2017.04", "X2018.04", "X2019.04", "X2020.04")]
+may = geo_dengue[, c("X2006.05", "X2007.05", "X2008.05", "X2009.05", "X2010.05", "X2011.05", "X2012.05", "X2013.05", "X2014.05", "X2015.05", "X2016.05", "X2017.05", "X2018.05", "X2019.05", "X2020.05")]
+jun = geo_dengue[, c("X2006.06", "X2007.06", "X2008.06", "X2009.06", "X2010.06", "X2011.06", "X2012.06", "X2013.06", "X2014.06", "X2015.06", "X2016.06", "X2017.06", "X2018.06", "X2019.06", "X2020.06")]
+jul = geo_dengue[, c("X2006.07", "X2007.07", "X2008.07", "X2009.07", "X2010.07", "X2011.07", "X2012.07", "X2013.07", "X2014.07", "X2015.07", "X2016.07", "X2017.07", "X2018.07", "X2019.07", "X2020.07")]
+aug = geo_dengue[, c("X2006.08", "X2007.08", "X2008.08", "X2009.08", "X2010.08", "X2011.08", "X2012.08", "X2013.08", "X2014.08", "X2015.08", "X2016.08", "X2017.08", "X2018.08", "X2019.08", "X2020.08")]
+sep = geo_dengue[, c("X2006.09", "X2007.09", "X2008.09", "X2009.09", "X2010.09", "X2011.09", "X2012.09", "X2013.09", "X2014.09", "X2015.09", "X2016.09", "X2017.09", "X2018.09", "X2019.09", "X2020.09")]
+oct = geo_dengue[, c("X2006.10", "X2007.10", "X2008.10", "X2009.10", "X2010.10", "X2011.10", "X2012.10", "X2013.10", "X2014.10", "X2015.10", "X2016.10", "X2017.10", "X2018.10", "X2019.10", "X2020.10")]
+nov = geo_dengue[, c("X2006.11", "X2007.11", "X2008.11", "X2009.11", "X2010.11", "X2011.11", "X2012.11", "X2013.11", "X2014.11", "X2015.11", "X2016.11", "X2017.11", "X2018.11", "X2019.11", "X2020.11")]
+dec = geo_dengue[, c("X2006.12", "X2007.12", "X2008.12", "X2009.12", "X2010.12", "X2011.12", "X2012.12", "X2013.12", "X2014.12", "X2015.12", "X2016.12", "X2017.12", "X2018.12", "X2019.12", "X2020.12")]
+
+## removing NA values to make sure that the mean can be calculated
+jan.m = apply(jan, 1, mean, na.rm=TRUE)
+feb.m = apply(feb, 1, mean, na.rm=TRUE)
+mar.m = apply(mar, 1, mean, na.rm=TRUE)
+apr.m = apply(apr, 1, mean, na.rm=TRUE)
+may.m = apply(may, 1, mean, na.rm=TRUE)
+jun.m = apply(jun, 1, mean, na.rm=TRUE)
+jul.m = apply(jul, 1, mean, na.rm=TRUE)
+aug.m = apply(aug, 1, mean, na.rm=TRUE)
+sep.m = apply(sep, 1, mean, na.rm=TRUE)
+oct.m = apply(oct, 1, mean, na.rm=TRUE)
+nov.m = apply(nov, 1, mean, na.rm=TRUE)
+dec.m = apply(dec, 1, mean, na.rm=TRUE)
+
+# combining the mean values in an new dataframe 
+geo_dengue_mean = cbind(geo_dengue$Reporting.areas, jan.m, feb.m, mar.m, apr.m, may.m, jun.m, jul.m, aug.m, sep.m, oct.m, nov.m, dec.m, geography )
+geo_dengue_mean
+```
+
+### plotting mean cases for each year
+
+```{r}
+#Jan-------------------------------------------------------------------------------------
+ggplot(geo_dengue_mean, aes(geometry=geometry)) +
+  geom_sf (aes(fill = jan.m)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "total dengue cases of January", fill = "mean of cases")
+
+#Feb--------------------------------------------------------------------------------------
+ggplot(geo_dengue_mean, aes(geometry=geometry)) +
+  geom_sf (aes(fill = feb.m)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "total dengue cases of February", fill = "mean of cases")
+
+#Mar--------------------------------------------------------------------------------------
+ggplot(geo_dengue_mean, aes(geometry=geometry)) +
+  geom_sf (aes(fill = mar.m)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "total dengue cases of March", fill = "mean of cases")
+
+#Apr--------------------------------------------------------------------------------------
+ggplot(geo_dengue_mean, aes(geometry=geometry)) +
+  geom_sf (aes(fill = apr.m)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "total dengue cases of April", fill = "mean of cases")
+
+#May--------------------------------------------------------------------------------------
+ggplot(geo_dengue_mean, aes(geometry=geometry)) +
+  geom_sf (aes(fill = may.m)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "total dengue cases of May", fill = "mean of cases")
+
+#Jun--------------------------------------------------------------------------------------
+ggplot(geo_dengue_mean, aes(geometry=geometry)) +
+  geom_sf (aes(fill = jun.m)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "total dengue cases of June", fill = "mean of cases")
+
+#Jul--------------------------------------------------------------------------------------
+ggplot(geo_dengue_mean, aes(geometry=geometry)) +
+  geom_sf (aes(fill = jul.m)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "total dengue cases of July", fill = "mean of cases")
+
+#Aug--------------------------------------------------------------------------------------
+ggplot(geo_dengue_mean, aes(geometry=geometry)) +
+  geom_sf (aes(fill = aug.m)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "total dengue cases of August", fill = "mean of cases")
+
+#Sep--------------------------------------------------------------------------------------
+ggplot(geo_dengue_mean, aes(geometry=geometry)) +
+  geom_sf (aes(fill = sep.m)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "total dengue cases of September", fill = "mean of cases")
+
+#Oct--------------------------------------------------------------------------------------
+ggplot(geo_dengue_mean, aes(geometry=geometry)) +
+  geom_sf (aes(fill = oct.m)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "total dengue cases of October", fill = "mean of cases")
+
+#Nov--------------------------------------------------------------------------------------
+ggplot(geo_dengue_mean, aes(geometry=geometry)) +
+  geom_sf (aes(fill = nov.m)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "total dengue cases of November", fill = "mean of cases")
+
+#Oct--------------------------------------------------------------------------------------
+ggplot(geo_dengue_mean, aes(geometry=geometry)) +
+  geom_sf (aes(fill = oct.m)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "total dengue cases of October", fill = "mean of cases")
+
+#Apr--------------------------------------------------------------------------------------
+ggplot(geo_dengue_mean, aes(geometry=geometry)) +
+  geom_sf (aes(fill = apr.m)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "total dengue cases of April", fill = "mean of cases")
+
+#Nov--------------------------------------------------------------------------------------
+ggplot(geo_dengue_mean, aes(geometry=geometry)) +
+  geom_sf (aes(fill = nov.m)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "total dengue cases of November", fill = "mean of cases")
+
+#Dec--------------------------------------------------------------------------------------
+ggplot(geo_dengue_mean, aes(geometry=geometry)) +
+  geom_sf (aes(fill = dec.m)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "total dengue cases of December", fill = "mean of cases")
+
+
+## beacuse of different amounts of NA values the maps look different
+```
+
+## boxplot of each year
+
+```{r}
+#defining a dataframe for each year (means of all months in one year)
+d2006 = geo_dengue[,c("X2006.01", "X2006.02", "X2006.03", "X2006.04", "X2006.05", "X2006.06", "X2006.07", "X2006.08", "X2006.09","X2006.10","X2006.11","X2006.12",)]
+d2007 = geo_dengue[, c("X2007.01", "X2007.02", "X2007.03", "X2007.04", "X2007.05", "X2007.06", "X2007.07", "X2007.08", "X2007.09","X2007.10","X2007.11","X2007.12",)]
+
+-----
+#merging the dataframes 
+m.T.huss= cbind(m.T.huss.2006, m.T.huss.2007,m.T.huss.2008,m.T.huss.2009, m.T.huss.2010, m.T.huss.2011, m.T.huss.2012,m.T.huss.2013,m.T.huss.2014,m.T.huss.2015,m.T.huss.2016,m.T.huss.2017,m.T.huss.2018,m.T.huss.2019,m.T.huss.2020)
+m.T.huss = as.data.frame(m.T.huss)
+colnames(m.T.huss) = c("mean of 2006", "mean of 2007", "mean of 2008", "mean of 2009", "mean of 2010", "mean of 2011", "mean of 2012", "mean of 2013", "mean of 2014", "mean of 2015", "mean of 2016", "mean of 2017", "mean of 2018", "mean of 2019", "mean of 2020")
+print(m.T.huss)
+
+# adding column with total dengue cases of each province
+row.means= apply(m.T.huss, 1, mean)
+length (row.means)
+
+m.T.huss.tot= cbind("total mean of each province"= row.means, m.T.huss)
+print(m.T.huss.tot)
+
+
+#starting to plot
+
+#install.packages("tidyverse")
+#install.packages("hrbrthemes")
+library(ggplot2)
+library(tidyverse)
+library(hrbrthemes)
+library(viridis)
+#install.packages("cowplot")
+library(cowplot)
+
+#plot
+plot.2006=ggplot(geo_dengue_mean, aes(y=geo_dengue_mean$))+
+        stat_boxplot(geom="errorbar")+
+        scale_x_discrete()+
+        geom_boxplot(outlier.color= "gray", outlier.size=2)+
+        labs(title=2006, y=" ")+
+        ylim(70, 90)
+plot.2007=ggplot(m.T.huss.tot, aes(y=m.T.huss.tot$"mean of 2007"))+
+        stat_boxplot(geom="errorbar")+
+        geom_boxplot(outlier.color= "gray", outlier.size=2)+
+        scale_x_discrete()+
+        ylim(70, 90)+
+        labs(title=2007, y=" ")
+plot.2008=ggplot(m.T.huss.tot, aes(y=m.T.huss$"mean of 2008"))+
+        stat_boxplot(geom="errorbar")+
+        geom_boxplot(outlier.color= "gray", outlier.size=2)+
+        scale_x_discrete()+
+        ylim(70, 90)+
+        labs(title=2008,y=" ")
+plot.2009=ggplot(m.T.huss.tot, aes(y=m.T.huss$"mean of 2009"))+
+        stat_boxplot(geom="errorbar")+
+        geom_boxplot(outlier.color= "gray", outlier.size=2)+
+        scale_x_discrete()+
+        ylim(70, 90)+
+        labs(title=2009,y=" ")
+plot.2010=ggplot(m.T.huss.tot, aes(y=m.T.huss$"mean of 2010"))+
+        stat_boxplot(geom="errorbar")+
+        geom_boxplot(outlier.color= "gray", outlier.size=2)+
+        scale_x_discrete()+
+        ylim(70, 90)+
+        labs(title=2010,y=" ")
+plot.2010
+plot.2011=ggplot(m.T.huss.tot, aes(y=m.T.huss$"mean of 2011"))+
+        stat_boxplot(geom="errorbar")+
+        geom_boxplot(outlier.color= "gray", outlier.size=2)+
+        scale_x_discrete()+
+        ylim(70, 90)+
+        labs(title=2011,y=" ")
+plot.2012=ggplot(m.T.huss.tot, aes(y=m.T.huss$"mean of 2012"))+
+        stat_boxplot(geom="errorbar")+
+        geom_boxplot(outlier.color= "gray", outlier.size=2)+
+        scale_x_discrete()+
+        ylim(70, 90)+
+        labs(title=2012,y=" ")
+plot.2013=ggplot(m.T.huss.tot, aes(y=m.T.huss$"mean of 2013"))+
+        stat_boxplot(geom="errorbar")+
+        geom_boxplot(outlier.color= "gray", outlier.size=2)+
+        scale_x_discrete()+
+        ylim(70, 90)+
+        labs(title=2013,y=" ")
+plot.2014=ggplot(m.T.huss.tot, aes(y=m.T.huss$"mean of 2014"))+
+        stat_boxplot(geom="errorbar")+
+        geom_boxplot(outlier.color= "gray", outlier.size=2)+
+        scale_x_discrete()+
+        ylim(70, 90)+
+        labs(title=2014,y=" ")
+plot.2015=ggplot(m.T.huss.tot, aes(y=m.T.huss$"mean of 2015"))+
+        stat_boxplot(geom="errorbar")+
+        geom_boxplot(outlier.color= "gray", outlier.size=2)+
+        scale_x_discrete()+
+        ylim(70, 90)+
+        labs(title=2015,y=" ")
+plot.2016=ggplot(m.T.huss.tot, aes(y=m.T.huss$"mean of 2016"))+
+        stat_boxplot(geom="errorbar")+
+        geom_boxplot(outlier.color= "gray", outlier.size=2)+
+        scale_x_discrete()+
+        ylim(70, 90)+
+        labs(title=2016,y=" ")
+plot.2017=ggplot(m.T.huss.tot, aes(y=m.T.huss$"mean of 2017"))+
+        stat_boxplot(geom="errorbar")+
+        geom_boxplot(outlier.color= "gray", outlier.size=2)+
+        scale_x_discrete()+
+        ylim(70, 90)+
+        labs(title=2017,y=" ")
+plot.2018=ggplot(m.T.huss.tot, aes(y=m.T.huss$"mean of 2018"))+
+        stat_boxplot(geom="errorbar")+
+        geom_boxplot(outlier.color= "gray", outlier.size=2)+
+        scale_x_discrete()+
+        ylim(70, 90)+
+        labs(title=2018,y=" ")
+plot.2019=ggplot(m.T.huss.tot, aes(y=m.T.huss$"mean of 2019"))+
+        stat_boxplot(geom="errorbar")+
+        geom_boxplot(outlier.color= "gray", outlier.size=2)+
+        scale_x_discrete()+
+        ylim(70, 900)+
+        labs(title=2019,y=" ")
+plot.2020=ggplot(m.T.huss.tot, aes(y=m.T.huss$"mean of 2020"))+
+        stat_boxplot(geom="errorbar")+
+        geom_boxplot(outlier.color= "gray", outlier.size=2)+
+        scale_x_discrete()+
+        ylim(70, 90)+
+        labs(title=2020,y=" ")
+
+#combining the plots into one big plot makes problems -> arrangement in word dokument   
+plot_grid(plot.2006, plot.2007, plot.2008, plot.2009, plot.2010, plot.2011, plot.2012, plot.2013,  nrow = 2, align = "h")
+
+plot_grid(plot.2014, plot.2015, plot.2016, plot.2017, plot.2018, plot.2019, plot.2020, nrow=2, align="h")
+ 
+#install.packages("patchwork")
+#library(patchwork)
+#plot1 = plot.2006 + plot.2007 + plot.2008 + plot.2009 + plot.2010 + plot.2011 
+#plot1  
+
+install.packages("gridExtra")
+library(gridExtra)
+grid.arrange(plot.2006, plot.2007, plot.2008, plot.2009, nrow=1)
+grid.arrange(plot.2010, plot.2011, plot.2012, plot.2013, nrow=1)  
+grid.arrange(plot.2014, plot.2015, plot.2016, plot.2017, nrow=1)  
+grid.arrange(plot.2018, plot.2019, plot.2020, nrow=1)
+        
+#overview of box plots
+boxplot(m.T.huss.tot[,-1], 
+        main="mean yearly relative humidity (2006-2020)",
+        xlab= "year",
+        ylab="mean relative humidity") 
+ 
+
+```
