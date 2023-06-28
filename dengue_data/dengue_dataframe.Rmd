@@ -559,4 +559,6 @@ dengue_data_com2 = merged_df
 #locales Speichern der dengue_hum 
 filePath = paste(getwd(), "dengue_data_com2.csv",sep = "/")
 write.csv(dengue_data_com2, filePath)
+
+
 ````
