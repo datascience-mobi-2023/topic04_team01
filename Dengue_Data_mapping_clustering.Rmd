@@ -434,15 +434,6 @@ ggplot(dengue.tot.2010.geo, aes(geometry=geometry)) +
   colorspace::scale_fill_continuous_sequential(palette= "plasma")+
   labs(title = "total reported dengue cases in 2010", fill = "total reported dengue cases")
 
-
-
-
-
-
-
-
-
-
 #2011------------------------------------------------------------------------------------------
 #coosing the lines that show total data for each district 2006 to 2020
 dengue.tot.2011 = combined_df[tot_2011,]
