@@ -269,21 +269,7 @@ ggplot(geo_dengue_mean, aes(geometry=geometry)) +
   colorspace::scale_fill_continuous_sequential(palette= "plasma")+
   labs(title = "total dengue cases of September", fill = "mean of cases")
 
-#Oct--------------------------------------------------------------------------------------
-ggplot(geo_dengue_mean, aes(geometry=geometry)) +
-  geom_sf (aes(fill = oct.m)) +
-  coord_sf() +
-  theme_minimal()+
-  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
-  labs(title = "total dengue cases of October", fill = "mean of cases")
 
-#Nov--------------------------------------------------------------------------------------
-ggplot(geo_dengue_mean, aes(geometry=geometry)) +
-  geom_sf (aes(fill = nov.m)) +
-  coord_sf() +
-  theme_minimal()+
-  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
-  labs(title = "total dengue cases of November", fill = "mean of cases")
 
 #Oct--------------------------------------------------------------------------------------
 ggplot(geo_dengue_mean, aes(geometry=geometry)) +
@@ -292,14 +278,6 @@ ggplot(geo_dengue_mean, aes(geometry=geometry)) +
   theme_minimal()+
   colorspace::scale_fill_continuous_sequential(palette= "plasma")+
   labs(title = "total dengue cases of October", fill = "mean of cases")
-
-#Apr--------------------------------------------------------------------------------------
-ggplot(geo_dengue_mean, aes(geometry=geometry)) +
-  geom_sf (aes(fill = apr.m)) +
-  coord_sf() +
-  theme_minimal()+
-  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
-  labs(title = "total dengue cases of April", fill = "mean of cases")
 
 #Nov--------------------------------------------------------------------------------------
 ggplot(geo_dengue_mean, aes(geometry=geometry)) +
@@ -318,157 +296,162 @@ ggplot(geo_dengue_mean, aes(geometry=geometry)) +
   labs(title = "total dengue cases of December", fill = "mean of cases")
 
 
-## beacuse of different amounts of NA values the maps look different
+## Why do maps look different?
 ```
 
 ## boxplot of each year
 
 ```{r}
 #defining a dataframe for each year (means of all months in one year)
-d2006 = geo_dengue[,c("X2006.01", "X2006.02", "X2006.03", "X2006.04", "X2006.05", "X2006.06", "X2006.07", "X2006.08", "X2006.09","X2006.10","X2006.11","X2006.12",)]
-d2007 = geo_dengue[, c("X2007.01", "X2007.02", "X2007.03", "X2007.04", "X2007.05", "X2007.06", "X2007.07", "X2007.08", "X2007.09","X2007.10","X2007.11","X2007.12",)]
+d2006 = geo_dengue[,c("X2006.01", "X2006.02", "X2006.03", "X2006.04", "X2006.05", "X2006.06", "X2006.07", "X2006.08", "X2006.09","X2006.10","X2006.11","X2006.12")]
+d2007 = geo_dengue[, c("X2007.01", "X2007.02", "X2007.03", "X2007.04", "X2007.05", "X2007.06", "X2007.07", "X2007.08", "X2007.09","X2007.10","X2007.11","X2007.12")]
+d2008 = geo_dengue[, c("X2008.01", "X2008.02", "X2008.03", "X2008.04", "X2008.05", "X2008.06", "X2008.07", "X2008.08", "X2008.09","X2008.10","X2008.11","X2008.12")]
+d2009 = geo_dengue[, c("X2009.01", "X2009.02", "X2009.03", "X2009.04", "X2009.05", "X2009.06", "X2009.07", "X2009.08", "X2009.09","X2009.10","X2009.11","X2009.12")]
+d2010 = geo_dengue[, c("X2010.01", "X2010.02", "X2010.03", "X2010.04", "X2010.05", "X2010.06", "X2010.07", "X2010.08", "X2010.09","X2010.10","X2010.11","X2010.12")]
+d2011 = geo_dengue[, c("X2011.01", "X2011.02", "X2011.03", "X2011.04", "X2011.05", "X2011.06", "X2011.07", "X2011.08", "X2011.09","X2011.10","X2011.11","X2011.12")]
+d2012 = geo_dengue[, c("X2012.01", "X2012.02", "X2012.03", "X2012.04", "X2012.05", "X2012.06", "X2012.07", "X2012.08", "X2012.09","X2012.10","X2012.11","X2012.12")]
+d2013 = geo_dengue[, c("X2013.01", "X2013.02", "X2013.03", "X2013.04", "X2013.05", "X2013.06", "X2013.07", "X2013.08", "X2013.09","X2013.10","X2013.11","X2013.12")]
+d2014 = geo_dengue[, c("X2014.01", "X2014.02", "X2014.03", "X2014.04", "X2014.05", "X2014.06", "X2014.07", "X2014.08", "X2014.09","X2014.10","X2014.11","X2014.12")]
+d2015 = geo_dengue[, c("X2015.01", "X2015.02", "X2015.03", "X2015.04", "X2015.05", "X2015.06", "X2015.07", "X2015.08", "X2015.09","X2015.10","X2015.11","X2015.12")]
+d2016 = geo_dengue[, c("X2016.01", "X2016.02", "X2016.03", "X2016.04", "X2016.05", "X2016.06", "X2016.07", "X2016.08", "X2016.09","X2016.10","X2016.11","X2016.12")]
+d2017 = geo_dengue[, c("X2017.01", "X2017.02", "X2017.03", "X2017.04", "X2017.05", "X2017.06", "X2017.07", "X2017.08", "X2017.09","X2017.10","X2017.11","X2017.12")]
+d2018 = geo_dengue[, c("X2018.01", "X2018.02", "X2018.03", "X2018.04", "X2018.05", "X2018.06", "X2018.07", "X2018.08", "X2018.09","X2018.10","X2018.11","X2018.12")]
+d2019 = geo_dengue[, c("X2019.01", "X2019.02", "X2019.03", "X2019.04", "X2019.05", "X2019.06", "X2019.07", "X2019.08", "X2019.09","X2019.10","X2019.11","X2019.12")]
+d2020 = geo_dengue[, c("X2020.01", "X2020.02", "X2020.03", "X2020.04", "X2020.05", "X2020.06", "X2020.07", "X2020.08", "X2020.09","X2020.10","X2020.11","X2020.12")]
 
------
-#merging the dataframes 
-m.T.huss= cbind(m.T.huss.2006, m.T.huss.2007,m.T.huss.2008,m.T.huss.2009, m.T.huss.2010, m.T.huss.2011, m.T.huss.2012,m.T.huss.2013,m.T.huss.2014,m.T.huss.2015,m.T.huss.2016,m.T.huss.2017,m.T.huss.2018,m.T.huss.2019,m.T.huss.2020)
-m.T.huss = as.data.frame(m.T.huss)
-colnames(m.T.huss) = c("mean of 2006", "mean of 2007", "mean of 2008", "mean of 2009", "mean of 2010", "mean of 2011", "mean of 2012", "mean of 2013", "mean of 2014", "mean of 2015", "mean of 2016", "mean of 2017", "mean of 2018", "mean of 2019", "mean of 2020")
-print(m.T.huss)
+#computing mean of each year
+m.d2006 = apply(d2006, 1, mean)
+m.d2007 = apply(d2007, 1, mean)
+m.d2008 = apply(d2008, 1, mean)
+m.d2009 = apply(d2009, 1, mean)
+m.d2010 = apply(d2010, 1, mean)
+m.d2011 = apply(d2011, 1, mean)
+m.d2012 = apply(d2012, 1, mean)
+m.d2013 = apply(d2013, 1, mean)
+m.d2014 = apply(d2014, 1, mean)
+m.d2015 = apply(d2015, 1, mean)
+m.d2016 = apply(d2016, 1, mean)
+m.d2017 = apply(d2017, 1, mean)
+m.d2018 = apply(d2018, 1, mean)
+m.d2019 = apply(d2019, 1, mean)
+m.d2020 = apply(d2020, 1, mean)
 
-# adding column with total dengue cases of each province
-row.means= apply(m.T.huss, 1, mean)
-length (row.means)
-
-m.T.huss.tot= cbind("total mean of each province"= row.means, m.T.huss)
-print(m.T.huss.tot)
-
+mean_dengue_yearly = cbind(m.d2006, m.d2007, m.d2008, m.d2009, m.d2010, m.d2011, m.d2012, m.d2013, m.d2014, m.d2015, m.d2016, m.d2017, m.d2018, m.d2019, m.d2020)
+mean_dengue_yearly
+mean_dengue_yearly= as.data.frame(mean_dengue_yearly)
 
 #starting to plot
 
-#install.packages("tidyverse")
-#install.packages("hrbrthemes")
 library(ggplot2)
 library(tidyverse)
 library(hrbrthemes)
 library(viridis)
-#install.packages("cowplot")
 library(cowplot)
 
 #plot
-plot.2006=ggplot(geo_dengue_mean, aes(y=geo_dengue_mean$))+
+plot.m.2006=ggplot(mean_dengue_yearly, aes(y=mean_dengue_yearly$m.d2006))+
         stat_boxplot(geom="errorbar")+
         scale_x_discrete()+
         geom_boxplot(outlier.color= "gray", outlier.size=2)+
         labs(title=2006, y=" ")+
-        ylim(70, 90)
-plot.2007=ggplot(m.T.huss.tot, aes(y=m.T.huss.tot$"mean of 2007"))+
+        ylim(50, 150)
+plot.m.2007=ggplot(mean_dengue_yearly, aes(y=mean_dengue_yearly$m.d2007))+
         stat_boxplot(geom="errorbar")+
-        geom_boxplot(outlier.color= "gray", outlier.size=2)+
         scale_x_discrete()+
-        ylim(70, 90)+
-        labs(title=2007, y=" ")
-plot.2008=ggplot(m.T.huss.tot, aes(y=m.T.huss$"mean of 2008"))+
+        geom_boxplot(outlier.color= "gray", outlier.size=2)+
+        labs(title=2007, y=" ")+
+        ylim(50, 150)
+plot.m.2008=ggplot(mean_dengue_yearly, aes(y=mean_dengue_yearly$m.d2008))+
         stat_boxplot(geom="errorbar")+
-        geom_boxplot(outlier.color= "gray", outlier.size=2)+
         scale_x_discrete()+
-        ylim(70, 90)+
-        labs(title=2008,y=" ")
-plot.2009=ggplot(m.T.huss.tot, aes(y=m.T.huss$"mean of 2009"))+
+        geom_boxplot(outlier.color= "gray", outlier.size=2)+
+        labs(title=2008, y=" ")+
+        ylim(50, 150)
+plot.m.2009=ggplot(mean_dengue_yearly, aes(y=mean_dengue_yearly$m.d2009))+
         stat_boxplot(geom="errorbar")+
-        geom_boxplot(outlier.color= "gray", outlier.size=2)+
         scale_x_discrete()+
-        ylim(70, 90)+
-        labs(title=2009,y=" ")
-plot.2010=ggplot(m.T.huss.tot, aes(y=m.T.huss$"mean of 2010"))+
+        geom_boxplot(outlier.color= "gray", outlier.size=2)+
+        labs(title=2009, y=" ")+
+        ylim(50, 150)
+plot.m.2010=ggplot(mean_dengue_yearly, aes(y=mean_dengue_yearly$m.d2010))+
         stat_boxplot(geom="errorbar")+
-        geom_boxplot(outlier.color= "gray", outlier.size=2)+
         scale_x_discrete()+
-        ylim(70, 90)+
-        labs(title=2010,y=" ")
-plot.2010
-plot.2011=ggplot(m.T.huss.tot, aes(y=m.T.huss$"mean of 2011"))+
+        geom_boxplot(outlier.color= "gray", outlier.size=2)+
+        labs(title=2010, y=" ")+
+        ylim(50, 150)
+plot.m.2011=ggplot(mean_dengue_yearly, aes(y=mean_dengue_yearly$m.d2011))+
         stat_boxplot(geom="errorbar")+
-        geom_boxplot(outlier.color= "gray", outlier.size=2)+
         scale_x_discrete()+
-        ylim(70, 90)+
-        labs(title=2011,y=" ")
-plot.2012=ggplot(m.T.huss.tot, aes(y=m.T.huss$"mean of 2012"))+
+        geom_boxplot(outlier.color= "gray", outlier.size=2)+
+        labs(title=2011, y=" ")+
+        ylim(50, 150)
+plot.m.2012=ggplot(mean_dengue_yearly, aes(y=mean_dengue_yearly$m.d2012))+
         stat_boxplot(geom="errorbar")+
-        geom_boxplot(outlier.color= "gray", outlier.size=2)+
         scale_x_discrete()+
-        ylim(70, 90)+
-        labs(title=2012,y=" ")
-plot.2013=ggplot(m.T.huss.tot, aes(y=m.T.huss$"mean of 2013"))+
+        geom_boxplot(outlier.color= "gray", outlier.size=2)+
+        labs(title=2012, y=" ")+
+        ylim(50, 150)
+plot.m.2013=ggplot(mean_dengue_yearly, aes(y=mean_dengue_yearly$m.d2013))+
         stat_boxplot(geom="errorbar")+
-        geom_boxplot(outlier.color= "gray", outlier.size=2)+
         scale_x_discrete()+
-        ylim(70, 90)+
-        labs(title=2013,y=" ")
-plot.2014=ggplot(m.T.huss.tot, aes(y=m.T.huss$"mean of 2014"))+
+        geom_boxplot(outlier.color= "gray", outlier.size=2)+
+        labs(title=2013, y=" ")+
+        ylim(50, 150)
+plot.m.2014=ggplot(mean_dengue_yearly, aes(y=mean_dengue_yearly$m.d2014))+
         stat_boxplot(geom="errorbar")+
-        geom_boxplot(outlier.color= "gray", outlier.size=2)+
         scale_x_discrete()+
-        ylim(70, 90)+
-        labs(title=2014,y=" ")
-plot.2015=ggplot(m.T.huss.tot, aes(y=m.T.huss$"mean of 2015"))+
+        geom_boxplot(outlier.color= "gray", outlier.size=2)+
+        labs(title=2014, y=" ")+
+        ylim(50, 150)
+plot.m.2015=ggplot(mean_dengue_yearly, aes(y=mean_dengue_yearly$m.d2015))+
         stat_boxplot(geom="errorbar")+
-        geom_boxplot(outlier.color= "gray", outlier.size=2)+
         scale_x_discrete()+
-        ylim(70, 90)+
-        labs(title=2015,y=" ")
-plot.2016=ggplot(m.T.huss.tot, aes(y=m.T.huss$"mean of 2016"))+
+        geom_boxplot(outlier.color= "gray", outlier.size=2)+
+        labs(title=2015, y=" ")+
+        ylim(50, 150)
+plot.m.2016=ggplot(mean_dengue_yearly, aes(y=mean_dengue_yearly$m.d2016))+
         stat_boxplot(geom="errorbar")+
-        geom_boxplot(outlier.color= "gray", outlier.size=2)+
         scale_x_discrete()+
-        ylim(70, 90)+
-        labs(title=2016,y=" ")
-plot.2017=ggplot(m.T.huss.tot, aes(y=m.T.huss$"mean of 2017"))+
+        geom_boxplot(outlier.color= "gray", outlier.size=2)+
+        labs(title=2016, y=" ")+
+        ylim(50, 150)
+plot.m.2017=ggplot(mean_dengue_yearly, aes(y=mean_dengue_yearly$m.d2017))+
         stat_boxplot(geom="errorbar")+
-        geom_boxplot(outlier.color= "gray", outlier.size=2)+
         scale_x_discrete()+
-        ylim(70, 90)+
-        labs(title=2017,y=" ")
-plot.2018=ggplot(m.T.huss.tot, aes(y=m.T.huss$"mean of 2018"))+
+        geom_boxplot(outlier.color= "gray", outlier.size=2)+
+        labs(title=2017, y=" ")+
+        ylim(50, 150)
+plot.m.2018=ggplot(mean_dengue_yearly, aes(y=mean_dengue_yearly$m.d2018))+
         stat_boxplot(geom="errorbar")+
-        geom_boxplot(outlier.color= "gray", outlier.size=2)+
         scale_x_discrete()+
-        ylim(70, 90)+
-        labs(title=2018,y=" ")
-plot.2019=ggplot(m.T.huss.tot, aes(y=m.T.huss$"mean of 2019"))+
+        geom_boxplot(outlier.color= "gray", outlier.size=2)+
+        labs(title=2018, y=" ")+
+        ylim(50, 150)
+plot.m.2019=ggplot(mean_dengue_yearly, aes(y=mean_dengue_yearly$m.d2019))+
         stat_boxplot(geom="errorbar")+
-        geom_boxplot(outlier.color= "gray", outlier.size=2)+
         scale_x_discrete()+
-        ylim(70, 900)+
-        labs(title=2019,y=" ")
-plot.2020=ggplot(m.T.huss.tot, aes(y=m.T.huss$"mean of 2020"))+
+        geom_boxplot(outlier.color= "gray", outlier.size=2)+
+        labs(title=2019, y=" ")+
+        ylim(50, 150)
+plot.m.2020=ggplot(mean_dengue_yearly, aes(y=mean_dengue_yearly$m.d2020))+
         stat_boxplot(geom="errorbar")+
-        geom_boxplot(outlier.color= "gray", outlier.size=2)+
         scale_x_discrete()+
-        ylim(70, 90)+
-        labs(title=2020,y=" ")
+        geom_boxplot(outlier.color= "gray", outlier.size=2)+
+        labs(title=2020, y=" ")+
+        ylim(50, 150)
 
 #combining the plots into one big plot makes problems -> arrangement in word dokument   
-plot_grid(plot.2006, plot.2007, plot.2008, plot.2009, plot.2010, plot.2011, plot.2012, plot.2013,  nrow = 2, align = "h")
+plot_grid(plot.m.2006, plot.m.2007, plot.m.2008, plot.m.2009, plot.m.2010, plot.m.2011, plot.m.2012, plot.m.2013,  nrow = 2, align = "h")
 
-plot_grid(plot.2014, plot.2015, plot.2016, plot.2017, plot.2018, plot.2019, plot.2020, nrow=2, align="h")
- 
-#install.packages("patchwork")
-#library(patchwork)
-#plot1 = plot.2006 + plot.2007 + plot.2008 + plot.2009 + plot.2010 + plot.2011 
-#plot1  
+plot_grid(plot.m.2014, plot.m.2015, plot.m.2016, plot.m.2017, plot.m.2018, plot.m.2019, plot.m.2020, nrow=2, align="h")
 
-install.packages("gridExtra")
-library(gridExtra)
-grid.arrange(plot.2006, plot.2007, plot.2008, plot.2009, nrow=1)
-grid.arrange(plot.2010, plot.2011, plot.2012, plot.2013, nrow=1)  
-grid.arrange(plot.2014, plot.2015, plot.2016, plot.2017, nrow=1)  
-grid.arrange(plot.2018, plot.2019, plot.2020, nrow=1)
-        
-#overview of box plots
-boxplot(m.T.huss.tot[,-1], 
-        main="mean yearly relative humidity (2006-2020)",
-        xlab= "year",
-        ylab="mean relative humidity") 
- 
+
+
+
+```
+
+context of dengue outbreaks
+
+```{r}
 
 ```
