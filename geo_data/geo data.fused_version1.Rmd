@@ -791,3 +791,50 @@ df2%>%
   scale_color_manual(values = c("violet", "pink", "orange"))+
   scale_x_continuous(minor_breaks = seq(1, 12, 0.5))
 ```
+
+## plot of 
+
+To understand the impact of relative humidity on different kinds of areas in Thailand I chose exemplary provinces with different characteristics (position in the country, height of land):
+
+-   Maha-Sarakham (north-east), 100-200m above sea level
+
+-   Chiang Mai (north to north-west), 1000-1500m above sea level
+
+-   Kalasin (central), 0-100m above sea level
+
+-   Chumphon
+
+-   Songkhla (south), 100-200m above sea level
+
+    *Diercke Weltatlas* (1st ed.). (2008). westermann
+
+```{r}
+# dataframe combining yearly mean of each province 
+
+huss.means = as_tibble(data.frame(T.huss.mon.ordered.df[,"ADM1_EN"], means.jan.v, means.feb.v, means.mar.v, means.apr.v, means.mai.v, means.jun.v, means.jul.v, means.aug.v, means.sep.v, means.oct.v, means.nov.v, means.dec.v)
+
+#colnames(huss.means.df)= T.huss.mon.ordered.df[,"ADM1_EN"]
+#huss.means.df = as.data.frame(huss.means)
+huss.means
+
+
+#choosing the mentioned exemplary provinces and plotting them
+huss.means.df%>%
+  ggplot(aes(x=seq(1,12,1), y=huss.means[,24], color ="Maha Sarakham"), linetype=1)+
+  geom_line(aes(y=huss.means[,24]), linetype=1)+
+  geom_point(aes(y=huss.means[,24]))+
+  geom_line(y=huss.means[,10], color="violet")+ 
+  geom_point(aes(y=huss.means[,10],color ="Chiang Mai"), linetype=1)+
+  geom_line(y=huss.means[,60], color="orange")+
+  geom_point(aes(y=huss.means[,60],color ="Saraburi"), linetype=1)+
+  geom_line(y=huss.means[,13], color="blue")+
+  geom_point(aes(y=huss.means[,13],color ="Chumphon"), linetype=1)+
+  geom_line(y=huss.means[,64], color="green")+
+  geom_point(aes(y=huss.means[,64],color ="Songkhla"), linetype=1)+
+  ylim(55,100)+
+  ylab("mean monthly relative humidity [%]")+
+  xlab("month")+
+  ggtitle("monthly mean relative humidity of all provinces (Maha Sarakham,Chiang Mai, Saraburi, Chumphon, Songkhala)")+
+  scale_color_manual(values = c("violet", "orange", "blue", "green"))+
+  scale_x_continuous(minor_breaks = seq(1, 12, 0.5))
+```
