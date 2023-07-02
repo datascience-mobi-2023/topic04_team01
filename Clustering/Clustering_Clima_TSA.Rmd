@@ -43,7 +43,9 @@ c) 5 mal 3 Jahre
 d) Vergleiche Welche Provinzen sich geändert haben. 
 e) Plotten von den Centern der Cluster 1, 2 ,3 von 2006 bis 2020  Yay hab ich hinbekommen auch mit 2 verschiedenen Methoden 
 f) Ändern der Farbgebung , damit Cluster und Centren nicht unterschiedlich sind YAY Hab ich bhinbekommen mit 2 verschiedenen Methoden :)
-g9 anwenden von einer Methode auf f :'/
+g9 anwenden von einer Methode auf DONE hab ich auch hinbekommen
+g) K-Means Elbow Clustering machen 
+
 
 
 ```{r}
@@ -152,18 +154,19 @@ huss.data <- list(
 )
 
 
-#PLOT 2006--------------------------------------------------------------------------------
+
 
 ##Clustering
+
 for (year in 2006:2020){
 
-k <-3
+k <-4
 
 huss.year <- get(paste0("huss.",year))
 huss.year.mean<-as.data.frame(apply(huss.year,1, mean))
 huss.year.mean ['numbers'] = c(1:77)
 
-kmeans.years <-kmeans(huss.year.mean$`apply(huss.year, 1, mean)`, centers = 3 )
+kmeans.years <-kmeans(huss.year.mean$`apply(huss.year, 1, mean)`, centers = k )
 
 
 
