@@ -134,7 +134,7 @@ huss.geography = merge(T.huss.mon.mean.df, geography, by= "numbers")
 
 ```{r}
 ggplot() +
-  geom_sf(data = huss.geography,aes(geometry = geometry, fill= T.huss.mon.mean), main= "mean temperature of each province") +
+  geom_sf(data = huss.geography,aes(geometry = geometry, fill= T.huss.mon.mean)) +
   coord_sf() +  
   theme_minimal() +
   labs(title = "mean relative humidity")
@@ -165,6 +165,16 @@ install.packages("colorspace")
 library(colorspace)
 library(ggplot2)
 
+ggplot(huss.goegraphy.max.rmv.1, aes(geometry=geometry, fill = mon.max)) +
+  geom_sf () +
+  colorspace::scale_fill_continuous_sequential(palette= "viridis")
+
+ggplot() +
+  geom_sf(data = huss.goegraphy.max.rmv.1,aes(geometry = geometry, fill= mon.max)) +
+  coord_sf() +  
+  theme_minimal() +
+  labs(title = "mean relative humidity")
+
 ggplot(huss.goegraphy.max.rmv.1, aes(geometry=geometry)) +
   geom_sf (aes(fill = mon.max)) +
   colorspace::scale_fill_continuous_sequential(palette= "viridis")
@@ -172,6 +182,8 @@ ggplot(huss.goegraphy.max.rmv.1, aes(geometry=geometry)) +
 # wieso geht es immernoch nicht? sieht aus, als ob es latitude plottet, obwohl nicht mehr im dataframe???
 print(huss.goegraphy.max.rmv.1)
 ```
+
+plotting a geographic plot of the minimum temperatures
 
 ```{r}
 
@@ -193,8 +205,8 @@ library(ggplot2)
 
 ggplot(huss.goegraphy.min.1, aes(geometry=geometry)) +
   geom_sf (aes(fill = mon.min)) +
-  colorspace::scale_fill_continuous_sequential(palette= "viridis")
-
+  colorspace::scale_fill_continuous_sequential(palette= "viridis")+
+  labs(title = "minimum relative humidity (2006-2020)")
 
 ```
 
@@ -694,7 +706,7 @@ plot.2019=ggplot(m.T.huss.tot, aes(y=m.T.huss$"mean of 2019"))+
         stat_boxplot(geom="errorbar")+
         geom_boxplot(outlier.color= "gray", outlier.size=2)+
         scale_x_discrete()+
-        ylim(70, 900)+
+        ylim(70, 90)+
         labs(title=2019,y=" ")
 plot.2020=ggplot(m.T.huss.tot, aes(y=m.T.huss$"mean of 2020"))+
         stat_boxplot(geom="errorbar")+
@@ -730,24 +742,99 @@ boxplot(m.T.huss.tot[,-1],
 
 ```
 
-### goeplot february
+### plot of relative humidity yearly around 2018 and 2009
+
+these years show the highest median values of relative humidity. I want to compare the yearly pattern of relative humidity between the mentioned years and the surrounding years
 
 ```{r}
-library(dplyr)
-library(colorspace)
-library(viridis)
+#loading necessary library
 library(ggplot2)
+library(dplyr)
+#defining  data to plot
+mean.mon.2009 = apply(T.huss.2009[,-1], 2, mean)
+mean.mon.2008 = apply(T.huss.2008[,-1], 2, mean)
+mean.mon.2010 = apply(T.huss.2010[,-1], 2, mean)
+mean.mon.2018 = apply(T.huss.2018[,-1], 2, mean)
+mean.mon.2017 = apply(T.huss.2017[,-1], 2, mean)
+mean.mon.2019 = apply(T.huss.2019[,-1], 2, mean)
+# combining data in tibbles
+df1 = as_tibble(data.frame(mean.mon.2008, mean.mon.2009, mean.mon.2010))
+df2 = as_tibble(data.frame(mean.mon.2017, mean.mon.2018, mean.mon.2019))
+#creating the plots
+df1%>%
+  ggplot(aes(x=seq(1,12,1), y=mean.mon.2009,color ="2009"), linetype=1)+
+  geom_line(aes(y=mean.mon.2009), linetype=1)+
+  geom_point(aes(y=mean.mon.2009))+
+  geom_line(y=mean.mon.2008, color="violet")+ 
+  geom_point(aes(y=mean.mon.2008,color ="2008"), linetype=1)+
+  geom_line(y=mean.mon.2010, color="orange")+
+  geom_point(aes(y=mean.mon.2010,color ="2010"), linetype=1)+
+  ylim(55,100)+
+  ylab("mean monthly relative humidity [%]")+
+  xlab("month")+
+  ggtitle("monthly mean relative humidity of all provinces (2008, 2009, 2010)")+
+  scale_color_manual(values = c("violet", "pink", "orange"))+
+  scale_x_continuous(minor_breaks = seq(1, 12, 0.5))
+  
+df2%>%
+  ggplot(aes(x=seq(1,12,1), y=mean.mon.2018,color ="2018"), linetype=1)+
+  geom_line(aes(y=mean.mon.2018, ), linetype=1)+
+  geom_point(aes(y=mean.mon.2018))+
+  geom_line(y=mean.mon.2017, color="violet")+ 
+  geom_point(aes(y=mean.mon.2017,color ="2017"), linetype=1)+
+  geom_line(y=mean.mon.2019, color="orange")+
+  geom_point(aes(y=mean.mon.2019,color ="2019"), linetype=1)+
+  ylim(55,100)+
+  ylab("mean monthly relative humidity [%]")+
+  xlab("month")+
+  ggtitle("monthly mean relative humidity of all provinces (2017, 2018, 2019)")+
+  scale_color_manual(values = c("violet", "pink", "orange"))+
+  scale_x_continuous(minor_breaks = seq(1, 12, 0.5))
+```
 
-#definieren als numeric
-class(feb.combined$feb)
-feb.num = as.numeric(feb.combined$feb)
-feb.combined$feb = feb.num
+## plot of 
 
-#plotten
-ggplot(feb.combined, aes(geometry=geometry)) +
-  geom_sf (aes(fill = feb.num)) +
-  coord_sf() +
-  theme_minimal()+
-  colorspace::scale_fill_continuous_sequential(palette= "viridis")+
-  labs(title = "mean relative humidity of february")
+To understand the impact of relative humidity on different kinds of areas in Thailand I chose exemplary provinces with different characteristics (position in the country, height of land):
+
+-   Maha-Sarakham (north-east), 100-200m above sea level
+
+-   Chiang Mai (north to north-west), 1000-1500m above sea level
+
+-   Kalasin (central), 0-100m above sea level
+
+-   Chumphon
+
+-   Songkhla (south), 100-200m above sea level
+
+    *Diercke Weltatlas* (1st ed.). (2008). westermann
+
+```{r}
+# dataframe combining yearly mean of each province 
+
+huss.means = as_tibble(data.frame(T.huss.mon.ordered.df[,"ADM1_EN"], means.jan.v, means.feb.v, means.mar.v, means.apr.v, means.mai.v, means.jun.v, means.jul.v, means.aug.v, means.sep.v, means.oct.v, means.nov.v, means.dec.v)
+
+#colnames(huss.means.df)= T.huss.mon.ordered.df[,"ADM1_EN"]
+#huss.means.df = as.data.frame(huss.means)
+huss.means
+
+
+#choosing the mentioned exemplary provinces and plotting them
+huss.means.df%>%
+  ggplot(aes(x=seq(1,12,1), y=huss.means[,24], color ="Maha Sarakham"), linetype=1)+
+  geom_line(aes(y=huss.means[,24]), linetype=1)+
+  geom_point(aes(y=huss.means[,24]))+
+  geom_line(y=huss.means[,10], color="violet")+ 
+  geom_point(aes(y=huss.means[,10],color ="Chiang Mai"), linetype=1)+
+  geom_line(y=huss.means[,60], color="orange")+
+  geom_point(aes(y=huss.means[,60],color ="Saraburi"), linetype=1)+
+  geom_line(y=huss.means[,13], color="blue")+
+  geom_point(aes(y=huss.means[,13],color ="Chumphon"), linetype=1)+
+  geom_line(y=huss.means[,64], color="green")+
+  geom_point(aes(y=huss.means[,64],color ="Songkhla"), linetype=1)+
+  ylim(55,100)+
+  ylab("mean monthly relative humidity [%]")+
+  xlab("month")+
+  ggtitle("monthly mean relative humidity of all provinces (Maha Sarakham,Chiang Mai, Saraburi, Chumphon, Songkhala)")+
+  scale_color_manual(values = c("violet", "orange", "blue", "green"))+
+  scale_x_continuous(minor_breaks = seq(1, 12, 0.5))
 ```
