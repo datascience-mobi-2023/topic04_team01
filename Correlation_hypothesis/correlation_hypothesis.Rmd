@@ -1,0 +1,116 @@
+---
+title: "Correlation_statisitcal_tests"
+author: "Paula"
+date: "2023-06-20"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+First load the data frame with the dengue cases 
+```{r}
+filePath = paste(getwd(), "dengue_data_com.csv",sep = "/")
+combined_df <- read.csv("../dengue_data/dengue_data_com.csv")
+print(combined_df)
+#convertieren der dengue cases zu zahlen statt charaktern
+combined_df$dengue_cases <- as.integer(combined_df$dengue_cases)
+print(combined_df)
+```
+
+Convert missing values to value zero 
+```{r}
+combined_df[is.na(combined_df)] <- 0
+print(combined_df)
+```
+load the climate data 
+```{r}
+install.packages("readxl")
+library(readxl)
+
+sheet_names = excel_sheets("../era5_data_2006_2020_thailand_monmean.xlsx")
+
+#load the humidity data 
+T.huss.mon = read_excel("../era5_data_2006_2020_thailand_monmean.xlsx", sheet="era5_huss_2006_2020_thailand_mo")
+```
+
+Humidity dataframe unwichtige Daten entfernen und correlation für Januar 2006 als Beispiel berechnen
+```{r}
+#unwichtige Columns entfernen 
+i.remove <- which(colnames(T.huss.mon) %in% c("Number","Longitude", "Latitude"))
+T.huss.mon1 <- T.huss.mon[,-i.remove]
+
+#alphabetisch ordnen
+sorted_df <- T.huss.mon1[order(T.huss.mon1$ADM1_EN), ]
+print(sorted_df)
+
+#Bueng Kan ist zu Beginn nicht vorhanden in dengue dataframe 
+sorted_df <- sorted_df[-4,]
+
+#Beispiel an Januar 2006
+dengue_2006_jan <- subset(combined_df, combined_df$Year == "2006" & combined_df$Month == "Jan")
+cor(sorted_df$'2006.01.', dengue_2006_jan$dengue_cases, method='pearson')
+cor(sorted_df$'2006.01.', dengue_2006_jan$dengue_cases, method='spearman')
+
+#plotten der Daten
+plot(sorted_df$'2006.01.', dengue_2006_jan$dengue_cases,
+     pch=20,
+     xlab='humidity',
+     ylab='dengue cases')
+
+```
+Bangkok is an outlier, try to calculate the correlation without Bangkok 
+```{r}
+#Bangkok entfernen aus beiden Dataframes 
+without_bangkok_d <- dengue_2006_jan[-3,]
+without_bangkok_c <- sorted_df[-3,]
+
+#correlation of humidity and dengue cases 
+cor(without_bangkok_c$'2006.01.', without_bangkok_d$dengue_cases, method='pearson')
+cor(without_bangkok_c$'2006.01.', without_bangkok_d$dengue_cases, method='spearman')
+
+#pearson correlation much higher without bangkok but spearman correlation is a little lower 
+#plot without bangkok 
+plot(without_bangkok_c$'2006.01.', without_bangkok_d$dengue_cases,
+     pch=20,
+     xlab='humidity',
+     ylab='dengue cases')
+```
+Let's try the lagged correlation for 1 month, 2 months and 3 months
+```{r}
+#get February 2006 from dengue dataframe
+dengue_2006_feb <-  subset(combined_df, combined_df$Year == "2006" & combined_df$Month == "Feb")
+#get March 2006 from dengue dataframe 
+dengue_2006_mar <- subset(combined_df, combined_df$Year == "2006" & combined_df$Month == "Mar")
+#get April 2006 from dengue dataframe
+dengue_2006_apr <- subset(combined_df, combined_df$Year == "2006" & combined_df$Month == "Apr")
+
+#correlation for 1 month lag, humidity data one month before dengue cases 
+cor(sorted_df$'2006.01.', dengue_2006_feb$dengue_cases, method='pearson')
+cor(sorted_df$'2006.01.', dengue_2006_feb$dengue_cases, method='spearman')
+
+#two months lagged
+cor(sorted_df$'2006.01.', dengue_2006_mar$dengue_cases, method='pearson')
+cor(sorted_df$'2006.01.', dengue_2006_mar$dengue_cases, method='spearman')
+
+#three months lagged 
+cor(sorted_df$'2006.01.', dengue_2006_apr$dengue_cases, method='pearson')
+cor(sorted_df$'2006.01.', dengue_2006_apr$dengue_cases, method='spearman')
+```
+Populationsdaten laden 
+```{r}
+popu_06 <- read_excel("C:\\Users\\paula\\Documents\\Uni Heidelberg\\4. Semester\\Bioinformatik\\github\\topic04_team01\\population_data\\2006_population.xlsx")
+popu_07 <- read_excel("C:\\Users\\paula\\Documents\\Uni Heidelberg\\4. Semester\\Bioinformatik\\github\\topic04_team01\\population_data\\2007_population.xlsx")
+popu_08 <- read_excel("C:\\Users\\paula\\Documents\\Uni Heidelberg\\4. Semester\\Bioinformatik\\github\\topic04_team01\\population_data\\2008_population.xlsx")
+popu_09 <- read_excel("C:\\Users\\paula\\Documents\\Uni Heidelberg\\4. Semester\\Bioinformatik\\github\\topic04_team01\\population_data\\2009_population.xlsx")
+popu_10 <- read_excel("C:\\Users\\paula\\Documents\\Uni Heidelberg\\4. Semester\\Bioinformatik\\github\\topic04_team01\\population_data\\2010_population.xlsx")
+popu_11 <- read_excel("C:\\Users\\paula\\Documents\\Uni Heidelberg\\4. Semester\\Bioinformatik\\github\\topic04_team01\\population_data\\2011_population.xlsx")
+popu_12_21 <- read_excel("C:\\Users\\paula\\Documents\\Uni Heidelberg\\4. Semester\\Bioinformatik\\github\\topic04_team01\\population_data\\2012-2021-population-sector_01_11102_EN_.xlsx")
+```
+
+Normalisieren der dengue cases auf 100'000 personen 
+```{r}
+
+```
+
