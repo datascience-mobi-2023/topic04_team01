@@ -166,3 +166,100 @@ filePath = paste(dirname(getwd()), "dengue_data", "dengue_norm.csv",sep = "/")
 write.csv(dengue_norm, filePath)
 ```
 
+Dengue cases und humidity cases in neuen Dataframe für monsoon Zeiten konvertieren 
+inter-monsoon: December, January, February
+pre-monsoon: March, April, Mai 
+monsoon: June, July, August, September
+post-monsoon: October, November
+
+Intermonsoon Berechnen
+```{r}
+intermon_06 <- dengue_norm$X2006.01 + dengue_norm$X2006.02
+intermon_07 <- rowSums(dengue_norm[, c( "X2006.12", "X2007.01", "X2007.02")], na.rm = FALSE)
+intermon_08 <- rowSums(dengue_norm[, c( "X2007.12", "X2008.01", "X2008.02")], na.rm = FALSE)
+intermon_09 <- rowSums(dengue_norm[, c( "X2008.12", "X2009.01", "X2009.02")], na.rm = FALSE)
+intermon_10 <- rowSums(dengue_norm[, c( "X2009.12", "X2010.01", "X2010.02")], na.rm = FALSE)
+intermon_11 <- rowSums(dengue_norm[, c( "X2010.12", "X2011.01", "X2011.02")], na.rm = FALSE)
+intermon_12 <- rowSums(dengue_norm[, c( "X2011.12", "X2012.01", "X2012.02")], na.rm = FALSE)
+intermon_13 <- rowSums(dengue_norm[, c( "X2012.12", "X2013.01", "X2013.02")], na.rm = FALSE)
+intermon_14 <- rowSums(dengue_norm[, c( "X2013.12", "X2014.01", "X2014.02")], na.rm = FALSE)
+intermon_15 <- rowSums(dengue_norm[, c( "X2014.12", "X2015.01", "X2015.02")], na.rm = FALSE)
+intermon_16 <- rowSums(dengue_norm[, c( "X2015.12", "X2016.01", "X2016.02")], na.rm = FALSE)
+intermon_17 <- rowSums(dengue_norm[, c( "X2016.12", "X2017.01", "X2017.02")], na.rm = FALSE)
+intermon_18 <- rowSums(dengue_norm[, c( "X2017.12", "X2018.01", "X2018.02")], na.rm = FALSE)
+intermon_19 <- rowSums(dengue_norm[, c( "X2018.12", "X2019.01", "X2019.02")], na.rm = FALSE)
+intermon_20 <- rowSums(dengue_norm[, c( "X2019.12", "X2020.01", "X2020.02")], na.rm = FALSE)
+```
+
+Pre-monsoon calculation 
+Pre-monsoon are months March, April and Mai
+```{r}
+premon_06 <- rowSums(dengue_norm[, c( "X2006.03", "X2006.04", "X2006.05")], na.rm = FALSE)
+premon_07 <- rowSums(dengue_norm[, c( "X2007.03", "X2007.04", "X2007.05")], na.rm = FALSE)
+premon_08 <- rowSums(dengue_norm[, c( "X2008.03", "X2008.04", "X2008.05")], na.rm = FALSE)
+premon_09 <- rowSums(dengue_norm[, c( "X2009.03", "X2009.04", "X2009.05")], na.rm = FALSE)
+premon_10 <- rowSums(dengue_norm[, c( "X2010.03", "X2010.04", "X2010.05")], na.rm = FALSE)
+premon_11 <- rowSums(dengue_norm[, c( "X2011.03", "X2011.04", "X2011.05")], na.rm = FALSE)
+premon_12 <- rowSums(dengue_norm[, c( "X2012.03", "X2012.04", "X2012.05")], na.rm = FALSE)
+premon_13 <- rowSums(dengue_norm[, c( "X2013.03", "X2013.04", "X2013.05")], na.rm = FALSE)
+premon_14 <- rowSums(dengue_norm[, c( "X2014.03", "X2014.04", "X2014.05")], na.rm = FALSE)
+premon_15 <- rowSums(dengue_norm[, c( "X2015.03", "X2015.04", "X2015.05")], na.rm = FALSE)
+premon_16 <- rowSums(dengue_norm[, c( "X2016.03", "X2016.04", "X2016.05")], na.rm = FALSE)
+premon_17 <- rowSums(dengue_norm[, c( "X2017.03", "X2017.04", "X2017.05")], na.rm = FALSE)
+premon_18 <- rowSums(dengue_norm[, c( "X2018.03", "X2018.04", "X2018.05")], na.rm = FALSE)
+premon_19 <- rowSums(dengue_norm[, c( "X2019.03", "X2019.04", "X2019.05")], na.rm = FALSE)
+premon_20 <- rowSums(dengue_norm[, c( "X2020.03", "X2020.04", "X2020.05")], na.rm = FALSE)
+```
+
+Monsoon season calculation 
+Monsoon months are June, July, August and September
+```{r}
+mon_06 <- rowSums(dengue_norm[, c( "X2006.06", "X2006.07", "X2006.08", "X2006.09")], na.rm = FALSE)
+mon_07 <- rowSums(dengue_norm[, c( "X2007.06", "X2007.07", "X2007.08", "X2007.09")], na.rm = FALSE)
+mon_08 <- rowSums(dengue_norm[, c( "X2008.06", "X2008.07", "X2008.08", "X2008.09")], na.rm = FALSE)
+mon_09 <- rowSums(dengue_norm[, c( "X2009.06", "X2009.07", "X2009.08", "X2009.09")], na.rm = FALSE)
+mon_10 <- rowSums(dengue_norm[, c( "X2010.06", "X2010.07", "X2010.08", "X2010.09")], na.rm = FALSE)
+mon_11 <- rowSums(dengue_norm[, c( "X2011.06", "X2011.07", "X2011.08", "X2011.09")], na.rm = FALSE)
+mon_12 <- rowSums(dengue_norm[, c( "X2012.06", "X2012.07", "X2012.08", "X2012.09")], na.rm = FALSE)
+mon_13 <- rowSums(dengue_norm[, c( "X2013.06", "X2013.07", "X2013.08", "X2013.09")], na.rm = FALSE)
+mon_14 <- rowSums(dengue_norm[, c( "X2014.06", "X2014.07", "X2014.08", "X2014.09")], na.rm = FALSE)
+mon_15 <- rowSums(dengue_norm[, c( "X2015.06", "X2015.07", "X2015.08", "X2015.09")], na.rm = FALSE)
+mon_16 <- rowSums(dengue_norm[, c( "X2016.06", "X2016.07", "X2016.08", "X2016.09")], na.rm = FALSE)
+mon_17 <- rowSums(dengue_norm[, c( "X2017.06", "X2017.07", "X2017.08", "X2017.09")], na.rm = FALSE)
+mon_18 <- rowSums(dengue_norm[, c( "X2018.06", "X2018.07", "X2018.08", "X2018.09")], na.rm = FALSE)
+mon_19 <- rowSums(dengue_norm[, c( "X2019.06", "X2019.07", "X2019.08", "X2019.09")], na.rm = FALSE)
+mon_20 <- rowSums(dengue_norm[, c( "X2020.06", "X2020.07", "X2020.08", "X2020.09")], na.rm = FALSE)
+```
+
+post-monsoon season calculation 
+post-monsoon season months are October and November
+```{r}
+postmon_06 <- rowSums(dengue_norm[, c( "X2006.10", "X2006.11")], na.rm = FALSE)
+postmon_07 <- rowSums(dengue_norm[, c( "X2007.10", "X2007.11")], na.rm = FALSE)
+postmon_08 <- rowSums(dengue_norm[, c( "X2008.10", "X2008.11")], na.rm = FALSE)
+postmon_09 <- rowSums(dengue_norm[, c( "X2009.10", "X2009.11")], na.rm = FALSE)
+postmon_10 <- rowSums(dengue_norm[, c( "X2010.10", "X2010.11")], na.rm = FALSE)
+postmon_11 <- rowSums(dengue_norm[, c( "X2011.10", "X2011.11")], na.rm = FALSE)
+postmon_12 <- rowSums(dengue_norm[, c( "X2012.10", "X2012.11")], na.rm = FALSE)
+postmon_13 <- rowSums(dengue_norm[, c( "X2013.10", "X2013.11")], na.rm = FALSE)
+postmon_14 <- rowSums(dengue_norm[, c( "X2014.10", "X2014.11")], na.rm = FALSE)
+postmon_15 <- rowSums(dengue_norm[, c( "X2015.10", "X2015.11")], na.rm = FALSE)
+postmon_16 <- rowSums(dengue_norm[, c( "X2016.10", "X2016.11")], na.rm = FALSE)
+postmon_17 <- rowSums(dengue_norm[, c( "X2017.10", "X2017.11")], na.rm = FALSE)
+postmon_18 <- rowSums(dengue_norm[, c( "X2018.10", "X2018.11")], na.rm = FALSE)
+postmon_19 <- rowSums(dengue_norm[, c( "X2019.10", "X2019.11")], na.rm = FALSE)
+postmon_20 <- rowSums(dengue_norm[, c( "X2020.10", "X2020.11")], na.rm = FALSE)
+```
+
+let's combine all these vectors into a dataframe 
+```{r}
+dengue_mon <- dengue_norm$Reporting.areas
+dengue_mon <- cbind(dengue_mon, intermon_06, premon_06, mon_06, postmon_06,intermon_07, premon_07, mon_07, postmon_07,  intermon_08, premon_08, mon_08, postmon_08, intermon_09, premon_09, mon_09, postmon_09, intermon_10, premon_10, mon_10, postmon_10, intermon_11, premon_11, mon_11, postmon_11, intermon_12, premon_12, mon_12, postmon_12, intermon_13, premon_13, mon_13, postmon_13, intermon_14, premon_14, mon_14, postmon_14, intermon_15, premon_15, mon_15, postmon_15, intermon_16, premon_16, mon_16, postmon_16, intermon_17, premon_17, mon_17, postmon_17, intermon_18, premon_18, mon_18, postmon_18, intermon_19, premon_19, mon_19, postmon_19, intermon_20, premon_20, mon_20, postmon_20)
+```
+
+save the new dataframe that contains the normalized dengue cases merged into monsoon seasons 
+```{r}
+filePath = paste(dirname(getwd()), "dengue_data", "dengue_mon.csv",sep = "/")
+write.csv(dengue_mon, filePath)
+```
+
