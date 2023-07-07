@@ -3,12 +3,14 @@ title: "Clustering_Clima_Data_2.0"
 author: "Manon Manddernach"
 date: "2023-06-20"
 output: html_document
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-
 
 ```{r}
 library(sp)
@@ -23,11 +25,11 @@ library(colorspace)
 library(viridis)
 library(viridisLite)
 library(reshape2)
+library(cluster)
 
 
 sheet_names = excel_sheets("../era5_data_2006_2020_thailand_monmean.xlsx")
 
-#laden von den einzelnen sheets
 T.huss.mon = read_excel("../era5_data_2006_2020_thailand_monmean.xlsx", sheet="era5_huss_2006_2020_thailand_mo")
 T.tp.mon = read_excel("../era5_data_2006_2020_thailand_monmean.xlsx", sheet="era5_tp_2006_2020_thailand_monm")
 T.t2m.mon = read_excel("../era5_data_2006_2020_thailand_monmean.xlsx", sheet="era5_t2m_2006_2020_thailand_mon")
@@ -36,23 +38,47 @@ T.t2m.mon = read_excel("../era5_data_2006_2020_thailand_monmean.xlsx", sheet="er
 
 GEOPLOT
 
-Ziel ( Wie kann ich Eine Seria Time Analysis machen , in der Clustere 
-a) jedes Jahr (mean)in Cluster einteile und Plotte
-b) 3 mal 5 Jahre 
-c) 5 mal 3 Jahre 
-d) Vergleiche Welche Provinzen sich geändert haben. 
-e) Plotten von den Centern der Cluster 1, 2 ,3 von 2006 bis 2020  Yay hab ich hinbekommen auch mit 2 verschiedenen Methoden 
-f) Ändern der Farbgebung , damit Cluster und Centren nicht unterschiedlich sind YAY Hab ich bhinbekommen mit 2 verschiedenen Methoden :)
-g9 anwenden von einer Methode auf DONE hab ich auch hinbekommen
-g) K-Means Elbow Clustering machen 
-
-
+Ziel ( Wie kann ich Eine Series Time Analysis machen , in der Clustere
+a) jedes Jahr (mean)in Cluster einteile und Plotte Done b) 3 mal 5 Jahre
+c) 5 mal 3 Jahre d) Vergleiche Welche Provinzen sich geändert haben. e)
+Plotten von den Centern der Cluster 1, 2 ,3 von 2006 bis 2020 Yay hab
+ich hinbekommen auch mit 2 verschiedenen Methoden f) Ändern der
+Farbgebung , damit Cluster und Centren nicht unterschiedlich sind YAY
+Hab ich bhinbekommen mit 2 verschiedenen Methoden :) g9 anwenden von
+einer Methode auf DONE hab ich auch hinbekommen g) K-Means Elbow
+Clustering machen i) Alignment der Einzelnen Provinzen und wie sie
+liegen h) Ordnung im Code
 
 ```{r}
 View(T.huss.mon.ordered)
 ```
 
-## a) Der Mean jeden Jahres als Cluster 
+# 1. Finding K : Silhouette Method
+
+```{r}
+set.seed(123)  # Set a seed for reproducibility
+k.values <- 2:10  # Define the range of K values to evaluate
+
+# Calculate the Silhouette coefficient for each value of K
+
+silhouette_scores <- sapply(k.values, function(k) {
+  kmeans_model <- kmeans(huss.2006, centers = k, nstart = 10)
+  silhouette_avg <- silhouette(kmeans_model$cluster, dist(huss.2018))
+  mean(silhouette_avg[, 3])
+})
+
+# Plot the Silhouette scores
+plot(k.values, silhouette_scores, type = "b", pch = 19, frame = FALSE, xlab = "Number of Clusters (K)", ylab = "Silhouette Coefficient")
+
+# Find the optimal number of clusters with the highest Silhouette score
+optimal_k <- k.values[which.max(silhouette_scores)]
+print(optimal_k)
+```
+
+# 2. Cluster each Year's Humidity
+
+## 2.1 Creating a list with yearly Humidity Data 
+
 ```{r}
 huss.2006<- as.data.frame(T.huss.mon.ordered[,5:16])
 huss.2007<- as.data.frame(T.huss.mon.ordered[,17:28])
@@ -89,9 +115,7 @@ huss_data <- list(
 )
 
 ```
-
-
-
+## 2.2 Find diffrent Methods for Coloring the Clusters on the Maps
 ```{r}
 ## TRY OUT COLOR CODING THE CLUSTERS PART 1 
 
@@ -129,10 +153,9 @@ ggplot() +
   labs(x="Longitude", y= "Latitude")
 
 ```
-
-
+##2.3 Clustering the yearly Humidity from each Province from 2006 to 2020
 ```{r}
-## TRY OUT COLOR CODING THE CLUSTERS PART 2 
+
 ##Clustering
 
 huss.data <- list(
@@ -160,7 +183,7 @@ huss.data <- list(
 
 for (year in 2006:2020){
 
-k <-4
+k <-3
 
 huss.year <- get(paste0("huss.",year))
 huss.year.mean<-as.data.frame(apply(huss.year,1, mean))
@@ -203,57 +226,9 @@ print(ggplot() +
 ```
 
 
-```{r}
-#Clustering für alle Jahre 
 
-# Loop über die Jahre von 2006 bis 2020
-for (year in 2006:2020) {
-  
-  
-  # Clustering
-  huss.year <- get(huss.[year])  # Annahme: Die Daten für jedes Jahr sind in den Objekten huss.2006, huss.2007, usw. gespeichert
-  huss.year.mean <- as.data.frame(apply(huss.year, 1, mean))
-  huss.year.mean['numbers'] <- 1:77
-  kmeans.year <- kmeans(huss.year.mean$`apply(huss.year, 1, mean)`, centers = k)
-  
-  # Zuordnen aller originalen Werte von Cluster 1, 2, 3 zu ihrem entsprechenden Zentrum
-  centers.year <- as.vector(kmeans.year$centers)
-  centers.clusters.year <- data.frame(Value = kmeans.year$cluster, Center = NA)
-  
-  for (i in 1:length(kmeans.year$cluster)) {
-    centers.clusters.year$Center[i] <- centers.year[kmeans.year$cluster[i]]
-  }
-  
-  centers.clusters.year['numbers'] <- 1:77
-  centers.clusters.year.geography <- merge(centers.clusters.year, geography, by = "numbers")
-  
-  # ggplot
-  ggplot() +
-    geom_sf(data = centers.clusters.year.geography, aes(geometry = geometry, fill = Center)) +
-    coord_sf() +
-    theme_minimal() +
-    labs(title = paste("kmeans K = 3 humidity of Provinces", year)) +
-    labs(x = "Longitude", y = "Latitude") +
-    theme_minimal() +
-    colorspace::scale_fill_continuous_sequential(palette = "plasma") +
-    guides(fill = guide_legend(title = "Legende", override.aes = list(shape = 22)))
-  
-  # Hier kannst du den Plot speichern, exportieren oder anzeigen lassen
-  # ggsave(paste("plot_", year, ".png", sep = ""), plot = last_plot(), device = "png")
-}
-
-```
-
-
-
-```{r}
-print(centers.clusters.2006.geography)
-```
-
-
-## Plotten von den Centern der Cluster 1, 2 ,3 von 2006 bis 2020
-
-
+# 3. Plottening the  Centers of the Clusters von 2006 bis 2020
+## 3.1.1 Creating a new Dataframe Yearly.Centers with the centers of each year
 ```{r}
 
 ## Creating a Data Frame of each year with a vector of the sorted centers 
@@ -277,6 +252,7 @@ for (year in years) {
 colnames(Yearly.Centers) <- years
 #print(Yearly.Centers)
 ```
+## 3.1.2 Plotting the Clusters in 3 single Plots
 ```{r}
 
 ## Clusters in 3 single ggPlots 
@@ -290,8 +266,7 @@ ggplot() +
   plot(years, Humidity3, type = "o", xlab = "Years", ylab = "Humidity ", main = " Yearly Clusters from 2006 to 2020", ylim = c(65, 85))
 
 ```
-
-
+## 3.2.1 Creating a new Dataframe Yearly.Centers.Plot with the centers of each year
 ```{r}
 ##New Data Frame: Rows switch to columns and columns to rows
 
@@ -310,7 +285,7 @@ Yearly.Centers.Plot <-data.frame(Years= years,
                                  HumidityHigh = HumidityHigh)
 #print(Yearly.Centers.Plot)
 ```
-
+## 3.2.2 Plotting the Clusters in one Plot
 ```{r}
 
 ## Clusters in one ggplot
@@ -331,7 +306,207 @@ ggplot(Yearly.Centers.Plot,aes(x=years))+
 
 
 
-----------------------------------------------------------------------------------------------------------------------------------------
+
+## 4. Clustering 3 times  5 Years 
+
+```{r}
+#print(kmeans.2006$cluster)
+#print(kmeans.2006$centers)
+
+#print(kmeans.2007$cluster)
+#print(kmeans.2007$centers)
+
+#print(kmeans.2008$cluster)
+#print(kmeans.2008$centers)
+
+#print(kmeans.2009$cluster)
+#print(kmeans.2009$centers)
+```
+4.1 creating an new List with 3 times 5 years Ckusterd together 
+```{r}
+huss.2006<- as.data.frame(T.huss.mon.ordered[,5:16])
+huss.2007<- as.data.frame(T.huss.mon.ordered[,17:28])
+huss.2008<- as.data.frame(T.huss.mon.ordered[,29:40])
+huss.2009<- as.data.frame(T.huss.mon.ordered[,41:52])
+huss.2010<- as.data.frame(T.huss.mon.ordered[,53:64])
+
+huss.2006.2010<-as.data.frame(T.huss.mon.ordered[,5:64])
+
+huss.2011<- as.data.frame(T.huss.mon.ordered[,65:76])
+huss.2012<- as.data.frame(T.huss.mon.ordered[,77:88])
+huss.2013<- as.data.frame(T.huss.mon.ordered[,89:100])
+huss.2014<- as.data.frame(T.huss.mon.ordered[,101:112])
+huss.2015<- as.data.frame(T.huss.mon.ordered[,113:124])
+
+huss.2011.2015<-as.data.frame(T.huss.mon.ordered[,65:124])
+
+huss.2016<- as.data.frame(T.huss.mon.ordered[,125:136])
+huss.2017<- as.data.frame(T.huss.mon.ordered[,137:148])
+huss.2018<- as.data.frame(T.huss.mon.ordered[,149:150])
+huss.2019<- as.data.frame(T.huss.mon.ordered[,151:162])
+huss.2020<- as.data.frame(T.huss.mon.ordered[,163:174])
+
+huss.2016.2020<-as.data.frame(T.huss.mon.ordered[,125:174])
+
+huss3.2006 <- huss.2006.2010
+huss3.2011 <- huss.2011.2015
+huss3.2016 <- huss.2016.2020
+
+
+huss3.<- list(
+  huss3.2006 = huss.2006.2010,
+  huss3.2011 = huss.2011.2015,
+  huss3.2016 = huss.2016.2020
+)
+```
+
+```{r}
+for (year in 2006:2020){
+
+k <-3
+
+huss3.year <- get(paste0("huss3.",year))
+huss3.year.mean<-as.data.frame(apply(huss3.year,1, mean))
+huss3.year.mean ['numbers'] = c(1:77)
+
+kmeansN.years <-kmeans(huss3.year.mean$`apply(huss.year3, 1, mean)`, centers = k )
+
+
+
+## Zuordnen aller original values  of cluster 1,2,3 their corresponding center 
+
+centers3.years <- as.vector(kmeans3.years$centers)
+centers3.clusters.years <- data.frame(Value = kmeans3.years$cluster, Center = NA)
+
+for (i in 1:length(kmeans3.years$cluster)) {
+  centers3.clusters.years$Center[i] <- centers3.years[kmeans3.years$cluster[i]]
+}
+
+
+centers3.clusters.years['numbers'] = c(1:77)
+
+centers3.clusters.years.geography <- merge(centers3.clusters.years, geography, by = "numbers")
+ 
+## ggplot
+print(ggplot() +
+  geom_sf(data = centers3.clusters.years.geography ,aes(geometry = geometry, fill= Center)) +
+  coord_sf() +  
+  theme_minimal() +
+  labs(title = paste("kmeans K = 3  humidity of Provinces",year)) +
+  #scale_fill_viridis()+
+  labs(x="Longitude", y= "Latitude")+
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  guides(fill = guide_legend(title = "Legende", override.aes = list(shape = 22))))
+}
+
+```
+
+
+
+
+```{r}
+
+#PLOT 2006-2010------------------------------------------------------------------------------------
+  
+## Clustering  
+k <-3
+
+huss.2006.2010
+huss.2006.2010.mean<-as.data.frame(apply(huss.2006.2010,1, mean))
+huss.2006.2010.mean ['numbers'] = c(1:77)
+kmeans.2006.2010 <-kmeans(huss.2006.2010.mean$`apply(huss.2006.2010, 1, mean)`, centers = k )
+
+print(kmeans.2006.2010$cluster)
+print(kmeans.2006.2010$centers)
+
+kmeans.2006.2010.cluster = as.data.frame(kmeans.2006.2010$cluster)
+kmeans.2006.2010.cluster['numbers'] = c(1:77)
+kmeans.2006.2010.clusters.geography = merge(kmeans.2006.2010.cluster, geography, by= "numbers")
+colnames(kmeans.2006.2010.clusters.geography)[colnames(kmeans.2006.2010.clusters.geography) == "kmeans.2006.2010$cluster"] <- "Clusters2006.2010"
+kmeans.2006.2010.cluster['numbers'] = c(1:77)
+
+## Plotten
+
+ggplot() +
+  geom_sf(data = kmeans.2006.2010.clusters.geography ,aes(geometry = geometry, fill= Clusters2006.2010)) +
+  coord_sf() +  
+  theme_minimal() +
+  labs(title = "kmeans K = 3  humidity of Provinces mean 2006-2010") +
+  scale_fill_viridis()+
+  labs(x="Longitude", y= "Latitude")
+
+#PLOT 2011-2015------------------------------------------------------------------------------------
+  
+## Clustering  
+k <-3
+
+huss.2011.2015
+huss.2011.2015.mean<-as.data.frame(apply(huss.2011.2015,1, mean))
+huss.2011.2015.mean ['numbers'] = c(1:77)
+kmeans.2011.2015 <-kmeans(huss.2011.2015.mean$`apply(huss.2011.2015, 1, mean)`, centers = k )
+
+print(kmeans.2011.2015$cluster)
+print(kmeans.2011.2015$centers)
+
+kmeans.2011.2015.cluster = as.data.frame(kmeans.2011.2015$cluster)
+kmeans.2011.2015.cluster['numbers'] = c(1:77)
+kmeans.2011.2015.clusters.geography = merge(kmeans.2011.2015.cluster, geography, by= "numbers")
+colnames(kmeans.2011.2015.clusters.geography)[colnames(kmeans.2011.2015.clusters.geography) == "kmeans.2011.2015$cluster"] <- "Clusters2011.2015"
+kmeans.2011.2015.cluster['numbers'] = c(1:77)
+
+## Plotten
+
+ggplot() +
+  geom_sf(data = kmeans.2011.2015.clusters.geography ,aes(geometry = geometry, fill= Clusters2011.2015)) +
+  coord_sf() +  
+  theme_minimal() +
+  labs(title = "kmeans K = 3  humidity of Provinces mean 2011-2015") +
+  scale_fill_viridis()+
+  labs(x="Longitude", y= "Latitude")
+
+#PLOT 2016-2020------------------------------------------------------------------------------------
+  
+## Clustering  
+k <-3
+
+huss.2016.2020
+huss.2016.2020.mean<-as.data.frame(apply(huss.2016.2020,1, mean))
+huss.2016.2020.mean ['numbers'] = c(1:77)
+kmeans.2016.2020 <-kmeans(huss.2016.2020.mean$`apply(huss.2016.2020, 1, mean)`, centers = k )
+
+print(kmeans.2016.2020$cluster)
+print(kmeans.2016.2020$centers)
+
+kmeans.2016.2020.cluster = as.data.frame(kmeans.2016.2020$cluster)
+kmeans.2016.2020.cluster['numbers'] = c(1:77)
+kmeans.2016.2020.clusters.geography = merge(kmeans.2016.2020.cluster, geography, by= "numbers")
+colnames(kmeans.2016.2020.clusters.geography)[colnames(kmeans.2016.2020.clusters.geography) == "kmeans.2016.2020$cluster"] <- "Clusters2016.2020"
+kmeans.2016.2020.cluster['numbers'] = c(1:77)
+
+## Plotten
+
+ggplot() +
+  geom_sf(data = kmeans.2016.2020.clusters.geography ,aes(geometry = geometry, fill= Clusters2016.2020)) +
+  coord_sf() +  
+  theme_minimal() +
+  labs(title = "kmeans K = 3  humidity of Provinces mean 2016-2020") +
+  scale_fill_viridis()+
+  labs(x="Longitude", y= "Latitude")
+```
+
+```{r}
+
+print(kmeans.2006.2010$cluster)
+print(kmeans.2006.2010$centers)
+
+print(kmeans.2011.2015$cluster)
+print(kmeans.2011.2015$centers)
+
+print(kmeans.2016.2020$cluster)
+print(kmeans.2016.2020$centers)
+```
+## Attached Code wich was used for presious Analysis 
 ```{r}
 #PLOT 2006--------------------------------------------------------------------------------
 
@@ -788,157 +963,5 @@ ggplot() +
   labs(title = "kmeans K = 3  humidity of Provinces in 2020") +
   scale_fill_viridis()+
   labs(x="Longitude", y= "Latitude")
-```
-```{r}
-View(kmeans.2020.clusters.geography)
-```
-
-## b) 3 mal 5 Jahre 
-
-
-```{r}
-print(kmeans.2006$cluster)
-print(kmeans.2006$centers)
-
-print(kmeans.2007$cluster)
-print(kmeans.2007$centers)
-
-print(kmeans.2008$cluster)
-print(kmeans.2008$centers)
-
-print(kmeans.2009$cluster)
-print(kmeans.2009$centers)
-```
-
-
-```{r}
-huss.2006<- as.data.frame(T.huss.mon.ordered[,5:16])
-huss.2007<- as.data.frame(T.huss.mon.ordered[,17:28])
-huss.2008<- as.data.frame(T.huss.mon.ordered[,29:40])
-huss.2009<- as.data.frame(T.huss.mon.ordered[,41:52])
-huss.2010<- as.data.frame(T.huss.mon.ordered[,53:64])
-
-huss.2006.2010<-as.data.frame(T.huss.mon.ordered[,5:64])
-
-huss.2011<- as.data.frame(T.huss.mon.ordered[,65:76])
-huss.2012<- as.data.frame(T.huss.mon.ordered[,77:88])
-huss.2013<- as.data.frame(T.huss.mon.ordered[,89:100])
-huss.2014<- as.data.frame(T.huss.mon.ordered[,101:112])
-huss.2015<- as.data.frame(T.huss.mon.ordered[,113:124])
-
-huss.2011.2015<-as.data.frame(T.huss.mon.ordered[,65:124])
-
-huss.2016<- as.data.frame(T.huss.mon.ordered[,125:136])
-huss.2017<- as.data.frame(T.huss.mon.ordered[,137:148])
-huss.2018<- as.data.frame(T.huss.mon.ordered[,149:150])
-huss.2019<- as.data.frame(T.huss.mon.ordered[,151:162])
-huss.2020<- as.data.frame(T.huss.mon.ordered[,163:174])
-
-huss.2016.2020<-as.data.frame(T.huss.mon.ordered[,125:174])
-```
-
-
-
-```{r}
-
-#PLOT 2006-2010------------------------------------------------------------------------------------
-  
-## Clustering  
-k <-3
-
-huss.2006.2010
-huss.2006.2010.mean<-as.data.frame(apply(huss.2006.2010,1, mean))
-huss.2006.2010.mean ['numbers'] = c(1:77)
-kmeans.2006.2010 <-kmeans(huss.2006.2010.mean$`apply(huss.2006.2010, 1, mean)`, centers = k )
-
-print(kmeans.2006.2010$cluster)
-print(kmeans.2006.2010$centers)
-
-kmeans.2006.2010.cluster = as.data.frame(kmeans.2006.2010$cluster)
-kmeans.2006.2010.cluster['numbers'] = c(1:77)
-kmeans.2006.2010.clusters.geography = merge(kmeans.2006.2010.cluster, geography, by= "numbers")
-colnames(kmeans.2006.2010.clusters.geography)[colnames(kmeans.2006.2010.clusters.geography) == "kmeans.2006.2010$cluster"] <- "Clusters2006.2010"
-kmeans.2006.2010.cluster['numbers'] = c(1:77)
-
-## Plotten
-
-ggplot() +
-  geom_sf(data = kmeans.2006.2010.clusters.geography ,aes(geometry = geometry, fill= Clusters2006.2010)) +
-  coord_sf() +  
-  theme_minimal() +
-  labs(title = "kmeans K = 3  humidity of Provinces mean 2006-2010") +
-  scale_fill_viridis()+
-  labs(x="Longitude", y= "Latitude")
-
-#PLOT 2011-2015------------------------------------------------------------------------------------
-  
-## Clustering  
-k <-3
-
-huss.2011.2015
-huss.2011.2015.mean<-as.data.frame(apply(huss.2011.2015,1, mean))
-huss.2011.2015.mean ['numbers'] = c(1:77)
-kmeans.2011.2015 <-kmeans(huss.2011.2015.mean$`apply(huss.2011.2015, 1, mean)`, centers = k )
-
-print(kmeans.2011.2015$cluster)
-print(kmeans.2011.2015$centers)
-
-kmeans.2011.2015.cluster = as.data.frame(kmeans.2011.2015$cluster)
-kmeans.2011.2015.cluster['numbers'] = c(1:77)
-kmeans.2011.2015.clusters.geography = merge(kmeans.2011.2015.cluster, geography, by= "numbers")
-colnames(kmeans.2011.2015.clusters.geography)[colnames(kmeans.2011.2015.clusters.geography) == "kmeans.2011.2015$cluster"] <- "Clusters2011.2015"
-kmeans.2011.2015.cluster['numbers'] = c(1:77)
-
-## Plotten
-
-ggplot() +
-  geom_sf(data = kmeans.2011.2015.clusters.geography ,aes(geometry = geometry, fill= Clusters2011.2015)) +
-  coord_sf() +  
-  theme_minimal() +
-  labs(title = "kmeans K = 3  humidity of Provinces mean 2011-2015") +
-  scale_fill_viridis()+
-  labs(x="Longitude", y= "Latitude")
-
-#PLOT 2016-2020------------------------------------------------------------------------------------
-  
-## Clustering  
-k <-3
-
-huss.2016.2020
-huss.2016.2020.mean<-as.data.frame(apply(huss.2016.2020,1, mean))
-huss.2016.2020.mean ['numbers'] = c(1:77)
-kmeans.2016.2020 <-kmeans(huss.2016.2020.mean$`apply(huss.2016.2020, 1, mean)`, centers = k )
-
-print(kmeans.2016.2020$cluster)
-print(kmeans.2016.2020$centers)
-
-kmeans.2016.2020.cluster = as.data.frame(kmeans.2016.2020$cluster)
-kmeans.2016.2020.cluster['numbers'] = c(1:77)
-kmeans.2016.2020.clusters.geography = merge(kmeans.2016.2020.cluster, geography, by= "numbers")
-colnames(kmeans.2016.2020.clusters.geography)[colnames(kmeans.2016.2020.clusters.geography) == "kmeans.2016.2020$cluster"] <- "Clusters2016.2020"
-kmeans.2016.2020.cluster['numbers'] = c(1:77)
-
-## Plotten
-
-ggplot() +
-  geom_sf(data = kmeans.2016.2020.clusters.geography ,aes(geometry = geometry, fill= Clusters2016.2020)) +
-  coord_sf() +  
-  theme_minimal() +
-  labs(title = "kmeans K = 3  humidity of Provinces mean 2016-2020") +
-  scale_fill_viridis()+
-  labs(x="Longitude", y= "Latitude")
-```
-
-
-```{r}
-
-print(kmeans.2006.2010$cluster)
-print(kmeans.2006.2010$centers)
-
-print(kmeans.2011.2015$cluster)
-print(kmeans.2011.2015$centers)
-
-print(kmeans.2016.2020$cluster)
-print(kmeans.2016.2020$centers)
 ```
 
