@@ -1,0 +1,372 @@
+---
+title: "Correlation_statisitcal_tests"
+author: "Paula"
+date: "2023-06-20"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+First load the data frame with the dengue cases
+
+```{r}
+filePath = paste(getwd(), "dengue_data_com.csv",sep = "/")
+combined_df <- read.csv("../dengue_data/dengue_data_com.csv")
+print(combined_df)
+#convertieren der dengue cases zu zahlen statt charaktern
+combined_df$dengue_cases <- as.integer(combined_df$dengue_cases)
+print(combined_df)
+```
+
+Convert missing values to value zero
+
+```{r}
+combined_df[is.na(combined_df)] <- 0
+print(combined_df)
+```
+
+load the climate data
+
+```{r}
+install.packages("readxl")
+library(readxl)
+
+sheet_names = excel_sheets("../era5_data_2006_2020_thailand_monmean.xlsx")
+
+#load the humidity data 
+T.huss.mon = read_excel("../era5_data_2006_2020_thailand_monmean.xlsx", sheet="era5_huss_2006_2020_thailand_mo")
+```
+
+Humidity dataframe unwichtige Daten entfernen und correlation für Januar 2006 als Beispiel berechnen
+
+```{r}
+#unwichtige Columns entfernen 
+i.remove <- which(colnames(T.huss.mon) %in% c("Number","Longitude", "Latitude"))
+T.huss.mon1 <- T.huss.mon[,-i.remove]
+
+#alphabetisch ordnen
+sorted_df <- T.huss.mon1[order(T.huss.mon1$ADM1_EN), ]
+print(sorted_df)
+
+#Bueng Kan ist zu Beginn nicht vorhanden in dengue dataframe 
+sorted_df <- sorted_df[-4,]
+
+#Beispiel an Januar 2006
+dengue_2006_jan <- subset(combined_df, combined_df$Year == "2006" & combined_df$Month == "Jan")
+cor(sorted_df$'2006.01.', dengue_2006_jan$dengue_cases, method='pearson')
+cor(sorted_df$'2006.01.', dengue_2006_jan$dengue_cases, method='spearman')
+
+#plotten der Daten
+plot(sorted_df$'2006.01.', dengue_2006_jan$dengue_cases,
+     pch=20,
+     xlab='humidity',
+     ylab='dengue cases')
+
+```
+
+Bangkok is an outlier, try to calculate the correlation without Bangkok
+
+```{r}
+#Bangkok entfernen aus beiden Dataframes 
+without_bangkok_d <- dengue_2006_jan[-3,]
+without_bangkok_c <- sorted_df[-3,]
+
+#correlation of humidity and dengue cases 
+cor(without_bangkok_c$'2006.01.', without_bangkok_d$dengue_cases, method='pearson')
+cor(without_bangkok_c$'2006.01.', without_bangkok_d$dengue_cases, method='spearman')
+
+#pearson correlation much higher without bangkok but spearman correlation is a little lower 
+#plot without bangkok 
+plot(without_bangkok_c$'2006.01.', without_bangkok_d$dengue_cases,
+     pch=20,
+     xlab='humidity',
+     ylab='dengue cases')
+```
+
+Let's try the lagged correlation for 1 month, 2 months and 3 months
+
+```{r}
+#get February 2006 from dengue dataframe
+dengue_2006_feb <-  subset(combined_df, combined_df$Year == "2006" & combined_df$Month == "Feb")
+#get March 2006 from dengue dataframe 
+dengue_2006_mar <- subset(combined_df, combined_df$Year == "2006" & combined_df$Month == "Mar")
+#get April 2006 from dengue dataframe
+dengue_2006_apr <- subset(combined_df, combined_df$Year == "2006" & combined_df$Month == "Apr")
+
+#correlation for 1 month lag, humidity data one month before dengue cases 
+cor(sorted_df$'2006.01.', dengue_2006_feb$dengue_cases, method='pearson')
+cor(sorted_df$'2006.01.', dengue_2006_feb$dengue_cases, method='spearman')
+
+#two months lagged
+cor(sorted_df$'2006.01.', dengue_2006_mar$dengue_cases, method='pearson')
+cor(sorted_df$'2006.01.', dengue_2006_mar$dengue_cases, method='spearman')
+
+#three months lagged 
+cor(sorted_df$'2006.01.', dengue_2006_apr$dengue_cases, method='pearson')
+cor(sorted_df$'2006.01.', dengue_2006_apr$dengue_cases, method='spearman')
+```
+
+Populationsdaten laden
+
+```{r}
+popu_06 <- read_excel("C:\\Users\\paula\\Documents\\Uni Heidelberg\\4. Semester\\Bioinformatik\\github\\topic04_team01\\population_data\\2006_population.xlsx")
+popu_07 <- read_excel("C:\\Users\\paula\\Documents\\Uni Heidelberg\\4. Semester\\Bioinformatik\\github\\topic04_team01\\population_data\\2007_population.xlsx")
+popu_08 <- read_excel("C:\\Users\\paula\\Documents\\Uni Heidelberg\\4. Semester\\Bioinformatik\\github\\topic04_team01\\population_data\\2008_population.xlsx")
+popu_09 <- read_excel("C:\\Users\\paula\\Documents\\Uni Heidelberg\\4. Semester\\Bioinformatik\\github\\topic04_team01\\population_data\\2009_population.xlsx")
+popu_10 <- read_excel("C:\\Users\\paula\\Documents\\Uni Heidelberg\\4. Semester\\Bioinformatik\\github\\topic04_team01\\population_data\\2010_population.xlsx")
+popu_11 <- read_excel("C:\\Users\\paula\\Documents\\Uni Heidelberg\\4. Semester\\Bioinformatik\\github\\topic04_team01\\population_data\\2011_population.xlsx")
+popu_12_21 <- read_excel("C:\\Users\\paula\\Documents\\Uni Heidelberg\\4. Semester\\Bioinformatik\\github\\topic04_team01\\population_data\\2012-2021-population-sector_01_11102_EN_.xlsx")
+```
+
+dengue data laden
+
+```{r}
+dengue <- read.csv("C:\\Users\\paula\\Documents\\Uni Heidelberg\\4. Semester\\Bioinformatik\\github\\topic04_team01\\dengue_data\\dengue_data_com2.csv")
+```
+
+gesamter Dataframe für population data erstellen und ich gleiches Format wie dengue dataframe bringen
+```{r}
+popu_06_20 <- cbind(popu_06, "2007" = popu_07$`Total population`, "2008" = popu_08$`Total population`, "2009" = popu_09$`Total population`, "2010" = popu_10$`Total population`, "2011" =  popu_11$`Total population`, popu_12_21[,3:12])
+
+#2006 umbennen
+names(popu_06_20)[names(popu_06_20) == "Total population"] <- "2006"
+
+```
+
+
+Normalisieren der Dengue cases auf 100'000 Personen
+
+```{r}
+dengue_norm = dengue
+# loops over all years in population dataframe
+for(i in 3 : ncol(popu_06_20)) {
+  # stores yearly population in local variable
+  yearly_pop = popu_06_20[,i]
+  # loops over total and monthly columns of each year
+  for(j in 0:12) {
+    # calculates index of corresponding monthly cases
+    # cases start at column index 3
+    # every year is displayed over 13 columns, thus every year cursor jumps by 13 columns (i-3)*13
+    # as years each are displayed in 13 columns, each month the cursor jumps over by 1
+    case_index = 3 + (i-3)*13 + j
+    
+    selected_cases = dengue[,case_index]
+    normalized_cases = selected_cases / yearly_pop * 100000
+    
+    dengue_norm[,case_index] = normalized_cases
+  }
+}
+```
+
+Normalisierte Daten abspeichern 
+```{r}
+filePath = paste(dirname(getwd()), "dengue_data", "dengue_norm.csv",sep = "/")
+write.csv(dengue_norm, filePath)
+```
+
+Dengue cases und humidity cases in neuen Dataframe für monsoon Zeiten konvertieren 
+inter-monsoon: December, January, February
+pre-monsoon: March, April, Mai 
+monsoon: June, July, August, September
+post-monsoon: October, November
+
+Intermonsoon Berechnen
+```{r}
+intermon_06 <- dengue_norm$X2006.01 + dengue_norm$X2006.02
+intermon_07 <- rowSums(dengue_norm[, c( "X2006.12", "X2007.01", "X2007.02")], na.rm = FALSE)
+intermon_08 <- rowSums(dengue_norm[, c( "X2007.12", "X2008.01", "X2008.02")], na.rm = FALSE)
+intermon_09 <- rowSums(dengue_norm[, c( "X2008.12", "X2009.01", "X2009.02")], na.rm = FALSE)
+intermon_10 <- rowSums(dengue_norm[, c( "X2009.12", "X2010.01", "X2010.02")], na.rm = FALSE)
+intermon_11 <- rowSums(dengue_norm[, c( "X2010.12", "X2011.01", "X2011.02")], na.rm = FALSE)
+intermon_12 <- rowSums(dengue_norm[, c( "X2011.12", "X2012.01", "X2012.02")], na.rm = FALSE)
+intermon_13 <- rowSums(dengue_norm[, c( "X2012.12", "X2013.01", "X2013.02")], na.rm = FALSE)
+intermon_14 <- rowSums(dengue_norm[, c( "X2013.12", "X2014.01", "X2014.02")], na.rm = FALSE)
+intermon_15 <- rowSums(dengue_norm[, c( "X2014.12", "X2015.01", "X2015.02")], na.rm = FALSE)
+intermon_16 <- rowSums(dengue_norm[, c( "X2015.12", "X2016.01", "X2016.02")], na.rm = FALSE)
+intermon_17 <- rowSums(dengue_norm[, c( "X2016.12", "X2017.01", "X2017.02")], na.rm = FALSE)
+intermon_18 <- rowSums(dengue_norm[, c( "X2017.12", "X2018.01", "X2018.02")], na.rm = FALSE)
+intermon_19 <- rowSums(dengue_norm[, c( "X2018.12", "X2019.01", "X2019.02")], na.rm = FALSE)
+intermon_20 <- rowSums(dengue_norm[, c( "X2019.12", "X2020.01", "X2020.02")], na.rm = FALSE)
+```
+
+Pre-monsoon calculation 
+Pre-monsoon are months March, April and Mai
+```{r}
+premon_06 <- rowSums(dengue_norm[, c( "X2006.03", "X2006.04", "X2006.05")], na.rm = FALSE)
+premon_07 <- rowSums(dengue_norm[, c( "X2007.03", "X2007.04", "X2007.05")], na.rm = FALSE)
+premon_08 <- rowSums(dengue_norm[, c( "X2008.03", "X2008.04", "X2008.05")], na.rm = FALSE)
+premon_09 <- rowSums(dengue_norm[, c( "X2009.03", "X2009.04", "X2009.05")], na.rm = FALSE)
+premon_10 <- rowSums(dengue_norm[, c( "X2010.03", "X2010.04", "X2010.05")], na.rm = FALSE)
+premon_11 <- rowSums(dengue_norm[, c( "X2011.03", "X2011.04", "X2011.05")], na.rm = FALSE)
+premon_12 <- rowSums(dengue_norm[, c( "X2012.03", "X2012.04", "X2012.05")], na.rm = FALSE)
+premon_13 <- rowSums(dengue_norm[, c( "X2013.03", "X2013.04", "X2013.05")], na.rm = FALSE)
+premon_14 <- rowSums(dengue_norm[, c( "X2014.03", "X2014.04", "X2014.05")], na.rm = FALSE)
+premon_15 <- rowSums(dengue_norm[, c( "X2015.03", "X2015.04", "X2015.05")], na.rm = FALSE)
+premon_16 <- rowSums(dengue_norm[, c( "X2016.03", "X2016.04", "X2016.05")], na.rm = FALSE)
+premon_17 <- rowSums(dengue_norm[, c( "X2017.03", "X2017.04", "X2017.05")], na.rm = FALSE)
+premon_18 <- rowSums(dengue_norm[, c( "X2018.03", "X2018.04", "X2018.05")], na.rm = FALSE)
+premon_19 <- rowSums(dengue_norm[, c( "X2019.03", "X2019.04", "X2019.05")], na.rm = FALSE)
+premon_20 <- rowSums(dengue_norm[, c( "X2020.03", "X2020.04", "X2020.05")], na.rm = FALSE)
+```
+
+Monsoon season calculation 
+Monsoon months are June, July, August and September
+```{r}
+mon_06 <- rowSums(dengue_norm[, c( "X2006.06", "X2006.07", "X2006.08", "X2006.09")], na.rm = FALSE)
+mon_07 <- rowSums(dengue_norm[, c( "X2007.06", "X2007.07", "X2007.08", "X2007.09")], na.rm = FALSE)
+mon_08 <- rowSums(dengue_norm[, c( "X2008.06", "X2008.07", "X2008.08", "X2008.09")], na.rm = FALSE)
+mon_09 <- rowSums(dengue_norm[, c( "X2009.06", "X2009.07", "X2009.08", "X2009.09")], na.rm = FALSE)
+mon_10 <- rowSums(dengue_norm[, c( "X2010.06", "X2010.07", "X2010.08", "X2010.09")], na.rm = FALSE)
+mon_11 <- rowSums(dengue_norm[, c( "X2011.06", "X2011.07", "X2011.08", "X2011.09")], na.rm = FALSE)
+mon_12 <- rowSums(dengue_norm[, c( "X2012.06", "X2012.07", "X2012.08", "X2012.09")], na.rm = FALSE)
+mon_13 <- rowSums(dengue_norm[, c( "X2013.06", "X2013.07", "X2013.08", "X2013.09")], na.rm = FALSE)
+mon_14 <- rowSums(dengue_norm[, c( "X2014.06", "X2014.07", "X2014.08", "X2014.09")], na.rm = FALSE)
+mon_15 <- rowSums(dengue_norm[, c( "X2015.06", "X2015.07", "X2015.08", "X2015.09")], na.rm = FALSE)
+mon_16 <- rowSums(dengue_norm[, c( "X2016.06", "X2016.07", "X2016.08", "X2016.09")], na.rm = FALSE)
+mon_17 <- rowSums(dengue_norm[, c( "X2017.06", "X2017.07", "X2017.08", "X2017.09")], na.rm = FALSE)
+mon_18 <- rowSums(dengue_norm[, c( "X2018.06", "X2018.07", "X2018.08", "X2018.09")], na.rm = FALSE)
+mon_19 <- rowSums(dengue_norm[, c( "X2019.06", "X2019.07", "X2019.08", "X2019.09")], na.rm = FALSE)
+mon_20 <- rowSums(dengue_norm[, c( "X2020.06", "X2020.07", "X2020.08", "X2020.09")], na.rm = FALSE)
+```
+
+post-monsoon season calculation 
+post-monsoon season months are October and November
+```{r}
+postmon_06 <- rowSums(dengue_norm[, c( "X2006.10", "X2006.11")], na.rm = FALSE)
+postmon_07 <- rowSums(dengue_norm[, c( "X2007.10", "X2007.11")], na.rm = FALSE)
+postmon_08 <- rowSums(dengue_norm[, c( "X2008.10", "X2008.11")], na.rm = FALSE)
+postmon_09 <- rowSums(dengue_norm[, c( "X2009.10", "X2009.11")], na.rm = FALSE)
+postmon_10 <- rowSums(dengue_norm[, c( "X2010.10", "X2010.11")], na.rm = FALSE)
+postmon_11 <- rowSums(dengue_norm[, c( "X2011.10", "X2011.11")], na.rm = FALSE)
+postmon_12 <- rowSums(dengue_norm[, c( "X2012.10", "X2012.11")], na.rm = FALSE)
+postmon_13 <- rowSums(dengue_norm[, c( "X2013.10", "X2013.11")], na.rm = FALSE)
+postmon_14 <- rowSums(dengue_norm[, c( "X2014.10", "X2014.11")], na.rm = FALSE)
+postmon_15 <- rowSums(dengue_norm[, c( "X2015.10", "X2015.11")], na.rm = FALSE)
+postmon_16 <- rowSums(dengue_norm[, c( "X2016.10", "X2016.11")], na.rm = FALSE)
+postmon_17 <- rowSums(dengue_norm[, c( "X2017.10", "X2017.11")], na.rm = FALSE)
+postmon_18 <- rowSums(dengue_norm[, c( "X2018.10", "X2018.11")], na.rm = FALSE)
+postmon_19 <- rowSums(dengue_norm[, c( "X2019.10", "X2019.11")], na.rm = FALSE)
+postmon_20 <- rowSums(dengue_norm[, c( "X2020.10", "X2020.11")], na.rm = FALSE)
+```
+
+let's combine all these vectors into a dataframe 
+```{r}
+Provinces <- dengue_norm$Reporting.areas
+dengue_mon <- cbind(Provinces, intermon_06, premon_06, mon_06, postmon_06,intermon_07, premon_07, mon_07, postmon_07,  intermon_08, premon_08, mon_08, postmon_08, intermon_09, premon_09, mon_09, postmon_09, intermon_10, premon_10, mon_10, postmon_10, intermon_11, premon_11, mon_11, postmon_11, intermon_12, premon_12, mon_12, postmon_12, intermon_13, premon_13, mon_13, postmon_13, intermon_14, premon_14, mon_14, postmon_14, intermon_15, premon_15, mon_15, postmon_15, intermon_16, premon_16, mon_16, postmon_16, intermon_17, premon_17, mon_17, postmon_17, intermon_18, premon_18, mon_18, postmon_18, intermon_19, premon_19, mon_19, postmon_19, intermon_20, premon_20, mon_20, postmon_20)
+
+#turn it into a dataframe
+dengue_mon <- as.data.frame(dengue_mon)
+
+#turn the character columns into numeric values 
+dengue_mon$intermon_06 <- as.numeric(dengue_mon$intermon_06)
+dengue_mon <- apply(dengue_mon, 2, as.numeric())
+```
+
+save the new dataframe that contains the normalized dengue cases merged into monsoon seasons 
+```{r}
+filePath = paste(dirname(getwd()), "dengue_data", "dengue_mon.csv",sep = "/")
+write.csv(dengue_mon, filePath)
+```
+
+we need another dataframe with the means of the humidity during each monsoon season to be able to calculate the correlation between the two, so let's do that 
+```{r}
+#first let's calculate the mean of the intermonsoon seasons 
+intermonH_06 <- rowMeans(T.huss.mon1[,c("2006.01.", "2006.02.")])
+intermonH_07 <- rowMeans(T.huss.mon1[,c("2006.12.", "2007.01.", "2007.02.")])
+intermonH_08 <- rowMeans(T.huss.mon1[,c("2007.12.", "2008.01.", "2008.02.")])
+intermonH_09 <- rowMeans(T.huss.mon1[,c("2008.12.", "2009.01.", "2009.02.")])
+intermonH_10 <- rowMeans(T.huss.mon1[,c("2009.12.", "2010.01.", "2010.02.")])
+intermonH_11 <- rowMeans(T.huss.mon1[,c("2010.12.", "2011.01.", "2011.02.")])
+intermonH_12 <- rowMeans(T.huss.mon1[,c("2011.12.", "2012.01.", "2012.02.")])
+intermonH_13 <- rowMeans(T.huss.mon1[,c("2012.12.", "2013.01.", "2013.02.")])
+intermonH_14 <- rowMeans(T.huss.mon1[,c("2013.12.", "2014.01.", "2014.02.")])
+intermonH_15 <- rowMeans(T.huss.mon1[,c("2014.12.", "2015.01.", "2015.02.")])
+intermonH_16 <- rowMeans(T.huss.mon1[,c("2015.12.", "2016.01.", "2016.02.")])
+intermonH_17 <- rowMeans(T.huss.mon1[,c("2016.12.", "2017.01.", "2017.02.")])
+intermonH_18 <- rowMeans(T.huss.mon1[,c("2017.12.", "2018.01.", "2018.02.")])
+intermonH_19 <- rowMeans(T.huss.mon1[,c("2018.12.", "2019.01.", "2019.02.")])
+intermonH_20 <- rowMeans(T.huss.mon1[,c("2019.12.", "2020.01.", "2020.02.")])
+```
+
+Do the same for the pre-monsoon months
+```{r}
+premonH_06 <- rowMeans(T.huss.mon1[,c("2006.03.", "2006.04.", "2006.05.")])
+premonH_07 <- rowMeans(T.huss.mon1[,c("2007.03.", "2007.04.", "2007.05.")])
+premonH_08 <- rowMeans(T.huss.mon1[,c("2008.03.", "2008.04.", "2008.05.")])
+premonH_09 <- rowMeans(T.huss.mon1[,c("2009.03.", "2009.04.", "2009.05.")])
+premonH_10 <- rowMeans(T.huss.mon1[,c("2010.03.", "2010.04.", "2010.05.")])
+premonH_11 <- rowMeans(T.huss.mon1[,c("2011.03.", "2011.04.", "2011.05.")])
+premonH_12 <- rowMeans(T.huss.mon1[,c("2012.03.", "2012.04.", "2012.05.")])
+premonH_13 <- rowMeans(T.huss.mon1[,c("2013.03.", "2013.04.", "2013.05.")])
+premonH_14 <- rowMeans(T.huss.mon1[,c("2014.03.", "2014.04.", "2014.05.")])
+premonH_15 <- rowMeans(T.huss.mon1[,c("2015.03.", "2015.04.", "2015.05.")])
+premonH_16 <- rowMeans(T.huss.mon1[,c("2016.03.", "2016.04.", "2016.05.")])
+premonH_17 <- rowMeans(T.huss.mon1[,c("2017.03.", "2017.04.", "2017.05.")])
+premonH_18 <- rowMeans(T.huss.mon1[,c("2018.03.", "2018.04.", "2018.05.")])
+premonH_19 <- rowMeans(T.huss.mon1[,c("2019.03.", "2019.04.", "2019.05.")])
+premonH_20 <- rowMeans(T.huss.mon1[,c("2020.03.", "2020.04.", "2020.05.")])
+```
+
+again for the monsoon months
+```{r}
+monH_06 <- rowMeans(T.huss.mon1[,c("2006.06.", "2006.07.", "2006.08.", "2006.09.")])
+monH_07 <- rowMeans(T.huss.mon1[,c("2007.06.", "2007.07.", "2007.08.", "2007.09.")])
+monH_08 <- rowMeans(T.huss.mon1[,c("2008.06.", "2008.07.", "2008.08.", "2008.09.")])
+monH_09 <- rowMeans(T.huss.mon1[,c("2009.06.", "2009.07.", "2009.08.", "2009.09.")])
+monH_10 <- rowMeans(T.huss.mon1[,c("2010.06.", "2010.07.", "2010.08.", "2010.09.")])
+monH_11 <- rowMeans(T.huss.mon1[,c("2011.06.", "2011.07.", "2011.08.", "2011.09.")])
+monH_12 <- rowMeans(T.huss.mon1[,c("2012.06.", "2012.07.", "2012.08.", "2012.09.")])
+monH_13 <- rowMeans(T.huss.mon1[,c("2013.06.", "2013.07.", "2013.08.", "2013.09.")])
+monH_14 <- rowMeans(T.huss.mon1[,c("2014.06.", "2014.07.", "2014.08.", "2014.09.")])
+monH_15 <- rowMeans(T.huss.mon1[,c("2015.06.", "2015.07.", "2015.08.", "2015.09.")])
+monH_16 <- rowMeans(T.huss.mon1[,c("2016.06.", "2016.07.", "2016.08.", "2016.09.")])
+monH_17 <- rowMeans(T.huss.mon1[,c("2017.06.", "2017.07.", "2017.08.", "2017.09.")])
+monH_18 <- rowMeans(T.huss.mon1[,c("2018.06.", "2018.07.", "2018.08.", "2018.09.")])
+monH_19 <- rowMeans(T.huss.mon1[,c("2019.06.", "2019.07.", "2019.08.", "2019.09.")])
+monH_20 <- rowMeans(T.huss.mon1[,c("2020.06.", "2020.07.", "2020.08.", "2020.09.")])
+```
+
+again for the postmonsoon seasons
+```{r}
+postmonH_06 <- rowMeans(T.huss.mon1[,c("2006.10.", "2006.11.")])
+postmonH_07 <- rowMeans(T.huss.mon1[,c("2007.10.", "2007.11.")])
+postmonH_08 <- rowMeans(T.huss.mon1[,c("2008.10.", "2008.11.")])
+postmonH_09 <- rowMeans(T.huss.mon1[,c("2009.10.", "2009.11.")])
+postmonH_10 <- rowMeans(T.huss.mon1[,c("2010.10.", "2010.11.")])
+postmonH_11 <- rowMeans(T.huss.mon1[,c("2011.10.", "2011.11.")])
+postmonH_12 <- rowMeans(T.huss.mon1[,c("2012.10.", "2012.11.")])
+postmonH_13 <- rowMeans(T.huss.mon1[,c("2013.10.", "2013.11.")])
+postmonH_14 <- rowMeans(T.huss.mon1[,c("2014.10.", "2014.11.")])
+postmonH_15 <- rowMeans(T.huss.mon1[,c("2015.10.", "2015.11.")])
+postmonH_16 <- rowMeans(T.huss.mon1[,c("2016.10.", "2016.11.")])
+postmonH_17 <- rowMeans(T.huss.mon1[,c("2017.10.", "2017.11.")])
+postmonH_18 <- rowMeans(T.huss.mon1[,c("2018.10.", "2018.11.")])
+postmonH_19 <- rowMeans(T.huss.mon1[,c("2019.10.", "2019.11.")])
+postmonH_20 <- rowMeans(T.huss.mon1[,c("2020.10.", "2020.11.")])
+```
+
+put all the means together in a new dataframe
+```{r}
+Provinces <- T.huss.mon1$ADM1_EN
+humidity_mon <- cbind(Provinces, intermonH_06, premonH_06, monH_06, postmonH_06, intermonH_07, premonH_07, monH_07, postmonH_07, intermonH_08, premonH_08, monH_08, postmonH_08, intermonH_09, premonH_09, monH_09, postmonH_09, intermonH_10, premonH_10, monH_10, postmonH_10, intermonH_11, premonH_11, monH_11, postmonH_11, intermonH_12, premonH_12, monH_12, postmonH_12, intermonH_13, premonH_13, monH_13, postmonH_13, intermonH_14, premonH_14, monH_14, postmonH_14, intermonH_15, premonH_15, monH_15, postmonH_15, intermonH_16, premonH_16, monH_16, postmonH_16, intermonH_17, premonH_17, monH_17, postmonH_17, intermonH_18, premonH_18, monH_18, postmonH_18, intermonH_19, premonH_19, monH_19, postmonH_19, intermonH_20, premonH_20, monH_20, postmonH_20)
+
+#turn it into a dataframe
+humidity_mon <- as.data.frame(humidity_mon)
+
+#the provinces aren't sorted alphabetically, order them 
+humidity_mon <- humidity_mon[order(humidity_mon$Provinces), ]
+```
+
+save the dataframe 
+```{r}
+filePath = paste(dirname(getwd()), "geo_data", "humidity_mon.csv",sep = "/")
+write.csv(humidity_mon, filePath)
+```
+
+Now that the data is in a format we can work with let's finally look at the correlation between humidity and dengue cases 
+```{r}
+cor(dengue_mon$intermon_06, humidity_mon$intermonH_06)
+```
+
