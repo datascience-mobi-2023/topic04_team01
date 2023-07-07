@@ -260,8 +260,9 @@ dengue_mon <- cbind(Provinces, intermon_06, premon_06, mon_06, postmon_06,interm
 dengue_mon <- as.data.frame(dengue_mon)
 
 #turn the character columns into numeric values 
-dengue_mon$intermon_06 <- as.numeric(dengue_mon$intermon_06)
-dengue_mon <- apply(dengue_mon, 2, as.numeric())
+numColumns1 <- names(dengue_mon)[-which(names(dengue_mon) == "Provinces")]
+dengue_mon[numColumns1] <- lapply(dengue_mon[numColumns1], as.numeric)
+str(dengue_mon)
 ```
 
 save the new dataframe that contains the normalized dengue cases merged into monsoon seasons 
@@ -357,6 +358,11 @@ humidity_mon <- as.data.frame(humidity_mon)
 
 #the provinces aren't sorted alphabetically, order them 
 humidity_mon <- humidity_mon[order(humidity_mon$Provinces), ]
+
+#make dataframe numerical 
+numColumns <- names(humidity_mon)[-which(names(humidity_mon) == "Provinces")]
+humidity_mon[numColumns] <- lapply(humidity_mon[numColumns], as.numeric)
+
 ```
 
 save the dataframe 
@@ -367,6 +373,78 @@ write.csv(humidity_mon, filePath)
 
 Now that the data is in a format we can work with let's finally look at the correlation between humidity and dengue cases 
 ```{r}
-cor(dengue_mon$intermon_06, humidity_mon$intermonH_06)
+#example for monsoon season 2006
+cor(dengue_mon$mon_06, humidity_mon$monH_06, use = "pairwise.complete.obs")
+
+#let's try the correlation throughout all years 
+##let's stack the data for the years atop of each other for easier calculation with the cor() function 
+
+#start with the inter-monsoon dengue cases
+stacked_intermon <- c(intermon_06, intermon_07, intermon_09, intermon_10, intermon_11, intermon_12, intermon_13, intermon_14, intermon_15, intermon_16, intermon_17, intermon_18, intermon_19, intermon_20)
+
+#next pre-monsoon dengue cases 
+stacked_premon <- c(premon_06, premon_07, premon_09, premon_10, premon_11, premon_12, premon_13, premon_14, premon_15, premon_16, premon_17, premon_18, premon_19, premon_20)
+
+#next monsoon dengue cases 
+stacked_mon <- c(mon_06, mon_07, mon_09, mon_10, mon_11, mon_12, mon_13, mon_14, mon_15, mon_16, mon_17, mon_18, mon_19, mon_20)
+
+#next post-monsoon dengue cases 
+stacked_postmon <- c(postmon_06, postmon_07, postmon_09, postmon_10, postmon_11, postmon_12, postmon_13, postmon_14, postmon_15, postmon_16, postmon_17, postmon_18, postmon_19, postmon_20)
+
+
+##let's do the same for the humidity monsoon seasons 
+#inter-monsoon seasons 
+stacked_intermonH <- c(intermonH_06, intermonH_07, intermonH_09, intermonH_10, intermonH_11, intermonH_12, intermonH_13, intermonH_14, intermonH_15, intermonH_16, intermonH_17, intermonH_18, intermonH_19, intermonH_20)
+
+#pre-monsoon seasons
+stacked_premonH <- c(premonH_06, premonH_07, premonH_09, premonH_10, premonH_11, premonH_12, premonH_13, premonH_14, premonH_15, premonH_16, premonH_17, premonH_18, premonH_19, premonH_20)
+
+#monsoon seasons 
+stacked_monH <-c(monH_06, monH_07, monH_09, monH_10, monH_11, monH_12, monH_13, monH_14, monH_15, monH_16, monH_17, monH_18, monH_19, monH_20)
+
+#post-monsoon seasons 
+stacked_postmonH <- c(postmonH_06, postmonH_07, postmonH_09, postmonH_10, postmonH_11, postmonH_12, postmonH_13, postmonH_14, postmonH_15, postmonH_16, postmonH_17, postmonH_18, postmonH_19, postmonH_20)
+
+##we need the provinces as well
+#sort the provinces alphabetically
+Provinces <- sort(Provinces)
+#stack them 14 times 
+stacked_provinces <- c(Provinces,Provinces,Provinces,Provinces,Provinces,Provinces,Provinces,Provinces,Provinces,Provinces,Provinces,Provinces,Provinces,Provinces)
+
+#make another dataframe to calculate the correlation 
+stacked_hum_den <- cbind(stacked_provinces, stacked_intermon, stacked_premon, stacked_mon, stacked_postmon, stacked_intermonH, stacked_premonH, stacked_monH, stacked_postmonH)
+
+#rename the coloumns 
+colnames(stacked_hum_den) <- c("Provinces", "intermon", "premon", "mon", "postmon", "intermonH", "premonH", "monH", "postmonH")
+
+#make it into a dataframe 
+stacked_hum_den <- as.data.frame(stacked_hum_den)
+
+#convert it to numeric 
+numColumns2 <- names(stacked_hum_den)[-which(names(stacked_hum_den) == "Provinces")]
+stacked_hum_den[numColumns2] <- lapply(stacked_hum_den[numColumns2], as.numeric)
+str(stacked_hum_den)
+```
+
+We have a stacked dataframe now, let's see how the correlation over all years looks, both lagged and not lagged 
+```{r}
+#first non-lagged correlation 
+##inter-monsoon season
+cor(stacked_hum_den$intermon, stacked_hum_den$intermonH, use = "pairwise.complete.obs")
+##pre-monsoon season
+cor(stacked_hum_den$premon, stacked_hum_den$premonH, use = "pairwise.complete.obs")
+##monsoon season 
+cor(stacked_hum_den$mon, stacked_hum_den$monH, use = "pairwise.complete.obs")
+##post-monsoon season
+cor(stacked_hum_den$postmon, stacked_hum_den$postmonH, use = "pairwise.complete.obs")
+
+#let's look at the relationship between the monsoon humidity season and the post-monsoon dengue cases 
+cor(stacked_hum_den$monH, stacked_hum_den$postmon, use = "pairwise.complete.obs")
+
+#and at the correlation between pre-monsoon humidity and post-monsoon dengue cases
+cor(stacked_hum_den$premonH, stacked_hum_den$postmon, use = "pairwise.complete.obs")
+
+#and at the correlation between pre-monsoon humidity and monsoon dengue cases 
+cor(stacked_hum_den$premonH, stacked_hum_den$monH, use = "pairwise.complete.obs")
 ```
 
