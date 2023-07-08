@@ -29,8 +29,7 @@ plot(pressure)
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
 
-
-# 0.Loading Dengue Data Normalized
+# 0. Loading Dengue Data Normalized
 
 ```{r}
 
@@ -43,27 +42,21 @@ dengue.norm[4,2:61] <- dengue.norm[35,2:61]
 print(dengue.norm)
 ```
 
-
 ```{r}
-dengue.norm <- read.csv("/Users/manon/Desktop/dengue_norm_Kopie.csv")
+dengue.norm <- read.csv("../dengue_data/dengue_norm.csv")
 
 dengue.norm <- subset(dengue.norm, select = setdiff(colnames(dengue.norm), c("X", "X.1","X2006.total", "X2007.total", "X2008.total","X2009.total", "X2010.total", "X2011.total","X2012.total", "X2013.total", "X2014.total","X2015.total", "X2016.total", "X2017.total","X2018.total", "X2019.total", "X2020.total")))
 dengue.norm['numbers']=c(1:77)
 dengue.norm[4,2:61] <- dengue.norm[35,2:61]
+dengue.norm <- replace(dengue.norm, is.na(dengue.norm), 0)
 as.data.frame(dengue.norm)
-
-print(colnames(dengue.norm))
-#view(dengue.norm)
-
-
 
 view(dengue.norm)
 ```
 
-# 1. Clustering each Years Dengue Cases 
+# 1. Clustering each Years Dengue Cases
 
-
-## 1.1 Creating a list with yearly Dengue Data 
+## 1.1 Creating a list with yearly Dengue Data
 
 ```{r}
 dengue.norm.2006 <- as.data.frame(dengue.norm[,2:13])
@@ -102,6 +95,7 @@ dengue.norm.list <- list(
 ```
 
 ## 1.2.Clustering the yearly Dengue Data from each Province from 2006 to 2020
+
 ```{r}
 
 
@@ -110,7 +104,6 @@ print(any(is.na(dengue.norm)))
 
 
 ```
-
 
 ```{r}
 #dengue.norm[4,2:61] <- dengue.norm[35,2:61]
@@ -152,15 +145,130 @@ print(ggplot() +
   labs(x="Longitude", y= "Latitude")+
   theme_minimal()+
   colorspace::scale_fill_continuous_sequential(palette= "plasma")+
-  guides(fill = guide_legend(title = "Legende", override.aes = list(shape = 22))))
+  guides(fill = guide_legend(title = "cases for 100.000 citizens", override.aes = list(shape = 22))))
 }
 
 
 ```
+
 ```{r}
-View(dengue.norm.year)
+View(dengue.norm.year.mean)
 ```
 
 # 2. Plotting the Centers of the Clusters from 2006 to 2020
-## 2.1 lotting the Clusters in 3 single Plots
+
+## 2.1 Plotting the Clusters in 3 single Plots
+
+```{r}
+
+
+dengue.norm.2006.mean <- as.data.frame(apply(dengue.norm.2006,1,mean))
+dengue.norm.2007.mean <- as.data.frame(apply(dengue.norm.2007,1,mean))
+dengue.norm.2008.mean <- as.data.frame(apply(dengue.norm.2008,1,mean))
+dengue.norm.2009.mean <- as.data.frame(apply(dengue.norm.2009,1,mean))
+dengue.norm.2010.mean <- as.data.frame(apply(dengue.norm.2010,1,mean))
+dengue.norm.2011.mean <- as.data.frame(apply(dengue.norm.2011,1,mean))
+dengue.norm.2012.mean <- as.data.frame(apply(dengue.norm.2012,1,mean))
+dengue.norm.2013.mean <- as.data.frame(apply(dengue.norm.2013,1,mean))
+dengue.norm.2014.mean <- as.data.frame(apply(dengue.norm.2014,1,mean))
+dengue.norm.2015.mean <- as.data.frame(apply(dengue.norm.2015,1,mean))
+dengue.norm.2016.mean <- as.data.frame(apply(dengue.norm.2016,1,mean))
+dengue.norm.2017.mean <- as.data.frame(apply(dengue.norm.2017,1,mean))
+dengue.norm.2018.mean <- as.data.frame(apply(dengue.norm.2018,1,mean))
+dengue.norm.2019.mean <- as.data.frame(apply(dengue.norm.2019,1,mean))
+dengue.norm.2020.mean <- as.data.frame(apply(dengue.norm.2020,1,mean))
+
+
+
+dengue.norm.kmeans.2006 <- kmeans(dengue.norm.2006.mean,centers = k)
+dengue.norm.kmeans.2007 <- kmeans(dengue.norm.2007.mean,centers = k)
+dengue.norm.kmeans.2008 <- kmeans(dengue.norm.2008.mean,centers = k)
+dengue.norm.kmeans.2009 <- kmeans(dengue.norm.2009.mean,centers = k)
+dengue.norm.kmeans.2010 <- kmeans(dengue.norm.2010.mean,centers = k)
+dengue.norm.kmeans.2011 <- kmeans(dengue.norm.2011.mean,centers = k)
+dengue.norm.kmeans.2012 <- kmeans(dengue.norm.2012.mean,centers = k)
+dengue.norm.kmeans.2013 <- kmeans(dengue.norm.2013.mean,centers = k)
+dengue.norm.kmeans.2014 <- kmeans(dengue.norm.2014.mean,centers = k)
+dengue.norm.kmeans.2015 <- kmeans(dengue.norm.2015.mean,centers = k)
+dengue.norm.kmeans.2016 <- kmeans(dengue.norm.2016.mean,centers = k)
+dengue.norm.kmeans.2017 <- kmeans(dengue.norm.2017.mean,centers = k)
+dengue.norm.kmeans.2018 <- kmeans(dengue.norm.2018.mean,centers = k)
+dengue.norm.kmeans.2019 <- kmeans(dengue.norm.2019.mean,centers = k)
+dengue.norm.kmeans.2020 <- kmeans(dengue.norm.2020.mean,centers = k)
+
+```
+
+```{r}
+
+## Creating a Data Frame of each year with a vector of the sorted centers 
+
+years <- c(2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020)
+
+dengue.norm.Yearly.Centers <- data.frame()
+
+for (year in years) {
+  dengue.norm.kmeans.year <- get(paste0("dengue.norm.kmeans.", year))# Annahme: dengue.norm.kmeans.2006, dengue.norm.kmeans.2007, etc do already excist
+  dengue.norm.centers.sorted <- sort(dengue.norm.kmeans.year$centers)
+  dengue.norm.centers.sorted.vector <- as.vector(dengue.norm.centers.sorted)
+  
+  if (ncol(dengue.norm.Yearly.Centers) == 0) {
+    dengue.norm.Yearly.Centers <- data.frame(dengue.norm.centers.sorted.vector)
+  } else {
+    dengue.norm.Yearly.Centers <- cbind(dengue.norm.Yearly.Centers, dengue.norm.centers.sorted.vector)
+  }
+}
+
+colnames(dengue.norm.Yearly.Centers) <- years
+print(dengue.norm.Yearly.Centers)
+```
+
+```{r}
+print(max(dengue.norm.Yearly.Centers))
+print(min(dengue.norm.Yearly.Centers))
+
+```
+
+```{r}
+## Clusters in 3 single ggPlots 
+Dengue1<- dengue.norm.Yearly.Centers[1,]
+Dengue2 <- dengue.norm.Yearly.Centers[2,]
+Dengue3 <- dengue.norm.Yearly.Centers[3,]
+
+ggplot() +
+  plot(years, Dengue1, type="o", xlab = "Years", ylab = "Humidity ", main = " Yearly Clusters from 2006 to 2020",ylim=c(0,110))+
+  plot(years, Dengue2, type = "o", xlab = "Years", ylab = "Humidity ", main = " Yearly Clusters from 2006 to 2020",ylim=c(0,110))+
+  plot(years, Dengue3, type = "o", xlab = "Years", ylab = "Humidity ", main = " Yearly Clusters from 2006 to 2020", ylim=c (0,110))
+```
+
 ## 2.2 Plotting the Clusters in one Plot
+
+```{r}
+##New Data Frame: Rows switch to columns and columns to rows
+
+DengueLow<- unlist(dengue.norm.Yearly.Centers[1,])
+DengueLow<- unname(DengueLow)
+
+DengueMedium<- unlist(dengue.norm.Yearly.Centers[2,])
+DengueMedium<- unname(DengueMedium)
+
+DengueHigh<- unlist(dengue.norm.Yearly.Centers[3,])
+DengueHigh<- unname(DengueHigh)
+
+dengue.norm.Yearly.Centers.Plot <-data.frame(Years= years,
+                                 DengueLow = DengueLow,
+                                 DengueMedium = DengueMedium,
+                                 DengueHigh = DengueHigh)
+
+ggplot(dengue.norm.Yearly.Centers.Plot,aes(x=years))+
+  geom_line(aes(y=DengueLow), color = "pink",type="o")+
+  geom_line(aes(y=DengueMedium), color = "orange",type ="o")+
+  geom_line(aes(y=DengueHigh), color = "violet", type= "o")+
+  labs(title="Yearly Dengue Clusters ",x = "Years" , y= " Dengue Cases for 100.000")+
+  geom_point(aes(y = DengueLow), color = "pink", shape = 16) +
+  geom_point(aes(y = DengueMedium), color = "orange", shape = 16) +
+  geom_point(aes(y = DengueHigh), color = "violet", shape = 16, show.legend = TRUE)+
+  scale_color_manual(values = c("low" = "pink", "medium" = "orange", "high" = "violet"),
+                     labels = c("low", "medium", "high"),
+                     name = "Dengue Cases for 100.00")
+
+```
