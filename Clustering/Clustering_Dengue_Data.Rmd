@@ -30,3 +30,136 @@ plot(pressure)
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
 
 
+# 0.Loading Dengue Data Normalized
+
+```{r}
+
+print()
+#print(dengue.norm[4,2:61])
+print(dengue.norm[35,2:61])
+
+dengue.norm[4,2:61] <- dengue.norm[35,2:61]
+
+print(dengue.norm)
+```
+
+
+```{r}
+dengue.norm <- read.csv("/Users/manon/Desktop/dengue_norm_Kopie.csv")
+
+dengue.norm <- subset(dengue.norm, select = setdiff(colnames(dengue.norm), c("X", "X.1","X2006.total", "X2007.total", "X2008.total","X2009.total", "X2010.total", "X2011.total","X2012.total", "X2013.total", "X2014.total","X2015.total", "X2016.total", "X2017.total","X2018.total", "X2019.total", "X2020.total")))
+dengue.norm['numbers']=c(1:77)
+dengue.norm[4,2:61] <- dengue.norm[35,2:61]
+
+print(colnames(dengue.norm))
+#view(dengue.norm)
+
+
+
+view(dengue.norm)
+```
+
+# 1. Clustering each Years Dengue Cases 
+
+
+## 1.1 Creating a list with yearly Dengue Data 
+
+```{r}
+dengue.norm.2006 <- as.data.frame(dengue.norm[,2:13])
+dengue.norm.2007 <- as.data.frame(dengue.norm[,14:25])
+dengue.norm.2008 <- as.data.frame(dengue.norm[,26:37])
+dengue.norm.2009 <- as.data.frame(dengue.norm[,38:49])
+dengue.norm.2010 <- as.data.frame(dengue.norm[,50:61])
+dengue.norm.2011 <- as.data.frame(dengue.norm[,62:73])
+dengue.norm.2012 <- as.data.frame(dengue.norm[,74:85])
+dengue.norm.2013 <- as.data.frame(dengue.norm[,86:97])
+dengue.norm.2014 <- as.data.frame(dengue.norm[,98:109])
+dengue.norm.2015 <- as.data.frame(dengue.norm[,110:121])
+dengue.norm.2016 <- as.data.frame(dengue.norm[,122:133])
+dengue.norm.2017 <- as.data.frame(dengue.norm[,134:145])
+dengue.norm.2018 <- as.data.frame(dengue.norm[,146:157])
+dengue.norm.2019 <- as.data.frame(dengue.norm[,158:169])
+dengue.norm.2020 <- as.data.frame(dengue.norm[,170:181])
+
+dengue.norm.list <- list(
+  dengue.norm.2006=dengue.norm.2006,
+  dengue.norm.2007=dengue.norm.2007,
+  dengue.norm.2008=dengue.norm.2008,
+  dengue.norm.2009=dengue.norm.2009,
+  dengue.norm.2010=dengue.norm.2010,
+  dengue.norm.2011=dengue.norm.2011,
+  dengue.norm.2012=dengue.norm.2012,
+  dengue.norm.2013=dengue.norm.2013,
+  dengue.norm.2014=dengue.norm.2014,
+  dengue.norm.2015=dengue.norm.2015,
+  dengue.norm.2016=dengue.norm.2016,
+  dengue.norm.2017=dengue.norm.2017,
+  dengue.norm.2018=dengue.norm.2018,
+  dengue.norm.2019=dengue.norm.2019,
+  dengue.norm.2020=dengue.norm.2020
+)
+```
+
+## 1.2.Clustering the yearly Dengue Data from each Province from 2006 to 2020
+```{r}
+print(dengue.norm$numbers)
+
+# Überprüfen, ob es NA/NaN/Inf-Werte gibt
+print(any(is.na(dengue.norm$numbers)| is.nan(dengue.norm$numbers) | is.infinite(dengue.norm$numbers)))
+
+print(dengue.norm[4,])
+```
+
+
+```{r}
+#dengue.norm[4,2:61] <- dengue.norm[35,2:61]
+print(dengue.norm)
+
+for (year in 2006:2020){
+
+k <-3
+
+
+dengue.norm.year <- get(paste0("dengue.norm.",year))
+dengue.norm.year.mean<-as.data.frame(apply(dengue.norm.year,1, mean))
+dengue.norm.year.mean ['numbers'] = c(1:77)
+
+dengue.norm.kmeans.years <-kmeans(dengue.norm.year.mean$`apply(dengue.norm.year, 1, mean)`, centers = k )
+
+
+
+## Zuordnen aller original values  of cluster 1,2,3 their corresponding center 
+
+dengue.norm.centers.years <- as.vector(dengue.norm.kmeans.years$centers)
+dengue.norm.centers.clusters.years <- data.frame(Value = dengue.norm.kmeans.years$cluster, Center = NA)
+
+for (i in 1:length(dengue.norm.kmeans.years$cluster)) {
+  dengue.norm.centers.clusters.years$Center[i] <- dengue.norm.centers.years[dengue.norm.kmeans.years$cluster[i]]
+}
+
+dengue.norm.centers.clusters.years['numbers'] = c(1:77)
+dengue.norm.centers.clusters.years.geography = merge(dengue.norm.centers.clusters.years, geography, by= "numbers")
+
+
+## ggplot
+print(ggplot() +
+  geom_sf(data = dengue.norm.centers.clusters.years.geography ,aes(geometry = geometry, fill= Center)) +
+  coord_sf() +  
+  theme_minimal() +
+  labs(title = paste("kmeans K = 3  Dengue Cases of Provinces",year)) +
+  #scale_fill_viridis()+
+  labs(x="Longitude", y= "Latitude")+
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  guides(fill = guide_legend(title = "Legende", override.aes = list(shape = 22))))
+}
+
+
+```
+```{r}
+View(dengue.norm.year)
+```
+
+# 2. Plotting the Centers of the Clusters from 2006 to 2020
+## 2.1 lotting the Clusters in 3 single Plots
+## 2.2 Plotting the Clusters in one Plot
