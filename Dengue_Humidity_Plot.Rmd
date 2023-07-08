@@ -1,0 +1,194 @@
+---
+title: "Plot mit Yearly Dengue Data and Clima Data"
+author: "Manon Manddernach"
+date: "2023-07-08"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+
+## Years
+
+Years <- c(2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020)
+
+
+## Dengue Data Mean values
+
+dengue.norm.2006.mean.absolute <- as.data.frame(apply(dengue.norm.2006.mean,1,mean))
+dengue.norm.2007.mean.absolute <- as.data.frame(apply(dengue.norm.2007.mean,1,mean))
+dengue.norm.2008.mean.absolute <- as.data.frame(apply(dengue.norm.2008.mean,1,mean))
+dengue.norm.2009.mean.absolute <- as.data.frame(apply(dengue.norm.2009.mean,1,mean))
+dengue.norm.2010.mean.absolute <- as.data.frame(apply(dengue.norm.2010.mean,1,mean))
+dengue.norm.2011.mean.absolute <- as.data.frame(apply(dengue.norm.2011.mean,1,mean))
+dengue.norm.2012.mean.absolute <- as.data.frame(apply(dengue.norm.2012.mean,1,mean))
+dengue.norm.2013.mean.absolute <- as.data.frame(apply(dengue.norm.2013.mean,1,mean))
+dengue.norm.2014.mean.absolute <- as.data.frame(apply(dengue.norm.2014.mean,1,mean))
+dengue.norm.2015.mean.absolute <- as.data.frame(apply(dengue.norm.2015.mean,1,mean))
+dengue.norm.2016.mean.absolute <- as.data.frame(apply(dengue.norm.2016.mean,1,mean))
+dengue.norm.2017.mean.absolute <- as.data.frame(apply(dengue.norm.2017.mean,1,mean))
+dengue.norm.2018.mean.absolute <- as.data.frame(apply(dengue.norm.2018.mean,1,mean))
+dengue.norm.2019.mean.absolute <- as.data.frame(apply(dengue.norm.2019.mean,1,mean))
+dengue.norm.2020.mean.absolute <- as.data.frame(apply(dengue.norm.2020.mean,1,mean))
+
+Dengue.mean <- c(dengue.norm.2006.mean.absolute,
+                 dengue.norm.2007.mean.absolute,
+                 dengue.norm.2008.mean.absolute,
+                 dengue.norm.2009.mean.absolute, 
+                 dengue.norm.2010.mean.absolute,
+                 dengue.norm.2011.mean.absolute,
+                 dengue.norm.2012.mean.absolute, 
+                 dengue.norm.2013.mean.absolute, 
+                 dengue.norm.2014.mean.absolute, 
+                 dengue.norm.2015.mean.absolute, 
+                 dengue.norm.2016.mean.absolute,
+                 dengue.norm.2017.mean.absolute, 
+                 dengue.norm.2018.mean.absolute, 
+                 dengue.norm.2019.mean.absolute,
+                 dengue.norm.2020.mean.absolute)
+
+Dengue.mean <- lapply(Dengue.mean, unlist)
+Dengue.mean <- lapply(Dengue.mean, mean)
+
+Dengue.mean <- list(
+  `apply(dengue.norm.2006.mean, 1, mean)` = 5.570221,
+  `apply(dengue.norm.2007.mean, 1, mean)` = 8.742932,
+  `apply(dengue.norm.2008.mean, 1, mean)` = 11.76473,
+  `apply(dengue.norm.2009.mean, 1, mean)` = 7.219884,
+  `apply(dengue.norm.2010.mean, 1, mean)` = 14.7395,
+  `apply(dengue.norm.2011.mean, 1, mean)` = 8.785111,
+  `apply(dengue.norm.2012.mean, 1, mean)` = 9.955709,
+  `apply(dengue.norm.2013.mean, 1, mean)` = 20.17376,
+  `apply(dengue.norm.2014.mean, 1, mean)` = 5.596716,
+  `apply(dengue.norm.2015.mean, 1, mean)` = 17.39642,
+  `apply(dengue.norm.2016.mean, 1, mean)` = 9.211036,
+  `apply(dengue.norm.2017.mean, 1, mean)` = 6.315424,
+  `apply(dengue.norm.2018.mean, 1, mean)` = 10.47807,
+  `apply(dengue.norm.2019.mean, 1, mean)` = 14.60038,
+  `apply(dengue.norm.2020.mean, 1, mean)` = 14.0717
+)
+
+Dengue.mean <- data.frame(Code = names(Dengue.mean), Value = unlist(Dengue.mean))
+Dengue.mean <- Dengue.mean$Value
+
+
+## Humidity Data Mean values 
+
+
+huss.2006<- as.data.frame(T.huss.mon.ordered[,5:16])
+huss.2007<- as.data.frame(T.huss.mon.ordered[,17:28])
+huss.2008<- as.data.frame(T.huss.mon.ordered[,29:40])
+huss.2009<- as.data.frame(T.huss.mon.ordered[,41:52])
+huss.2010<- as.data.frame(T.huss.mon.ordered[,53:64])
+huss.2011<- as.data.frame(T.huss.mon.ordered[,65:76])
+huss.2012<- as.data.frame(T.huss.mon.ordered[,77:88])
+huss.2013<- as.data.frame(T.huss.mon.ordered[,89:100])
+huss.2014<- as.data.frame(T.huss.mon.ordered[,101:112])
+huss.2015<- as.data.frame(T.huss.mon.ordered[,113:124])
+huss.2016<- as.data.frame(T.huss.mon.ordered[,125:136])
+huss.2017<- as.data.frame(T.huss.mon.ordered[,137:148])
+huss.2018<- as.data.frame(T.huss.mon.ordered[,149:150])
+huss.2019<- as.data.frame(T.huss.mon.ordered[,151:162])
+huss.2020<- as.data.frame(T.huss.mon.ordered[,163:174])
+
+
+
+
+huss.2006.mean.absolute <- as.data.frame(apply(huss.2006.mean,1,mean))
+huss.2007.mean.absolute <- as.data.frame(apply(huss.2007.mean,1,mean))
+huss.2008.mean.absolute <- as.data.frame(apply(huss.2008.mean,1,mean))
+huss.2009.mean.absolute <- as.data.frame(apply(huss.2009.mean,1,mean))
+huss.2010.mean.absolute <- as.data.frame(apply(huss.2010.mean,1,mean))
+huss.2011.mean.absolute <- as.data.frame(apply(huss.2011.mean,1,mean))
+huss.2012.mean.absolute <- as.data.frame(apply(huss.2012.mean,1,mean))
+huss.2013.mean.absolute <- as.data.frame(apply(huss.2013.mean,1,mean))
+huss.2014.mean.absolute <- as.data.frame(apply(huss.2014.mean,1,mean))
+huss.2015.mean.absolute <- as.data.frame(apply(huss.2015.mean,1,mean))
+huss.2016.mean.absolute <- as.data.frame(apply(huss.2016.mean,1,mean))
+huss.2017.mean.absolute <- as.data.frame(apply(huss.2017.mean,1,mean))
+huss.2018.mean.absolute <- as.data.frame(apply(huss.2018.mean,1,mean))
+huss.2019.mean.absolute <- as.data.frame(apply(huss.2019.mean,1,mean))
+huss.2020.mean.absolute <- as.data.frame(apply(huss.2020.mean,1,mean))
+
+Huss.mean <- c(huss.2006.mean.absolute,
+               huss.2007.mean.absolute,
+               huss.2008.mean.absolute,
+               huss.2009.mean.absolute, 
+               huss.2010.mean.absolute,
+               huss.2011.mean.absolute,
+               huss.2012.mean.absolute, 
+               huss.2013.mean.absolute, 
+               huss.2014.mean.absolute, 
+               huss.2015.mean.absolute, 
+               huss.2016.mean.absolute,
+               huss.2017.mean.absolute,
+               huss.2018.mean.absolute, 
+               huss.2019.mean.absolute,
+               huss.2020.mean.absolute)
+
+Huss.mean <- lapply(Huss.mean,unlist)
+Huss.mean <- lapply(Huss.mean,mean)
+
+Huss.mean <- list(
+  `$apply(huss.2006.mean, 1, mean)` = 74.8919,
+  `$apply(huss.2007.mean, 1, mean)` = 56.53615,
+  `$apply(huss.2008.mean, 1, mean)` = 57.60083,
+  `$apply(huss.2009.mean, 1, mean)` = 57.32692,
+  `$apply(huss.2010.mean, 1, mean)` = 57.13848,
+  `$apply(huss.2011.mean, 1, mean)` = 58.08443,
+  `$apply(huss.2012.mean, 1, mean)` = 57.97239,
+  `$apply(huss.2013.mean, 1, mean)` = 57.40518,
+  `$apply(huss.2014.mean, 1, mean)` = 57.16852,
+  `$apply(huss.2015.mean, 1, mean)` = 56.8422,
+  `$apply(huss.2016.mean, 1, mean)` = 56.88025,
+  `$apply(huss.2017.mean, 1, mean)` = 58.00465,
+  `$apply(huss.2018.mean, 1, mean)` = 55.85306,
+  `$apply(huss.2019.mean, 1, mean)` = 57.80723,
+  `$apply(huss.2020.mean, 1, mean)` = 55.99571
+)
+
+Huss.mean <- data.frame(Code = names(Huss.mean), Value = unlist(Huss.mean))
+Huss.mean <- Huss.mean$Value
+
+
+
+
+
+
+```
+
+```{r}
+
+print(Dengue.mean)
+print(Huss.mean)
+```
+
+```{r}
+Dengue.Humidity.Plot <- data.frame(Years=Years,
+                                   Dengue.mean = Dengue.mean,
+                                   Huss.mean = Huss.mean
+                                   )
+```
+
+## 2. Plotting Denge and Humidity Yearly Means
+
+
+
+```{r}
+ggplot(Dengue.Humidity.Plot, aes(x = Years)) +
+  geom_line(aes(y = Dengue.mean, color = "Dengue Cases per 100.000"), type = "o") +
+  geom_line(aes(y = Huss.mean, color = "Humidity in %"), type = "o") +
+  labs(title = "Yearly Dengue Cases and Humidity", x = "Years", y = "Dengue Cases for 100.000") +
+  geom_point(aes(y = Dengue.mean, color = "Dengue Cases per 100.000"), shape = 16) +
+  geom_point(aes(y = Huss.mean, color = "Humidity in %"), shape = 16) +
+  scale_color_manual(values = c("Dengue Cases per 100.000" = "violet", "Humidity in %" = "orange"),
+                     labels = c("Dengue Cases per 100.000", "Humidity in %"),
+                     guide = guide_legend(title = "Legend Title"))+
+   scale_y_continuous(sec.axis = sec_axis(~ . / 100, name = "Humidity in %", labels = scales::percent))
+
+
+```
+
