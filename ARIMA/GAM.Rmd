@@ -1,0 +1,60 @@
+---
+title: "GAM_modeling"
+output: html_document
+date: "2023-07-04"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#install the packages 
+```{r}
+install.packages("readxl")
+install.packages("nlme")
+install.packages("gam")
+install.packages("sdm")
+install.packages("raster")
+install.packages("ncdf4")
+```
+
+```{r}
+library(mgcv)
+library(readxl) 
+library(nlme) 
+library(gam) 
+library(sdm) 
+library(raster) 
+library(ncdf4)
+```
+
+#load the dataset 
+```{r}
+dengue_hum = read.csv("../dengue_data/dengue_hum.csv")
+print(dengue_hum)
+```
+#first lets vis. the dengue_cases and the corresponding relative_humidity 
+```{r}
+# Lade die erforderlichen Bibliotheken
+library(ggplot2)
+
+# Erstelle den Plot
+ggplot(dengue_hum, aes(x = Year, y = Dengue_Cases)) +
+  geom_point() +
+  labs(x = "Dengue Cases", y = "Relative Humidity", title = "Dengue Cases vs. Relative Humidity")
+```
+
+
+
+#lets model our first gam 
+```{r}
+attach(dengue_hum)
+model = gam(Dengue_Cases~s(Relative_Humidity),family = "quasipoisson")
+plot(model, rug = FALSE)
+
+summary(model)
+```
+
+
+```
+

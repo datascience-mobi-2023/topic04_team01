@@ -469,19 +469,6 @@ write.csv(dengue_hum, filePath)
 #ausgangsdataframe sind die einzelmnen von 2006 - 2020 
 #zuerst müssen wir alle Spalten umbennen
 
-#neue dataframecopy 
-
-dengue2020_2 = dengue2020 
-
-# Jahr für die Umbenennung festlegen
-jahr <- 2020
-
-# Spaltennamen umformatieren
-colnames(dengue2020_2)[2:14] <- c(paste(jahr, "total", sep = "."), paste(jahr, sprintf('%02d', 1:12), sep = "."))
-
-# Überprüfung der neuen Spaltennamen
-print(colnames(dengue2020_2))
-
 # Datenrahmen für die Jahre 2006 bis 2019 kopieren und umbenennen
 
 colnames(dengue2006)[2:14] <- c(paste(2006, "total", sep = "."), paste(2006, sprintf('%02d', 1:12), sep = "."))
@@ -512,8 +499,36 @@ colnames(dengue2018)[2:14] <- c(paste(2018, "total", sep = "."), paste(2018, spr
 
 colnames(dengue2019)[2:14] <- c(paste(2019, "total", sep = "."), paste(2019, sprintf('%02d', 1:12), sep = "."))
 
+colnames(dengue2020)[2:14] <- c(paste(2020, "total", sep = "."), paste(2020, sprintf('%02d', 1:12), sep = "."))
+
 ```
 
+#Bungkan Zeile für jahre 2006 -2009 hinzufügen 
+```{r}
+# Vektor erstellen
+vektor <- c("Bungkan", rep(0, 13))
+
+print(vektor)
+
+dengue2006 = rbind(dengue2006,vektor)
+dengue2007 = rbind(dengue2007,vektor)
+dengue2008 = rbind(dengue2008,vektor)
+dengue2009 = rbind(dengue2009,vektor)
+dengue2010 = rbind(dengue2010,vektor)
+```
+
+#alles nochmal alphabetisch ordnen 
+```{r}
+#Zeilen alphabetisch sortieren 
+
+dataframes <- ls(pattern = "dengue\\d{4}")  # Liste der Dataframes, die dem Muster "dengueXXXX" entsprechen
+
+for (df_name in dataframes) {
+  df <- get(df_name)  # Dataframe abrufen
+  df <- df[order(df$`Reporting areas`), ]  # Sortierung nach "Reporting areas"
+  assign(df_name, df)  # Aktualisierten Dataframe speichern
+}
+```
 
 #anhand der spalte Reporting_area die datendätze zusammenfügen 
 
@@ -553,11 +568,28 @@ print(merged_df)
 dengue_data_com2 = merged_df
 ```
 
+
+#alle spalten in anderen kategoerien in numeric umwandeln 
+```{r}
+library(dplyr)
+
+# Alle Spalten außer der ersten Spalte in numerischen Datentyp umwandeln
+dengue_data_com2 <- mutate_at(dengue_data_com2, vars(-1), as.numeric)
+
+print(dengue_data_com2)
+```
+#alle NA IN O umwandwandeln 
+
+```{r}
+# Werte "-" in 0 umwandeln
+dengue_data_com2[is.na(dengue_data_com2)] = 0
+
+print(dengue_data_com2)
+```
 #lets save the format for the dengue_data
 ```{r}
 #locales Speichern der dengue_hum 
 filePath = paste(getwd(), "dengue_data_com2.csv",sep = "/")
 write.csv(dengue_data_com2, filePath)
 
-
-````
+```
