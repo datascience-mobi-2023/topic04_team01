@@ -445,6 +445,51 @@ cor(stacked_hum_den$monH, stacked_hum_den$postmon, use = "pairwise.complete.obs"
 cor(stacked_hum_den$premonH, stacked_hum_den$postmon, use = "pairwise.complete.obs")
 
 #and at the correlation between pre-monsoon humidity and monsoon dengue cases 
-cor(stacked_hum_den$premonH, stacked_hum_den$monH, use = "pairwise.complete.obs")
+cor(stacked_hum_den$premonH, stacked_hum_den$mon, use = "pairwise.complete.obs")
+cor(stacked_hum_den$premonH, stacked_hum_den$mon, use = "pairwise.complete.obs", method = "spearman")
 ```
+make a scatterplot for the pre-monsoon humidity and the monsoon dengue cases 
+```{r}
+plot(stacked_hum_den$premonH, stacked_hum_den$mon,
+     pch=20,
+     xlab='pre-monsoon humidity',
+     ylab='monsoon dengue cases')
+```
+The most interesting correlation would be the correlation between pre-monsoon humidity and monsoon dengue cases.
+The correlation does not seem great, however let's test this with a correlation test.
+The H0 hypothesis assumes that the actual correlation between the pre-monsoon humidity and the monsoon season dengue cases is equal to zero 
+The H1 hypothesis assumes that the actual correlation between the pre-monsoon humidity and the monsoon season dengue cases is less than zero
+```{r}
+cor.test(stacked_hum_den$premonH, stacked_hum_den$mon, use = "pairwise.complete.obs", method = "pearson", alternative = "less")
+```
+The correlation test returns a p-value that is smaller than 0.05 which indicates that the H0 hypothesis is rejected and the H1 hypothesis is assumed. This is not what one would expect.
 
+If we look at the relationship between the dengue cases between the monsoon seasons the relationship is more clear 
+```{r}
+cor(stacked_hum_den$intermon, stacked_hum_den$premon, use = "pairwise.complete.obs")
+cor(stacked_hum_den$premon, stacked_hum_den$mon, use = "pairwise.complete.obs" )
+cor(stacked_hum_den$mon, stacked_hum_den$postmon, use = "pairwise.complete.obs")
+cor(stacked_hum_den$postmon, stacked_hum_den$intermon, use = "pairwise.complete.obs")
+```
+The correlation between the pre-monsoon dengue cases and the monsoon dengue cases is by far the highest with an r-value of 0.73. 
+```{r}
+model <- lm(stacked_hum_den$mon ~ stacked_hum_den$premon)
+plot(stacked_hum_den$premon, stacked_hum_den$mon, pch=20,
+     xlab='pre-monsoon cases',
+     ylab='monsoon dengue cases'
+     )
+abline(model, col = 4, lwd = 3)
+```
+Let's test the correlation again with a correlation test 
+H0: the actual correlation between the pre-monsoon cases and the monsoon season dengue cases is equal to zero 
+H1: the actual correlation between the pre-monsoon cases and the monsoon season dengue cases is greater than zero 
+```{r}
+cor.test(stacked_hum_den$premon, stacked_hum_den$mon, use = "pairwise.complete.obs", method = "pearson", alternative = "greater")
+```
+The H0 hypothesis can be rejected as the p-value is smaller than 0.05.
+Maybe the monsoon cases could be predicted through a linear regression model with the pre-monsoon dengue cases 
+```{r}
+#the linear model was used before to plot an Abline in the scatterplot, we just need to summerize it
+summary(model)
+```
+We can see that the regression model can explain 53% of the variance in this relationship as well as with a p-value smaller than 0.05 using the linear regression model here would be significantly better to predict the monsoon dengue cases than the zero model. 
