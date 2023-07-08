@@ -77,7 +77,7 @@ print(optimal_k)
 
 # 2. Cluster each Year's Humidity
 
-## 2.1 Creating a list with yearly Humidity Data 
+## 2.1 Creating a list with yearly Humidity Data
 
 ```{r}
 huss.2006<- as.data.frame(T.huss.mon.ordered[,5:16])
@@ -115,7 +115,9 @@ huss_data <- list(
 )
 
 ```
+
 ## 2.2 Find diffrent Methods for Coloring the Clusters on the Maps
+
 ```{r}
 ## TRY OUT COLOR CODING THE CLUSTERS PART 1 
 
@@ -153,7 +155,9 @@ ggplot() +
   labs(x="Longitude", y= "Latitude")
 
 ```
-##2.3 Clustering the yearly Humidity from each Province from 2006 to 2020
+
+## 2.3 Clustering the yearly Humidity from each Province from 2006 to 2020
+
 ```{r}
 
 ##Clustering
@@ -225,10 +229,10 @@ print(ggplot() +
 
 ```
 
+# 3. Plottening the Centers of the Clusters von 2006 bis 2020
 
-
-# 3. Plottening the  Centers of the Clusters von 2006 bis 2020
 ## 3.1.1 Creating a new Dataframe Yearly.Centers with the centers of each year
+
 ```{r}
 
 ## Creating a Data Frame of each year with a vector of the sorted centers 
@@ -252,7 +256,9 @@ for (year in years) {
 colnames(Yearly.Centers) <- years
 #print(Yearly.Centers)
 ```
+
 ## 3.1.2 Plotting the Clusters in 3 single Plots
+
 ```{r}
 
 ## Clusters in 3 single ggPlots 
@@ -266,7 +272,9 @@ ggplot() +
   plot(years, Humidity3, type = "o", xlab = "Years", ylab = "Humidity ", main = " Yearly Clusters from 2006 to 2020", ylim = c(65, 85))
 
 ```
+
 ## 3.2.1 Creating a new Dataframe Yearly.Centers.Plot with the centers of each year
+
 ```{r}
 ##New Data Frame: Rows switch to columns and columns to rows
 
@@ -285,7 +293,9 @@ Yearly.Centers.Plot <-data.frame(Years= years,
                                  HumidityHigh = HumidityHigh)
 #print(Yearly.Centers.Plot)
 ```
+
 ## 3.2.2 Plotting the Clusters in one Plot
+
 ```{r}
 
 ## Clusters in one ggplot
@@ -303,11 +313,7 @@ ggplot(Yearly.Centers.Plot,aes(x=years))+
                      name = "Legende")
 ```
 
-
-
-
-
-## 4. Clustering 3 times  5 Years 
+# 4. Clustering 3 times 5 Years
 
 ```{r}
 #print(kmeans.2006$cluster)
@@ -322,7 +328,9 @@ ggplot(Yearly.Centers.Plot,aes(x=years))+
 #print(kmeans.2009$cluster)
 #print(kmeans.2009$centers)
 ```
-4.1 creating an new List with 3 times 5 years Ckusterd together 
+
+## 4.1 creating an new List with 3 times 5 years Clusterd together
+
 ```{r}
 huss.2006<- as.data.frame(T.huss.mon.ordered[,5:16])
 huss.2007<- as.data.frame(T.huss.mon.ordered[,17:28])
@@ -401,9 +409,6 @@ print(ggplot() +
 }
 
 ```
-
-
-
 
 ```{r}
 
@@ -506,7 +511,9 @@ print(kmeans.2011.2015$centers)
 print(kmeans.2016.2020$cluster)
 print(kmeans.2016.2020$centers)
 ```
-## Attached Code wich was used for presious Analysis 
+
+## Attached Code wich was used for presious Analysis
+
 ```{r}
 #PLOT 2006--------------------------------------------------------------------------------
 
@@ -964,4 +971,3 @@ ggplot() +
   scale_fill_viridis()+
   labs(x="Longitude", y= "Latitude")
 ```
-
