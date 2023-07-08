@@ -50,6 +50,7 @@ dengue.norm <- read.csv("/Users/manon/Desktop/dengue_norm_Kopie.csv")
 dengue.norm <- subset(dengue.norm, select = setdiff(colnames(dengue.norm), c("X", "X.1","X2006.total", "X2007.total", "X2008.total","X2009.total", "X2010.total", "X2011.total","X2012.total", "X2013.total", "X2014.total","X2015.total", "X2016.total", "X2017.total","X2018.total", "X2019.total", "X2020.total")))
 dengue.norm['numbers']=c(1:77)
 dengue.norm[4,2:61] <- dengue.norm[35,2:61]
+as.data.frame(dengue.norm)
 
 print(colnames(dengue.norm))
 #view(dengue.norm)
@@ -102,12 +103,12 @@ dengue.norm.list <- list(
 
 ## 1.2.Clustering the yearly Dengue Data from each Province from 2006 to 2020
 ```{r}
-print(dengue.norm$numbers)
+
 
 # Überprüfen, ob es NA/NaN/Inf-Werte gibt
-print(any(is.na(dengue.norm$numbers)| is.nan(dengue.norm$numbers) | is.infinite(dengue.norm$numbers)))
+print(any(is.na(dengue.norm)))
 
-print(dengue.norm[4,])
+
 ```
 
 
