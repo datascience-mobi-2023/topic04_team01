@@ -9,6 +9,10 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+# 0. Preparing the Data 
+
+## 0.1 Preparing the Data for yearly means
+
 ```{r}
 
 ## Years
@@ -173,9 +177,65 @@ Dengue.Humidity.Plot <- data.frame(Years=Years,
                                    )
 ```
 
-## 2. Plotting Denge and Humidity Yearly Means
+## 0.2 Preparing the Data for Monsoon Seasons 
 
+```{r}
+view(dengue.norm)
+```
 
+```{r}
+Months <- c("January", "February", "March", "April", "May", "June", 
+            "July", "August", "September", "October", "November", "December")
+
+#Bankok
+
+Bangkok <- data.frame(T.huss.mon.ordered[3, ])
+
+Humidity.2006 <- c(Bangkok$`2006.01`, Bangkok$`2006.2`, Bangkok$`2006.03`, 
+                   Bangkok$`2006.04`, Bangkok$`2006.05`, Bangkok$`2006.06`, 
+                   Bangkok$`2006.07`, Bangkok$`2006.08`, Bangkok$`2006.09`, 
+                   Bangkok$`2006.10`, Bangkok$`2006.11`, Bangkok$`2006.12`)
+
+BangkokD <- data.frame(T.huss.mon.ordered[3, ])
+
+Dengue.2006 <- c(BangkokD$`X2006.01`, BangkokD$`X2006.2`, BangkokD$`X2006.03`, 
+                 BangkokD$`X2006.04`, BangkokD$`X2006.05`, BangkokD$`X2006.06`, 
+                 BangkokD$`X2006.07`, BangkokD$`X2006.08`, BangkokD$`X2006.09`,
+                 BangkokD$`X2006.10`, BangkokD$`X2006.11`, BangkokD$`X2006.12`)
+
+Bangkok.2006 <- data.frame(Humidity.2006=Humidity.2006,
+                           Dengue.2006=Dengue.2006,
+                           Months=Months)
+
+```
+
+```{r}
+#print(Dengue.2006)
+print(Humidity.2006)
+```
+
+```{r}
+ggplot(Bangkok
+```
+
+```{r}
+
+```
+
+```{, aes(x = Years)) +}
+  geom_line(aes(y = Dengue.mean, color = "Dengue Cases per 100.000"), type = "o") +
+  geom_line(aes(y = Huss.mean, color = "Humidity in %"), type = "o") +
+  labs(title = "Yearly Dengue Cases and Humidity", x = "Years", y = "Dengue Cases for 100.000") +
+  geom_point(aes(y = Dengue.mean, color = "Dengue Cases per 100.000"), shape = 16) +
+  geom_point(aes(y = Huss.mean, color = "Humidity in %"), shape = 16) +
+  scale_color_manual(values = c("Dengue Cases per 100.000" = "violet", "Humidity in %" = "orange"),
+                     labels = c("Dengue Cases per 100.000", "Humidity in %"),
+                     guide = guide_legend(title = "Legend Title"))+
+   scale_y_continuous(sec.axis = sec_axis(~ . / 100, name = "Humidity in %", labels = scales::percent))
+
+```
+
+## 1. Plotting Dengue and Humidity Yearly Means
 
 ```{r}
 ggplot(Dengue.Humidity.Plot, aes(x = Years)) +
@@ -191,4 +251,3 @@ ggplot(Dengue.Humidity.Plot, aes(x = Years)) +
 
 
 ```
-
