@@ -1,0 +1,155 @@
+---
+title: "Correlation_testing"
+author: "Paula"
+date: "2023-07-11"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+The humidity and dengue case data is now sorted into their respective monsoon seasons and stacked atop of each other. Let's load it again and do some basic correlation tests 
+First load the packages we need and the data 
+```{r}
+dengue_norm <- read.csv("C:\\Users\\paula\\Documents\\Uni Heidelberg\\4. Semester\\Bioinformatik\\github\\topic04_team01\\dengue_data\\dengue_norm.csv")
+T.huss.mon = read_excel("../era5_data_2006_2020_thailand_monmean.xlsx", sheet="era5_huss_2006_2020_thailand_mo")
+stacked_hum_den <- read.csv("C:\\Users\\paula\\Documents\\Uni Heidelberg\\4. Semester\\Bioinformatik\\github\\topic04_team01\\Correlation_hypothesis\\mon_dengue_hum.csv")
+stacked_hum_den
+```
+First let's look at the correlation between the respective seasons, so between the intermonsoon humdidity and the intermonsoon cases from the years 2006-2020, as well as all other seasons 
+```{r}
+#first non-lagged correlation 
+##inter-monsoon season
+cor(stacked_hum_den$intermon, stacked_hum_den$intermonH, use = "pairwise.complete.obs")
+##pre-monsoon season
+cor(stacked_hum_den$premon, stacked_hum_den$premonH, use = "pairwise.complete.obs")
+##monsoon season 
+cor(stacked_hum_den$mon, stacked_hum_den$monH, use = "pairwise.complete.obs")
+##post-monsoon season
+cor(stacked_hum_den$postmon, stacked_hum_den$postmonH, use = "pairwise.complete.obs")
+```
+We can see no significant correlation within the seasons.
+Therefore we can now look at the lagged correlation for 1 season and 2 seasons 
+
+```{r}
+#lag of one season
+#correlation between inter-monsoon humdity and pre-monsoon cases 
+cor(stacked_hum_den$intermonH, stacked_hum_den$premon, use = "pairwise.complete.obs" )
+
+#correlation between the pre-monsoon humidity season and the monsoon dengue cases 
+cor(stacked_hum_den$premonH, stacked_hum_den$mon, use = "pairwise.complete.obs")
+
+#correlation between monsoon humidity and post-monsoon dengue cases
+cor(stacked_hum_den$premonH, stacked_hum_den$postmon, use = "pairwise.complete.obs")
+
+#correlation between post-monsoon humidity and inter-monsoon dengue cases 
+cor(stacked_hum_den$postmonH, stacked_hum_den$intermon, use = "pairwise.complete.obs")
+
+
+#lag of 2 seasons 
+#correlation between inter-monsoon humidity and monsoon dengue cases 
+cor(stacked_hum_den$intermonH, stacked_hum_den$mon, use = "pairwise.complete.obs")
+
+#correlation between pre-monsoon humidity and post-monsoon dengue cases 
+cor(stacked_hum_den$premonH, stacked_hum_den$postmon, use = "pairwise.complete.obs")
+
+#correlation between monsoon humidity and inter-monsoon dengue cases 
+cor(stacked_hum_den$monH, stacked_hum_den$intermon, use = "pairwise.complete.obs")
+
+#correlation between post-monsoon humidity and pre-monsoon dengue cases 
+cor(stacked_hum_den$postmonH, stacked_hum_den$premon, use = "pairwise.complete.obs")
+```
+
+The highest 3 correlations are between pre-monsoon humidity and monsoon dengue cases, monsoon humidity and post-monsoon dengue cases, and pre-monsoon humidity and post-monsoon dengue cases. 
+All correlations are still very small (between -0.145 and -0.164) and interestingly also negative. 
+
+Let's visualize these with scatterplots 
+```{r}
+#a linear model can be used to add the correlation to the scatterplot 
+lm1 <- lm(stacked_hum_den$premonH ~ stacked_hum_den$mon)
+lm2 <- lm(stacked_hum_den$monH ~ stacked_hum_den$postmon)
+lm3 <- lm(stacked_hum_den$premonH ~ stacked_hum_den$postmon)
+
+plot(stacked_hum_den$premonH, stacked_hum_den$mon,
+     pch=20,
+     xlab='pre-monsoon humidity',
+     ylab='monsoon dengue cases')
+abline(lm1, col = 4, lwd = 3)
+
+plot(stacked_hum_den$monH, stacked_hum_den$postmon,pch=20,
+     xlab='monsoon humidity',
+     ylab='post-monsoon dengue cases')
+abline(lm2, col = 4, lwd = 3)
+
+plot(stacked_hum_den$premonH, stacked_hum_den$postmon,pch=20,
+     xlab='pre-monsoon humidity',
+     ylab='post-monsoon dengue cases')
+abline(lm3, col = 4, lwd = 3)
+```
+
+The most interesting correlation would be the correlation between pre-monsoon humidity and monsoon dengue cases or between the monsoon humidity and the post monsoon dengue cases.
+The correlation does not seem great, however let's test this with a correlation test to see if it might actually not exist at all.
+The H0 hypothesis assumes that the actual correlation between the pre-monsoon humidity and the monsoon season dengue cases is equal to zero 
+The H1 hypothesis assumes that the actual correlation between the pre-monsoon humidity and the monsoon season dengue cases is less than zero
+
+The same H0 and H1 Hypothesis apply to the correlation between monsoon humidity and post-monsoon dengue cases.
+```{r}
+#correlation between pre-monsoon humidity and monsoon dengue cases 
+cor.test(stacked_hum_den$premonH, stacked_hum_den$mon, use = "pairwise.complete.obs", method = "pearson", alternative = "less")
+
+#correlation between monsoon humidity and post-monsoon dengue cases
+cor.test(stacked_hum_den$monH, stacked_hum_den$postmon, use = "pairwise.complete.obs", method = "pearson", alternative = "less")
+```
+
+The correlation test returns a p-value that is smaller than 0.05 for both tests, which indicates that the H0 hypothesis is rejected and the H1 hypothesis is assumed. This is not what one would expect.
+
+Correlation between the monsoon seasons within the variables 
+A paper mentions, that even slightly higher pre-epidemic case numbers have a significant impact on the epidemic case numbers, maybe this same principle can be seen within the monsoon seasons if we assume the pre-monsoon season as the pre-epidemic stage and the monsoon season as the epidemic stage 
+```{r}
+cor(stacked_hum_den$intermon, stacked_hum_den$premon, use = "pairwise.complete.obs")
+cor(stacked_hum_den$premon, stacked_hum_den$mon, use = "pairwise.complete.obs" )
+cor(stacked_hum_den$mon, stacked_hum_den$postmon, use = "pairwise.complete.obs")
+cor(stacked_hum_den$postmon, stacked_hum_den$intermon, use = "pairwise.complete.obs")
+```
+The correlation between the pre-monsoon dengue cases and the monsoon dengue cases is by far the highest with an r-value of 0.73. 
+```{r}
+model <- lm(stacked_hum_den$mon ~ stacked_hum_den$premon)
+plot(stacked_hum_den$premon, stacked_hum_den$mon, pch=20,
+     xlab='pre-monsoon cases',
+     ylab='monsoon dengue cases'
+     )
+abline(model, col = 4, lwd = 3)
+```
+
+Let's test the correlation again with a correlation test 
+H0: the actual correlation between the pre-monsoon cases and the monsoon season dengue cases is equal to zero 
+H1: the actual correlation between the pre-monsoon cases and the monsoon season dengue cases is greater than zero 
+```{r}
+cor.test(stacked_hum_den$premon, stacked_hum_den$mon, use = "pairwise.complete.obs", method = "pearson", alternative = "greater")
+```
+
+```{r}
+#the linear model was used before to plot an Abline in the scatterplot, we just need to summerize it
+summary(model)
+```
+We can see that the regression model can explain 54% of the variance in this relationship as well as with a p-value smaller than 0.05 using the linear regression model here would be significantly better to predict the monsoon dengue cases than the zero model. 
+
+```{r}
+cases = c()
+dengue_monthly = data.frame()
+
+
+for(i in 0:14){
+    position = as.vector(5+(13*i))
+    cases = dengue_norm[,position]
+    if (i == 0){
+      dengue = cases
+    }
+      else {
+        dengue = c(dengue_jan, cases)
+      }
+}  
+  print(dengue)
+```
+
