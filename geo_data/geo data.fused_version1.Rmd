@@ -792,7 +792,7 @@ df2%>%
   scale_x_continuous(minor_breaks = seq(1, 12, 0.5))
 ```
 
-## plot of 
+## plot of
 
 To understand the impact of relative humidity on different kinds of areas in Thailand I chose exemplary provinces with different characteristics (position in the country, height of land):
 

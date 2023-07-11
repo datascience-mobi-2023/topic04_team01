@@ -8,35 +8,34 @@ date: "2023-06-14"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-#load the dengue dataframe combined -> dengue_data_com
+#1. load the dengue dataframe combined -> dengue_data_com
 ```{r}
-#laden aus dem github repository mit relativen path 
 dengue_data_com = read.csv("../dengue_data/dengue_data_com.csv")
 
 head(dengue_data_com)
 
 ```
-#get the data into a diffrent shape we need for time series analysis 
+
+#2. get the data into a diffrent shape we need for time series analysis 
 ```{r}
 #überlegung: dengue daten erstmal auf ganz thailand bezogen also für jeden monat der Jahre 2006-2020 die summer der dengue cases im ganzen land thailand berechnen 
 
-# Benötigt die tidyverse-Pakete
+# load the needed package 
 library(tidyverse)
 
-# Gruppiere den DataFrame nach Jahr, Monat und berechne die Summe der Dengue-Fälle
+# Group the dataframe after year, month and calculate the dengue cases sum 
 dengue_sum <- dengue_data_com %>%
   group_by(Year, Month) %>%
   summarise(`Dengue_Total` = sum(`dengue_cases`))
 
-# Gib den neuen DataFrame aus
-print(df_sum)
+print(dengue_sum)
 
-#neuen dataframe generien nur mit den spalten year, month und dengue cases 
+# generaten a new dataframe with coulmns year, month, dengue cases 
 ts_dengue = data.frame 
 ```
-# die total werte noch raus filtrieren 
+
+#2.1 Remove the Total-values 
 ```{r}
-# entfernen wir jetzt die Total values aus dem dengue_sum
 i.remove = which(dengue_sum$Month %in% c("Total"))
 i.remove 
 
@@ -44,20 +43,25 @@ dengue_sum = dengue_sum[-i.remove,]
 
 #lets turn the months into numerics 
 
-# Definiere die Umwandlung der Monatsnamen
+# Define the Change 
 monat_umwandlung <- c(Jan = "01", Feb = "02", Mar = "03", Apr = "04", May = "05", June = "06",
                       July = "07", Aug = "08", Sept = "09", Oct = "10", Nov = "11", Dec = "12")
 
-# Wandele die Monate in numerische Werte um
+# Change the months into numbers 
 dengue_sum <- dengue_sum %>%
   mutate(Month = recode(Month, !!!monat_umwandlung))
 
-#umwandeln von month von chr in dbl 
+#Chnage the class from chr into dbl 
 dengue_sum$Month = as.numeric(dengue_sum$Month)
 print(dengue_sum)
 
+#order the dataframe 
+
+dengue_sum = dengue_sum[order(dengue_sum$Year, dengue_sum$Month),]
+print(dengue_sum)
 ```
-# now lets convert the dataframe into a ts 
+
+#3. now lets convert the dataframe into a ts 
 ```{r}
 # Convert to time series object
 myTs <- ts(dengue_sum$Dengue_Total, frequency = 12, start = c(2006, 1))
@@ -67,7 +71,8 @@ class(myTs) # ts"  (if you don't just feed in one but more data points per time 
 TSstudio::ts_plot(myTs, title = "Dengue Cases in Thailand between the years 2006 - 2020", Xgrid = TRUE)
 
 ```
-#lets have a look on the data 
+
+#4. lets have a look on the data 
 ```{r}
 # Loess smoothing, A periodic decomposition
 # decompose() assumes the seasonal term to be fixed and repeating (constant throughout the entire time series)
@@ -78,9 +83,8 @@ grid(lty = 2, col = "gray")
 
 ?stl
 ```
+#5. Test for stationarity 
 ```{r}
-# 02 TESTING THE TIME SERIES
-
 # Test for Stationarity
 # Stationarity is an important assumption in many statistical tests  and ts analysis models. 
 # A ts is stationary when the mean and variance, do not change over time. 
@@ -92,19 +96,18 @@ grid(lty = 2, col = "gray")
 library(tseries)
 adf.test(myTs) # p-value < 0.05 indicates the TS is stationary --> suggests it is stationary !!!
 ```
-#Test auf subset of myTS (differnet years) 
-```{r}
-# Annahme: Sie haben bereits eine Zeitreihenobjekt "myTs" definiert
 
-# Subset der Zeitreihe für bestimmte Jahre auswählen
-start_year <- 2010
-end_year <- 2020
+#5.1 Test auf subset of myTS (differnet years) 
+```{r}
+# Subset of the time series 
+start_year <- 2012
+end_year <- 2015
 subset_ts <- window(myTs, start = c(start_year, 1), end = c(end_year, 12))
 
-# Dickey-Fuller-Test auf dem ausgewählten Subset durchführen
+# Dickey-Fuller-Test on the choosen subset 
  adf.test(subset_ts)
 ```
-#Autocorr 
+#6. Test for Autocorr 
 ```{r}
 # PACF & ACF: 
 # Which lag fits the data best? --> order
@@ -120,24 +123,24 @@ acfRes <- acf(dengue_sum$Dengue_Total)  # generates plots by default
 pacfRes <- pacf(dengue_sum$Dengue_Total)  # generates plots by default
 ```
 
-#Lets model 
+#7. Lets model 
 ```{r}
 library(forecast)
 best_model_auto  <- auto.arima(myTs)
 best_model_auto
 ```
 
-# 05 FORCASTING
+#8. FORCASTING
 ```{r}
 # Generate forecasts
 library(forecast)
-horizon <- 50 # number of units you want to forecast --> here days
+horizon <- 24 # number of units you want to forecast --> here months 
 forecasted <- forecast(best_model_auto, h = horizon)
 class(forecasted) # forcast
 
 # Access forecasted values and intervals
 forecastedTs <- forecasted$mean
-forecastedTs  <- ts(forecastedTs, frequency = 12, start = c(2020, 12) )
+forecastedTs  <- ts(forecastedTs, frequency = 12, start = c(2019, 1) )
 class(forecastedTs) 
 plot(forecastedTs)
 
@@ -158,18 +161,16 @@ ggplot() +
   theme_minimal()
 ```
 
-# PREDICTION EVALUATION
+#9. PREDICTION EVALUATION
 ```{r}
 # Here are some evaluation metrics to compare our predicted and our actual data
-original <- ts(dengue_sum$Dengue_Total[474:525], frequency = 12 , start = c(2020,1) ) # create an object containing the original ts of 2020
+original <- ts(dengue_sum$Dengue_Total[157:180], frequency = 12 , start = c(2018,1) ) # create an object containing the original ts of 2018 - 2020
 
-keep = which(dengue_sum$Year %in% c("2020"))
+keep = which(dengue_sum$Year %in% c("2018","2019","2020"))
 
 dengue_sum_test = dengue_sum[keep,]
 
 head(dengue_sum_test)
-
-
 
 predicted <- forecastedTs
 
@@ -180,18 +181,21 @@ plot(abs(original-predicted)) # absolute difference
 
 # Mean Absolute Error (MAE):
 mae_value <- mae(predicted, original)
+mae_value
 # mean(abs(predicted - original))
-# -> on average, the forecasted cases deviate from the actual case number by approximately 25.44 cases
+# -> on average, the forecasted cases deviate from the actual case number by approximately 524.74 cases
 
 # Root Mean Squared Error (RMSE):
 rmse_value <- rmse(predicted, original)
+rmse_value
 # sqrt(mean((predicted - original)^2))
-# -> a typical magnitude of the forecast errors was 33 cases
+# -> a typical magnitude of the forecast errors was 601.65 cases
 
 # Mean Absolute Percentage Error (MAPE):
 mape <- mape(predicted, original)*100
+mape
 # mean(abs((predicted - original) / original)) * 100
-# -> the average percentage difference between the predicted values and the actual values was 47%
+# -> the average percentage difference between the predicted values and the actual values was 7.8%
 
 
 ```
