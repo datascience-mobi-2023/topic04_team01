@@ -37,7 +37,10 @@ T.t2m.mon = read_excel("../era5_data_2006_2020_thailand_monmean.xlsx", sheet="er
  
  
 ```{r}
-
+filePath = paste(dirname(getwd()),"geo_data","geography.csv",sep = "/")
+print(filePath)
+print(geography)
+write.csv(geography, filePath)
 ```
  
  
