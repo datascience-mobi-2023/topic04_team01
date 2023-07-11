@@ -1,0 +1,656 @@
+---
+title: "dengue_data_plotting"
+output: html_document
+date: "2023-06-27"
+author: Lea Mrowiec
+---
+
+## 0) preparing the dataframes 
+
+"dengue_data_com2" is a dataframe containing the dengue cases of each month (2006 to 2020). The data is normalized according to the number of citizens in each province over each years. Therefore, the numbers shoe the dengue cases per 100.000 citizens.
+
+```{r}
+#loading dataframe with dengue data
+library(readxl)
+dengue_data_com2 = read.csv("/Users/leamrowiec/Desktop/Datenanalyse SS23/dengue_norm.csv")
+dengue_data_com2
+
+#loading the geo data
+library(sf)
+geography <- st_read("/Users/leamrowiec/Desktop/Datenanalyse SS23/other data/gadm36_THA_shp")
+geography= as.data.frame(geography)
+geography
+```
+
+```{r}
+# in 2010 the values for Bunga Khan are not set no NA in the initial dataframe. Therefore I set those values to NA. 
+de.2010 = c("X2010.total", "X2010.01", "X2010.02", "X2010.03", "X2010.04", "X2010.05", "X2010.06", "X2010.07", "X2010.08", "X2010.09", "X2010.10", "X2010.11", "X2010.12")
+dengue_data_com2[4, de.2010] = NA
+dengue_data_com2
+#combining the dataframes
+geo_dengue=cbind(dengue_data_com2, geography)
+geo_dengue
+```
+
+## 1) plotting total dengue cases of each year 
+
+Note: in 2011 a new province called "Bueng Kan" was formed. It was dissociated from the province "Nong Khai". Because we had no data f dengue cases for Bueng Kan before 2011 we defined them as NAs. The total dengue cases of Nong Khai and todays Bueng Kan can be seen in the map in the province Nong Khai. After 2010 both provinces have separate values.
+
+```{r}
+library(viridis)
+library(ggplot2)
+
+#2006--------------------------------------------------------------------------------------
+ggplot(geo_dengue, aes(geometry=geometry)) +
+  geom_sf (aes(fill = X2006.total)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = " dengue cases per 100.000 citizens in 2006", fill = "cases per 100.000 citizens")+
+  labs(caption = "provinces with non-available data are shown in grey")
+
+#2007--------------------------------------------------------------------------------------
+ggplot(geo_dengue, aes(geometry=geometry)) +
+  geom_sf (aes(fill = X2007.total)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+   labs(title = " dengue cases per 100.000 citizens in 2007", fill = "cases per 100.000 citizens")+
+  labs(caption = "provinces with non-available data are shown in grey")
+
+#2008--------------------------------------------------------------------------------------
+ggplot(geo_dengue, aes(geometry=geometry)) +
+  geom_sf (aes(fill = X2008.total)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = " dengue cases per 100.000 citizens in 2008", fill = "cases per 100.000 citizens")+
+  labs(caption = "provinces with non-available data are shown in grey")
+
+#2009--------------------------------------------------------------------------------------
+ggplot(geo_dengue, aes(geometry=geometry)) +
+  geom_sf (aes(fill = X2009.total)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = " dengue cases per 100.000 citizens in 2009", fill = "cases per 100.000 citizens")+
+  labs(caption = "provinces with non-available data are shown in grey")
+
+#2010--------------------------------------------------------------------------------------
+ggplot(geo_dengue, aes(geometry=geometry)) +
+  geom_sf (aes(fill = X2010.total)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = " dengue cases per 100.000 citizens in 2010", fill = "cases per 100.000 citizens")+
+  labs(caption = "provinces with non-available data are shown in grey")
+
+#2011--------------------------------------------------------------------------------------
+ggplot(geo_dengue, aes(geometry=geometry)) +
+  geom_sf (aes(fill = X2011.total)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+   labs(title = " dengue cases per 100.000 citizens in 2011", fill = "cases per 100.000 citizens")+
+  labs(caption = "provinces with non-available data are shown in grey")
+
+#2012--------------------------------------------------------------------------------------
+ggplot(geo_dengue, aes(geometry=geometry)) +
+  geom_sf (aes(fill = X2012.total)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+   labs(title = " dengue cases per 100.000 citizens in 2012", fill = "cases per 100.000 citizens")+
+  labs(caption = "provinces with non-available data are shown in grey")
+
+#2013--------------------------------------------------------------------------------------
+ggplot(geo_dengue, aes(geometry=geometry)) +
+  geom_sf (aes(fill = X2013.total)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+   labs(title = " dengue cases per 100.000 citizens in 2013", fill = "cases per 100.000 citizens")+
+  labs(caption = "provinces with non-available data are shown in grey")
+
+#2014--------------------------------------------------------------------------------------
+ggplot(geo_dengue, aes(geometry=geometry)) +
+  geom_sf (aes(fill = X2014.total)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+   labs(title = " dengue cases per 100.000 citizens in 2014", fill = "cases per 100.000 citizens")+
+  labs(caption = "provinces with non-available data are shown in grey")
+
+#2015--------------------------------------------------------------------------------------
+ggplot(geo_dengue, aes(geometry=geometry)) +
+  geom_sf (aes(fill = X2015.total)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+   labs(title = " dengue cases per 100.000 citizens in 2015", fill = "cases per 100.000 citizens")+
+  labs(caption = "provinces with non-available data are shown in grey")
+
+#2016--------------------------------------------------------------------------------------
+ggplot(geo_dengue, aes(geometry=geometry)) +
+  geom_sf (aes(fill = X2016.total)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+   labs(title = " dengue cases per 100.000 citizens in 2016", fill = "cases per 100.000 citizens")+
+  labs(caption = "provinces with non-available data are shown in grey")
+
+#2017--------------------------------------------------------------------------------------
+ggplot(geo_dengue, aes(geometry=geometry)) +
+  geom_sf (aes(fill = X2017.total)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+   labs(title = " dengue cases per 100.000 citizens in 2017", fill = "cases per 100.000 citizens")+
+  labs(caption = "provinces with non-available data are shown in grey")
+
+#2018--------------------------------------------------------------------------------------
+ggplot(geo_dengue, aes(geometry=geometry)) +
+  geom_sf (aes(fill = X2018.total)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+   labs(title = " dengue cases per 100.000 citizens in 2018", fill = "cases per 100.000 citizens")+
+  labs(caption = "provinces with non-available data are shown in grey")
+
+#2019--------------------------------------------------------------------------------------
+ggplot(geo_dengue, aes(geometry=geometry)) +
+  geom_sf (aes(fill = X2019.total)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = " dengue cases per 100.000 citizens in 2019", fill = "cases per 100.000 citizens")+
+  labs(caption = "provinces with non-available data are shown in grey")
+
+#2020--------------------------------------------------------------------------------------
+ggplot(geo_dengue, aes(geometry=geometry)) +
+  geom_sf (aes(fill = X2020.total)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+   labs(title = " dengue cases per 100.000 citizens in 2020", fill = "cases per 100.000 citizens")+
+  labs(caption = "provinces with non-available data are shown in grey")
+
+```
+
+## 2) geoplots of each month
+
+### 2.1) assembling the dataframe
+
+```{r}
+# 1) computing the sum of each month over all years
+jan = geo_dengue[, c("X2006.01", "X2007.01", "X2008.01", "X2009.01", "X2010.01", "X2011.01", "X2012.01", "X2013.01", "X2014.01", "X2015.01", "X2016.01", "X2017.01", "X2018.01", "X2019.01", "X2020.01")]
+feb = geo_dengue[, c("X2006.02", "X2007.02", "X2008.02", "X2009.02", "X2010.02", "X2011.02", "X2012.02", "X2013.02", "X2014.02", "X2015.02", "X2016.02", "X2017.02", "X2018.02", "X2019.02", "X2020.02")]
+mar = geo_dengue[, c("X2006.03", "X2007.03", "X2008.03", "X2009.03", "X2010.03", "X2011.03", "X2012.03", "X2013.03", "X2014.03", "X2015.03", "X2016.03", "X2017.03", "X2018.03", "X2019.03", "X2020.03")]
+apr = geo_dengue[, c("X2006.04", "X2007.04", "X2008.04", "X2009.04", "X2010.04", "X2011.04", "X2012.04", "X2013.04", "X2014.04", "X2015.04", "X2016.04", "X2017.04", "X2018.04", "X2019.04", "X2020.04")]
+may = geo_dengue[, c("X2006.05", "X2007.05", "X2008.05", "X2009.05", "X2010.05", "X2011.05", "X2012.05", "X2013.05", "X2014.05", "X2015.05", "X2016.05", "X2017.05", "X2018.05", "X2019.05", "X2020.05")]
+jun = geo_dengue[, c("X2006.06", "X2007.06", "X2008.06", "X2009.06", "X2010.06", "X2011.06", "X2012.06", "X2013.06", "X2014.06", "X2015.06", "X2016.06", "X2017.06", "X2018.06", "X2019.06", "X2020.06")]
+jul = geo_dengue[, c("X2006.07", "X2007.07", "X2008.07", "X2009.07", "X2010.07", "X2011.07", "X2012.07", "X2013.07", "X2014.07", "X2015.07", "X2016.07", "X2017.07", "X2018.07", "X2019.07", "X2020.07")]
+aug = geo_dengue[, c("X2006.08", "X2007.08", "X2008.08", "X2009.08", "X2010.08", "X2011.08", "X2012.08", "X2013.08", "X2014.08", "X2015.08", "X2016.08", "X2017.08", "X2018.08", "X2019.08", "X2020.08")]
+sep = geo_dengue[, c("X2006.09", "X2007.09", "X2008.09", "X2009.09", "X2010.09", "X2011.09", "X2012.09", "X2013.09", "X2014.09", "X2015.09", "X2016.09", "X2017.09", "X2018.09", "X2019.09", "X2020.09")]
+oct = geo_dengue[, c("X2006.10", "X2007.10", "X2008.10", "X2009.10", "X2010.10", "X2011.10", "X2012.10", "X2013.10", "X2014.10", "X2015.10", "X2016.10", "X2017.10", "X2018.10", "X2019.10", "X2020.10")]
+nov = geo_dengue[, c("X2006.11", "X2007.11", "X2008.11", "X2009.11", "X2010.11", "X2011.11", "X2012.11", "X2013.11", "X2014.11", "X2015.11", "X2016.11", "X2017.11", "X2018.11", "X2019.11", "X2020.11")]
+dec = geo_dengue[, c("X2006.12", "X2007.12", "X2008.12", "X2009.12", "X2010.12", "X2011.12", "X2012.12", "X2013.12", "X2014.12", "X2015.12", "X2016.12", "X2017.12", "X2018.12", "X2019.12", "X2020.12")]
+
+## removing NA values to make sure that the sum can be calculated
+jan.s = apply(jan, 1, sum, na.rm=TRUE)
+feb.s = apply(feb, 1, sum, na.rm=TRUE)
+mar.s = apply(mar, 1, sum, na.rm=TRUE)
+apr.s = apply(apr, 1, sum, na.rm=TRUE)
+may.s = apply(may, 1, sum, na.rm=TRUE)
+jun.s = apply(jun, 1, sum, na.rm=TRUE)
+jul.s = apply(jul, 1, sum, na.rm=TRUE)
+aug.s = apply(aug, 1, sum, na.rm=TRUE)
+sep.s = apply(sep, 1, sum, na.rm=TRUE)
+oct.s = apply(oct, 1, sum, na.rm=TRUE)
+nov.s = apply(nov, 1, sum, na.rm=TRUE)
+dec.s = apply(dec, 1, sum, na.rm=TRUE)
+
+# combining the mean values in an new dataframe 
+geo_dengue_sum = cbind(geo_dengue$Reporting.areas, jan.s, feb.s, mar.s, apr.s, may.s, jun.s, jul.s, aug.s, sep.s, oct.s, nov.s, dec.s, geography )
+geo_dengue_sum
+```
+
+### 2.2) plotting dengue cases per 100.000 citizens for each month over all yeas
+
+The cases for January show the sum of all cases in each province that were reported in a Januars of the years 2006 to 2020.
+
+```{r}
+#Jan-------------------------------------------------------------------------------------
+ggplot(geo_dengue_sum, aes(geometry=geometry)) +
+  geom_sf (aes(fill = jan.s)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+   labs(title = "dengue cases per 100.000 citizens in January ", fill = "cases per 100.000 citizens")
+
+#Feb--------------------------------------------------------------------------------------
+ggplot(geo_dengue_sum, aes(geometry=geometry)) +
+  geom_sf (aes(fill = feb.s)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "dengue cases per 100.000 citizens in February ", fill = "cases per 100.000 citizens")
+
+#Mar--------------------------------------------------------------------------------------
+ggplot(geo_dengue_sum, aes(geometry=geometry)) +
+  geom_sf (aes(fill = mar.s)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+   labs(title = "dengue cases per 100.000 citizens in March ", fill = "cases per 100.000 citizens")
+#Apr--------------------------------------------------------------------------------------
+ggplot(geo_dengue_sum, aes(geometry=geometry)) +
+  geom_sf (aes(fill = apr.s)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+   labs(title = "dengue cases per 100.000 citizens in April ", fill = "cases per 100.000 citizens")
+
+#May--------------------------------------------------------------------------------------
+ggplot(geo_dengue_sum, aes(geometry=geometry)) +
+  geom_sf (aes(fill = may.s)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+   labs(title = "dengue cases per 100.000 citizens in May ", fill = "cases per 100.000 citizens")
+
+#Jun--------------------------------------------------------------------------------------
+ggplot(geo_dengue_sum, aes(geometry=geometry)) +
+  geom_sf (aes(fill = jun.s)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "dengue cases per 100.000 citizens in June ", fill = "cases per 100.000 citizens")
+
+#Jul--------------------------------------------------------------------------------------
+ggplot(geo_dengue_sum, aes(geometry=geometry)) +
+  geom_sf (aes(fill = jul.s)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "dengue cases per 100.000 citizens in July ", fill = "cases per 100.000 citizens")
+
+#Aug--------------------------------------------------------------------------------------
+ggplot(geo_dengue_sum, aes(geometry=geometry)) +
+  geom_sf (aes(fill = aug.s)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "dengue cases per 100.000 citizens in August ", fill = "cases per 100.000 citizens")
+
+#Sep--------------------------------------------------------------------------------------
+ggplot(geo_dengue_sum, aes(geometry=geometry)) +
+  geom_sf (aes(fill = sep.s)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+   labs(title = "dengue cases per 100.000 citizens in September ", fill = "cases per 100.000 citizens")
+
+
+#Oct--------------------------------------------------------------------------------------
+ggplot(geo_dengue_sum, aes(geometry=geometry)) +
+  geom_sf (aes(fill = oct.s)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+   labs(title = "dengue cases per 100.000 citizens in October ", fill = "cases per 100.000 citizens")
+
+#Nov--------------------------------------------------------------------------------------
+ggplot(geo_dengue_sum, aes(geometry=geometry)) +
+  geom_sf (aes(fill = nov.s)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+   labs(title = "dengue cases per 100.000 citizens in November ", fill = "cases per 100.000 citizens")
+#Dec--------------------------------------------------------------------------------------
+ggplot(geo_dengue_sum, aes(geometry=geometry)) +
+  geom_sf (aes(fill = dec.s)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+   labs(title = "dengue cases per 100.000 citizens in December ", fill = "cases per 100.000 citizens")
+
+```
+
+## 2.3) geoplots of dengue cases during the different monsoon seasons
+
+```{r}
+season_dengue= cbind(jan.s, feb.s, mar.s, apr.s, may.s, jun.s, jul.s, aug.s, sep.s, oct.s, nov.s, dec.s)
+as.data.frame(season_dengue)
+
+#pre-monsoon: march, april, may
+#monsoon: june, july, august, september
+#post-monsoon: october, november
+pre.monsoon.d= apply(season_dengue[,c(3,4,5)], 1, mean)
+monsoon.d= apply(season_dengue[,c(6,7,8,9)],1,mean)
+post.monsoon.d= apply(season_dengue[,c(10,11)],1,mean)
+inter.monsoon.d= apply(season_dengue[,c(12,1,2)],1,mean)
+monsoon_dengue_df = cbind(pre.monsoon.d, monsoon.d, post.monsoon.d, inter.monsoon.d, geography)
+monsoon_dengue_df
+
+# pre monsoon----------------------------------------------------------------------------------
+ggplot(monsoon_dengue_df, aes(geometry=geometry)) +
+  geom_sf (aes(fill = pre.monsoon.d)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "repored dengue cases per 100.000 citizens: pre-monsoon season",fill = "cases per 100.000 citizens")+
+  labs(caption= "pre-monsoon season (March, April, May)")
+
+# inter monsoon--------------------------------------------------------------------------------
+ggplot(monsoon_dengue_df, aes(geometry=geometry)) +
+  geom_sf (aes(fill = monsoon.d)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "repored dengue cases per 100.000 citizens: monsoon season",fill = "cases per 100.000 citizens")+
+  labs(caption= "inter-monsoon season (June, July, August, September)")
+
+#post monsoon---------------------------------------------------------------------------------
+ggplot(monsoon_dengue_df, aes(geometry=geometry)) +
+  geom_sf (aes(fill = post.monsoon.d)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "repored dengue cases per 100.000 citizens: post-monsoon season",fill = "cases per 100.000 citizens")+
+  labs(caption= "post-monsoon season (October, November)")
+
+#post monsoon---------------------------------------------------------------------------------
+ggplot(monsoon_dengue_df, aes(geometry=geometry)) +
+  geom_sf (aes(fill = inter.monsoon.d)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "repored dengue cases per 100.000 citizens: inter-monsoon season",fill = "cases per 100.000 citizens")+
+  labs(caption= "inter-monsoon season (December, January, Fabruary)")
+```
+
+## 3) anormality plots: boxplot of the total cases of every year per 100.000 citizens
+
+```{r}
+#defining a dataframe for each year (sums of all months in one year)
+d2006 = geo_dengue[,c("X2006.01", "X2006.02", "X2006.03", "X2006.04", "X2006.05", "X2006.06", "X2006.07", "X2006.08", "X2006.09","X2006.10","X2006.11","X2006.12")]
+d2007 = geo_dengue[, c("X2007.01", "X2007.02", "X2007.03", "X2007.04", "X2007.05", "X2007.06", "X2007.07", "X2007.08", "X2007.09","X2007.10","X2007.11","X2007.12")]
+d2008 = geo_dengue[, c("X2008.01", "X2008.02", "X2008.03", "X2008.04", "X2008.05", "X2008.06", "X2008.07", "X2008.08", "X2008.09","X2008.10","X2008.11","X2008.12")]
+d2009 = geo_dengue[, c("X2009.01", "X2009.02", "X2009.03", "X2009.04", "X2009.05", "X2009.06", "X2009.07", "X2009.08", "X2009.09","X2009.10","X2009.11","X2009.12")]
+d2010 = geo_dengue[, c("X2010.01", "X2010.02", "X2010.03", "X2010.04", "X2010.05", "X2010.06", "X2010.07", "X2010.08", "X2010.09","X2010.10","X2010.11","X2010.12")]
+d2011 = geo_dengue[, c("X2011.01", "X2011.02", "X2011.03", "X2011.04", "X2011.05", "X2011.06", "X2011.07", "X2011.08", "X2011.09","X2011.10","X2011.11","X2011.12")]
+d2012 = geo_dengue[, c("X2012.01", "X2012.02", "X2012.03", "X2012.04", "X2012.05", "X2012.06", "X2012.07", "X2012.08", "X2012.09","X2012.10","X2012.11","X2012.12")]
+d2013 = geo_dengue[, c("X2013.01", "X2013.02", "X2013.03", "X2013.04", "X2013.05", "X2013.06", "X2013.07", "X2013.08", "X2013.09","X2013.10","X2013.11","X2013.12")]
+d2014 = geo_dengue[, c("X2014.01", "X2014.02", "X2014.03", "X2014.04", "X2014.05", "X2014.06", "X2014.07", "X2014.08", "X2014.09","X2014.10","X2014.11","X2014.12")]
+d2015 = geo_dengue[, c("X2015.01", "X2015.02", "X2015.03", "X2015.04", "X2015.05", "X2015.06", "X2015.07", "X2015.08", "X2015.09","X2015.10","X2015.11","X2015.12")]
+d2016 = geo_dengue[, c("X2016.01", "X2016.02", "X2016.03", "X2016.04", "X2016.05", "X2016.06", "X2016.07", "X2016.08", "X2016.09","X2016.10","X2016.11","X2016.12")]
+d2017 = geo_dengue[, c("X2017.01", "X2017.02", "X2017.03", "X2017.04", "X2017.05", "X2017.06", "X2017.07", "X2017.08", "X2017.09","X2017.10","X2017.11","X2017.12")]
+d2018 = geo_dengue[, c("X2018.01", "X2018.02", "X2018.03", "X2018.04", "X2018.05", "X2018.06", "X2018.07", "X2018.08", "X2018.09","X2018.10","X2018.11","X2018.12")]
+d2019 = geo_dengue[, c("X2019.01", "X2019.02", "X2019.03", "X2019.04", "X2019.05", "X2019.06", "X2019.07", "X2019.08", "X2019.09","X2019.10","X2019.11","X2019.12")]
+d2020 = geo_dengue[, c("X2020.01", "X2020.02", "X2020.03", "X2020.04", "X2020.05", "X2020.06", "X2020.07", "X2020.08", "X2020.09","X2020.10","X2020.11","X2020.12")]
+
+#computing sum of each year
+s.d2006 = apply(d2006, 1, sum)
+s.d2007 = apply(d2007, 1, sum)
+s.d2008 = apply(d2008, 1, sum)
+s.d2009 = apply(d2009, 1, sum)
+s.d2010 = apply(d2010, 1, sum)
+s.d2011 = apply(d2011, 1, sum)
+s.d2012 = apply(d2012, 1, sum)
+s.d2013 = apply(d2013, 1, sum)
+s.d2014 = apply(d2014, 1, sum)
+s.d2015 = apply(d2015, 1, sum)
+s.d2016 = apply(d2016, 1, sum)
+s.d2017 = apply(d2017, 1, sum)
+s.d2018 = apply(d2018, 1, sum)
+s.d2019 = apply(d2019, 1, sum)
+s.d2020 = apply(d2020, 1, sum)
+
+sum_dengue_yearly = cbind(s.d2006, s.d2007, s.d2008, s.d2009, s.d2010, s.d2011, s.d2012, s.d2013, s.d2014, s.d2015, s.d2016, s.d2017, s.d2018, s.d2019, s.d2020)
+sum_dengue_yearly
+sum_dengue_yearly= as.data.frame(sum_dengue_yearly)
+sum_dengue_yearly
+
+#starting to plot
+
+library(ggplot2)
+library(tidyverse)
+library(hrbrthemes)
+library(viridis)
+library(cowplot)
+
+#plot
+plot.s.2006=ggplot(sum_dengue_yearly, aes(y=sum_dengue_yearly$s.d2006))+
+        stat_boxplot(geom="errorbar")+
+        scale_x_discrete()+
+        geom_boxplot(outlier.color= "gray", outlier.size=2)+
+        labs(title=2006, y=" ")+
+        ylim(50, 150)
+plot.s.2007=ggplot(sum_dengue_yearly, aes(y=sum_dengue_yearly$s.d2007))+
+        stat_boxplot(geom="errorbar")+
+        scale_x_discrete()+
+        geom_boxplot(outlier.color= "gray", outlier.size=2)+
+        labs(title=2007, y=" ")+
+        ylim(50, 150)
+plot.s.2008=ggplot(sum_dengue_yearly, aes(y=sum_dengue_yearly$s.d2008))+
+        stat_boxplot(geom="errorbar")+
+        scale_x_discrete()+
+        geom_boxplot(outlier.color= "gray", outlier.size=2)+
+        labs(title=2008, y=" ")+
+        ylim(50, 150)
+plot.s.2009=ggplot(sum_dengue_yearly, aes(y=sum_dengue_yearly$s.d2009))+
+        stat_boxplot(geom="errorbar")+
+        scale_x_discrete()+
+        geom_boxplot(outlier.color= "gray", outlier.size=2)+
+        labs(title=2009, y=" ")+
+        ylim(50, 150)
+plot.s.2010=ggplot(sum_dengue_yearly, aes(y=sum_dengue_yearly$s.d2010))+
+        stat_boxplot(geom="errorbar")+
+        scale_x_discrete()+
+        geom_boxplot(outlier.color= "gray", outlier.size=2)+
+        labs(title=2010, y=" ")+
+        ylim(50, 150)
+plot.s.2011=ggplot(sum_dengue_yearly, aes(y=sum_dengue_yearly$s.d2011))+
+        stat_boxplot(geom="errorbar")+
+        scale_x_discrete()+
+        geom_boxplot(outlier.color= "gray", outlier.size=2)+
+        labs(title=2011, y=" ")+
+        ylim(50, 150)
+plot.s.2012=ggplot(sum_dengue_yearly, aes(y=sum_dengue_yearly$s.d2012))+
+        stat_boxplot(geom="errorbar")+
+        scale_x_discrete()+
+        geom_boxplot(outlier.color= "gray", outlier.size=2)+
+        labs(title=2012, y=" ")+
+        ylim(50, 150)
+plot.s.2013=ggplot(sum_dengue_yearly, aes(y=sum_dengue_yearly$s.d2013))+
+        stat_boxplot(geom="errorbar")+
+        scale_x_discrete()+
+        geom_boxplot(outlier.color= "gray", outlier.size=2)+
+        labs(title=2013, y=" ")+
+        ylim(50, 150)
+plot.s.2014=ggplot(sum_dengue_yearly, aes(y=sum_dengue_yearly$s.d2014))+
+        stat_boxplot(geom="errorbar")+
+        scale_x_discrete()+
+        geom_boxplot(outlier.color= "gray", outlier.size=2)+
+        labs(title=2014, y=" ")+
+        ylim(50, 150)
+plot.s.2015=ggplot(sum_dengue_yearly, aes(y=sum_dengue_yearly$s.d2015))+
+        stat_boxplot(geom="errorbar")+
+        scale_x_discrete()+
+        geom_boxplot(outlier.color= "gray", outlier.size=2)+
+        labs(title=2015, y=" ")+
+        ylim(50, 150)
+plot.s.2016=ggplot(sum_dengue_yearly, aes(y=sum_dengue_yearly$s.d2016))+
+        stat_boxplot(geom="errorbar")+
+        scale_x_discrete()+
+        geom_boxplot(outlier.color= "gray", outlier.size=2)+
+        labs(title=2016, y=" ")+
+        ylim(50, 150)
+plot.s.2017=ggplot(sum_dengue_yearly, aes(y=sum_dengue_yearly$s.d2017))+
+        stat_boxplot(geom="errorbar")+
+        scale_x_discrete()+
+        geom_boxplot(outlier.color= "gray", outlier.size=2)+
+        labs(title=2017, y=" ")+
+        ylim(50, 150)
+plot.s.2018=ggplot(sum_dengue_yearly, aes(y=sum_dengue_yearly$s.d2018))+
+        stat_boxplot(geom="errorbar")+
+        scale_x_discrete()+
+        geom_boxplot(outlier.color= "gray", outlier.size=2)+
+        labs(title=2018, y=" ")+
+        ylim(50, 150)
+plot.s.2019=ggplot(sum_dengue_yearly, aes(y=sum_dengue_yearly$s.d2019))+
+        stat_boxplot(geom="errorbar")+
+        scale_x_discrete()+
+        geom_boxplot(outlier.color= "gray", outlier.size=2)+
+        labs(title=2019, y=" ")+
+        ylim(50, 150)
+plot.s.2020=ggplot(sum_dengue_yearly, aes(y=sum_dengue_yearly$s.d2020))+
+        stat_boxplot(geom="errorbar")+
+        scale_x_discrete()+
+        geom_boxplot(outlier.color= "gray", outlier.size=2)+
+        labs(title=2020, y=" ")+
+        ylim(50, 150)
+
+#combining the plots into one big plot makes problems -> arrangement in word dokument   
+plot_grid(plot.s.2006, plot.s.2007, plot.s.2008, plot.s.2009, plot.s.2010, plot.s.2011, plot.s.2012, plot.s.2013,  nrow = 2, align = "h")
+
+plot_grid(plot.s.2014, plot.s.2015, plot.s.2016, plot.s.2017, plot.s.2018, plot.s.2019, plot.s.2020, nrow=2, align="h")
+
+
+
+
+```
+
+## 4) context of dengue outbreaks
+
+According to the boxplots, the highest mean dengue cases were reported in 2013. to have a look at the surrounding conditions (ex. previous outbreaks) the total reported dengue cases of the years 2012, 2013 and 2014 were plotted in the course of a year.
+
+```{r}
+#loading necessary library
+library(ggplot2)
+library(dplyr)
+#computing the mean of each month in 2013
+m_jan= sum(dengue_data_com2[,"X2013.01"])
+m_feb= sum(dengue_data_com2[,"X2013.02"])
+m_mar= sum(dengue_data_com2[,"X2013.03"])
+m_apr= sum(dengue_data_com2[,"X2013.04"])
+m_may= sum(dengue_data_com2[,"X2013.05"])
+m_jun= sum(dengue_data_com2[,"X2013.06"])
+m_jul= sum(dengue_data_com2[,"X2013.07"])
+m_aug= sum(dengue_data_com2[,"X2013.08"])
+m_sep= sum(dengue_data_com2[,"X2013.09"])
+m_oct= sum(dengue_data_com2[,"X2013.10"])
+m_nov= sum(dengue_data_com2[,"X2013.11"])
+m_dec= sum(dengue_data_com2[,"X2013.12"])
+
+sum_2013 = apply(dengue_data_com2[,c("X2013.01","X2013.02","X2013.03", "X2013.04","X2013.05","X2013.06","X2013.07","X2013.08","X2013.09","X2013.10","X2013.11","X2013.12")], 2,function(x){sum(x, na.rm = TRUE)} )
+sum_2014 = apply(dengue_data_com2[,c("X2014.01","X2014.02","X2014.03", "X2014.04","X2014.05","X2014.06","X2014.07","X2014.08","X2014.09","X2014.10","X2014.11","X2014.12")], 2,function(x){sum(x, na.rm = TRUE)} )
+sum_2012 = apply(dengue_data_com2[,c("X2012.01","X2012.02","X2012.03", "X2012.04","X2012.05","X2012.06","X2012.07","X2012.08","X2012.09","X2012.10","X2012.11","X2012.12")], 2,function(x){sum(x, na.rm = TRUE)} )
+as.data.frame(sum_2013)
+as.data.frame(sum_2014)
+as.data.frame(sum_2012)
+sum_2012.2013.2014 = cbind(sum_2012, sum_2013, sum_2014)
+rownames(sum_2012.2013.2014) = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+sum_2012.2013.2014_df = as.data.frame(sum_2012.2013.2014)
+sum_2012.2013.2014_df
+
+
+# combining data in tibbles
+df3 = as_tibble(sum_2012.2013.2014_df)
+df3
+#na.omit(df3)
+
+#creating the plots
+df3%>%
+  ggplot(aes(x=seq(1,12,1), y=sum_2012, color ="2012"), linetype=1)+
+  geom_line(aes(y=sum_2012), linetype=1)+
+  geom_point(aes(y=sum_2012))+
+  geom_line(y=sum_2013, color="violet")+ 
+  geom_point(aes(y=sum_2013,color="2013"), linetype=1)+
+  geom_line(y=sum_2014, color="orange")+
+  geom_point(aes(y=sum_2014,color ="2014"), linetype=1)+
+  ylim(10,5000)+
+  ylab("reported monthly dengue cases per 100.000 citizens")+
+  xlab("month")+
+  ggtitle("monthly reported dengue cases per 100.000 citizens in the whole country (2012, 2013, 2014)")+
+  scale_color_manual(values = c("pink", "violet", "orange"))+
+  scale_x_continuous(breaks=c(1,2,3,4,5,6,7,8,9,10,11,12),labels=c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"))
+
+```
+
+## 5) plotting dengue cases in exemplary provinces
+
+### 5.1) monthly plot
+
+To understand the connection between dengue cases and different kinds of areas in Thailand exemplary provinces with different characteristics (position in the country, height of land) were chosen:
+
+-   Maha-Sarakham (north-east), 100-200m above sea level
+
+-   Chiang Mai (north to north-west), 1000-1500m above sea level
+
+-   Kalasin (central), 0-100m above sea level
+
+-   Chumphon
+
+-   Songkhla (south), 100-200m above sea level
+
+    *Diercke Weltatlas* (1st ed.). (2008). westermann
+
+```{r}
+#install.packages("lubridate")
+library(ggplot2)
+library(dplyr)
+library(lubridate)
+
+# dataframe combining yearly mean of each province 
+month= c("Jan", "Feb", "Mar", "Apr","May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+dengue_sum = as.data.frame(rbind(jan.s, feb.s, mar.s, apr.s, may.s, jun.s, jul.s, aug.s, sep.s, oct.s, nov.s, dec.s))
+
+dengue_sum = cbind(month, dengue_sum)                
+colnames(dengue_sum)= c("Month",geography[,"NAME_1"])
+#huss.means.df = as.data.frame(huss.means)
+#adding column with the names of each month
+
+dengue_sum
+
+#plotting
+dengue_sum%>%
+  ggplot(aes(x=seq(1,12,1), y= dengue_sum[,16], color ="Maha Sarakham"), linetype=1)+
+  geom_line(aes(y= dengue_sum[,16], color="Maha Sarakam"), linetype=1)+
+  geom_line(aes(y=dengue_sum[,12], color="Chiang Mai"))+ 
+  geom_line(aes(y=dengue_sum[,62], color="Saraburi"))+
+  geom_line(aes(y=dengue_sum[,15], color="Chumphon"))+
+  geom_line(aes(y=dengue_sum[,66], color="Songkhla"))+
+  ylim(10,750)+
+  ylab(" reported dengue cases per 100.000 citizens")+
+  xlab("month")+
+  ggtitle("monthly reported dengue cases per 100.000 citizens Maha Sarakham,Chiang Mai, Saraburi, Chumphon and Songkhala")+
+  scale_x_continuous(breaks=c(1,2,3,4,5,6,7,8,9,10,11,12),labels=c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"))
+
+```
+
+### 5.2) seasonal plot of all provinces
+
+```{r}
+monsoon_dengue_nogeo
+# computing mean of all provinces
+monsoon_dengue_nogeo = rbind(pre.monsoon.d, monsoon.d, post.monsoon.d, inter.monsoon.d)
+monsoon_tot_dengue = apply(monsoon_dengue_nogeo, 1, sum)
+monsoon_tot_dengue = as.data.frame(monsoon_tot_dengue)
+colnames(monsoon_tot_dengue) = "cases per 100.000"
+monsoon_tot_dengue
+
+plot(monsoon_tot_dengue)
+
+#does not work yet
+monsoon_tot_dengue %>%
+  ggplot(aes(x = seq(1, 4, 1), y = `total dengue cases per 100.000 citizens`, color = "Season")) +
+  geom_line(aes(y = `cases per 100.000`)) +
+  ylim(10, 10000) +
+  ylab("Reported Dengue Cases") +
+  xlab("Season") +
+  ggtitle("Reported Dengue Cases in the Monsoon Seasons in the Whole Country")
+
+
+```
