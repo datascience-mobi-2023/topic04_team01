@@ -257,6 +257,14 @@ colnames(Yearly.Centers) <- years
 #print(Yearly.Centers)
 ```
 
+```{r}
+print(kmeans.obj)
+```
+
+```{r}
+
+```
+
 ## 3.1.2 Plotting the Clusters in 3 single Plots
 
 ```{r}
