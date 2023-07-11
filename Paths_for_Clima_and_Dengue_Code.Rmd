@@ -46,9 +46,18 @@ T.huss.mon.ordered['numbers'] = c(1:77)
 ## Loading the Geography Data
 ```{r}
 
-geography <- st_read("./geo_data/gadm36_THA_shp")
+
+shapefilePath <- "./geo_data/gadm36_THA_shp"
+layers <- st_layers(shapefilePath)
+geography <- st_read(shapefilePath, layer = "gadm36_THA_1")
+numbers <- c(1:77)
+geography <- cbind(geography,numbers)
+
 
 ```
 
+```{r}
+View(geography)
+```
  
  
