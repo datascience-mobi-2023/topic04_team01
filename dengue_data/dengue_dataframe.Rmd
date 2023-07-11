@@ -4,18 +4,30 @@ output: html_document
 date: "2023-05-30"
 ---
 
-#Dengue data als dataframe einzeln einlesen in den Jahren 2006 - 2020:
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+#Dengue Data Cleaning and Preperation ##Bulding the different Dataframes
 
 ```{r}
-# Benötigte Bibliothek installieren
+#Install needed library 
 install.packages("readxl")
 ```
 
+##1.Load the Excel Sheets for the Dengue Data Sets into R (Year 2006 - 2020)
+
 ```{r}
-# Benötigte Bibliothek laden
+# Load the needed libraries 
 library(readxl)
 
-# Relativer Pfad zur Excel-Datei
+# Assinge all the relative paths to the different Excel sheets in a new variable 
 path2006 <- "2006_dengue_extracted.xlsx" 
 path2007 <- "2007_dengue_extracted.xlsx"
 path2008 <- "2008_dengue_extracted.xlsx" 
@@ -30,12 +42,12 @@ path2016 <- "2016_dengue_extracted.xlsx"
 path2017 <- "2017_dengue_extracted.xlsx"
 path2018 <- "2018_dengue_extracted.xlsx" 
 path2019 <- "2019_dengue_extracted.xlsx"
-path2020 <- "2010_dengue_extracted.xlsx" 
+path2020 <- "2020_dengue_extracted.xlsx" 
 
-# Pfad zum Arbeitsverzeichnis setzen (wo die Excel-Datei liegt)
+# Set the working directonary pazh (where the Excel files are located)
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 
-# Excel-Datei einlesen und als Dataframe speichern
+#Read the Excel sheets and save them as dataframe 
 dengue2006 <- read_excel(path2006)
 dengue2007 <- read_excel(path2007)
 dengue2008 <- read_excel(path2008)
@@ -53,64 +65,42 @@ dengue2019 <- read_excel(path2019)
 dengue2020 <- read_excel(path2020)
 
  
-# Den eingelesenen Dataframe anzeigen
+# Show an example dataframe 
 print(dengue2006)
 print(dengue2007)
 
 #eine zeile fehlt bei 2020: lasst uns sie hinzufügen 
-Bungkan = c("Bungkan",873, 17, 31, 48, 21, 154, 453, 122, 21, 5, 1, 0, 0)
-dengue2020 = rbind(dengue2020,Bungkan)
+#Bungkan = c("Bungkan",873, 17, 31, 48, 21, 154, 453, 122, 21, 5, 1, 0, 0)
+#dengue2020 = rbind(dengue2020,Bungkan)
 
 ```
 
-##Vereinfachtes einlesen mit schleife -> funktioniert nicht akkurat 
-- hab versucht es einfacher zu machen hat aber noch nicht geklappt 
-- wenn sich da jemand drin auskennt gerne ausprobieren 
+#2.Calculate the total number of dengue cases for each region for the years 2012-2016
 
 ```{r}
-# Benötigte Bibliothek laden
-#library(readxl)
 
-# Liste der Dateinamen
-#file_names <- c("2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020")
-
-# Pfad zum Arbeitsverzeichnis setzen (wo die Excel-Dateien liegen)
-#setwd(dirname(rstudioapi::getSourceEditorContext()$path))
-
-# Excel-Dateien einlesen und als Liste von Dataframes speichern
-#dengue_data <- lapply(file_names, function(file_name) {
-  #file_path <- paste0("./dengue_data/", file_name, "_dengue_extracted.xlsx")
-  #read_excel(file_path)
-#})
-
-# Die einzelnen Dataframes den entsprechenden Variablennamen zuweisen
-#list2env(setNames(dengue_data, paste0("dengue", file_names)), envir = .GlobalEnv)
-```
-
-#Calculate the total number of dengue cases for each region for the years 2012-2016
-```{r}
-
-# Liste der Jahre
+# List of the years 
 years <- c(2012:2016)  
 
 for (year in years) {
-   # Name des Dataframes
+   # Name of the Dataframes
   df_name <- paste0("dengue", year)  
-  # Dataframe abrufen
+  # get the right dataframe 
   df <- get(df_name)  
   
-  total_col_name <- paste0("Total", year)  # Name der "Total"-Spalte
+  total_col_name <- paste0("Total")  # Name the "Total"-column
   
-  df[, total_col_name] <- rowSums(df[, 2:13])  # "Total"-Spalte hinzufügen
+  df[, total_col_name] <- rowSums(df[, 2:13])  # add "Total"-column 
   
-  assign(df_name, df)  # Aktualisierten Dataframe speichern
+  assign(df_name, df)  # safe the new dataframes 
 }
 
 ```
 
+#3. Adjusting the data from 2006-2011 & 2017-2020 without zone numbers to match the format of the intervening years
 
-#Angleichen der Daten von 2006 -2011 & 2017 - 2020 ohne Zonen zahlen an die der Jahre dazwischen
-#Beispiel für das JAhr 2006
+##3.1. Example for the year 2006
+
 ```{r}
 rownames(dengue2006) = dengue2006$`Reporting areas`
 
@@ -124,10 +114,32 @@ dengue2006 = dengue2006[- i.remove,]
 print(dengue2006)
 ```
 
+##3.2. Change the order of column for the years 2012-2016 \### The Total-column needs to be at the same place as in the other years
 
-# function um die rows für alle dengue daten zu cleanen (=zusätzlichen rows rausschneiden )
 ```{r}
-#alle spalten namen angleichen
+ # List of the years 
+years <- c(2012:2016)  
+
+for (year in years) {
+  # Name of the dataframe 
+  df_name <- paste0("dengue", year)  
+  # get the datafarme
+  df <- get(df_name)  
+  
+  new_order = c("Reporting areas","Total","Jan","Feb","Mar","Apr","May","June","July","Aug","Sept","Oct","Nov","Dec")# vector with new order for the dataframe 
+  
+  df = df[,new_order] 
+  
+  assign(df_name, df)  # actulized dataframe 
+}
+
+#remove the second column of the 2020 dataframe: 
+dengue2020 = dengue2020[,- 2]
+```
+
+##3.3. Rename all the columns, after the example of the year 2009
+
+```{r}
 colnames(dengue2008) = dengue2009[1,]
 colnames(dengue2009) = dengue2009[1,]
 colnames(dengue2010) = dengue2009[1,]
@@ -143,139 +155,141 @@ colnames(dengue2019) = dengue2009[1,]
 colnames(dengue2020) = dengue2009[1,]
 ```
 
-#dataframes anhand der reporting regions vergleichen um falsche zeilen zu entfernen 
+##3.4.Compare the dataframes
+
 ```{r}
 
-#vergleich = which(dengue2019$`Reporting areas` %in% dengue2020$`Reporting areas`)
-
-#dengue_zeilezuviel= dengue2019[-vergleich,] 
-
-#print (dengue_zeilezuviel)
+vergleich = which(dengue2019$`Reporting areas` %in% dengue2020$`Reporting areas`)
+dengue_zeilezuviel= dengue2019[-vergleich,] 
+print (dengue_zeilezuviel)
 
 ```
 
+##3.5. Remove all the extensive rows from the dataframes
 
 ```{r}
-# Liste der Jahre
+# List of the years 
 years <- c(2006:2020)
 
-#Nummern von 1-19
+#numbers 1:19 
 years0 = paste0("0", 1:9)
 years1 = c(10:19)
 
-#liste der Zonen mit format: ZONE:01 - 19 
+#list of the Zones with format: ZONE:01 - 19 
 ZONE0 = c(paste0("ZONE",":", years0), paste0("ZONE",":", years1)) 
 
-#Liste der Zonen mit format Zone:1 - 19 
+#List of the Zones with format Zone:1 - 19 
 Zone1 = c(paste0("Zone",":", 1:19))
 
-# Schleife über die Jahre
+# Loop for all the years 
 for (year in years) {
-  # DataFrame-Namen generieren
+  #generate the dataframe name 
   df_name <- paste0("dengue", year)
   
-  # DataFrame laden
+  # load the datafarme 
   df <- get(df_name)
   
-  # Setze die Zeilennamen auf die Werte der Spalte "Reporting areas"
+  # Assign the rownames to the column "Reporting areas"
   rownames(df) <- df$`Reporting areas`
   
-  # Zeilen entfernen
+  # Remove all extra Rows 
   remove_rows <- c(ZONE0, Zone1, "Northern Region", "Central Region", "Southern Region", "North-Eastern Region","Total","Reportingareas", "Reporting areas", "North Region", "South Region", "Northeast Region")
   df <- df[!rownames(df) %in% remove_rows, ]
   
-  # Speichere das modifizierte DataFrame unter dem gleichen Namen
+  # Safe the modified dataframe 
   assign(df_name, df)
   
-  # Gib das modifizierte DataFrame aus
+  # show the modified data farme 
   print(df)
 }
 ```
 
+##3.6. Order all the dataframes in alphabetical Order
 
-#Zeilen alphabetisch sortieren 
 ```{r}
 
-dataframes <- ls(pattern = "dengue\\d{4}")  # Liste der Dataframes, die dem Muster "dengueXXXX" entsprechen
+dataframes <- ls(pattern = "dengue\\d{4}")  # List of the datafarmes acording to the example dengueXXXX
 
 for (df_name in dataframes) {
-  df <- get(df_name)  # Dataframe abrufen
-  df <- df[order(df$`Reporting areas`), ]  # Sortierung nach "Reporting areas"
-  assign(df_name, df)  # Aktualisierten Dataframe speichern
+  df <- get(df_name)  # get Dataframe 
+  df <- df[order(df$`Reporting areas`), ]  # sort after"Reporting areas"
+  assign(df_name, df)  # safte the datafarme 
 }
 ```
 
+#4. Let's build a merged DATAFRAME for all teh denguedata years 2006 -2020 ##Princip: 4 columns with the order: Reporting area; Year; Month; cases; humidity data
 
-#DATAFRAME erstellen 
-Prinzip: 4 spalten mit einteilung: Reporting area; Year; Month; cases; humidity data
 ```{r}
 
-# Liste der Jahre
+# List of the years
 years <- c(2006:2020)
 
-# Leeres DataFrame für die kombinierten Daten erstellen
+# create an empty dataframe L
 dengue_data_com <- data.frame(Reporting_area = character(),
                           Year = integer(),
                           Month = character(),
                           dengue_cases = integer(),
                           stringsAsFactors = FALSE)
 
-# Schleife über die Jahre
+# Loop for all the years 
 for (year in years) {
-  # DataFrame-Namen generieren
+  # get the Dataframe Name 
   df_name <- paste0("dengue", year)
   
-  # DataFrame laden
+  # load the DataFrame 
   df <- get(df_name)
   
-  # Spaltennamen für die Monate extrahieren
+  # extract the column names for the months 
   months <- colnames(df)[-1]
   
-  # Schleife über die Monate
+  # Loop over all months 
   for (month in months) {
-    # Daten für den aktuellen Monat extrahieren
+    # extract the data for the current month 
     month_data <- df[, c("Reporting areas", month)]
     
-    # Spaltennamen anpassen
+    # adjust column names 
     colnames(month_data) <- c("Reporting_area", "dengue_cases")
     
-    # Jahr und Monat hinzufügen
+    # add years and months 
     month_data$Year <- year
     month_data$Month <- month
     
-    # Zeilen an das kombinierte DataFrame anhängen
+    # Add Rows to the combinded datafarme 
     dengue_data_com <- rbind(dengue_data_com, month_data)
   }
 }
 
-# Das kombinierte DataFrame anzeigen und alle fehlenden Values in 0 verwandeln
+# Print 
 print(dengue_data_com)
 ```
+##4.1. Change the variable class, save the dataframe 
 ```{r}
-#umwandeln der dengue_cases von chr in dbl 
+#Change the chr into dbl 
 dengue_data_com$dengue_cases = as.numeric(dengue_data_com$dengue_cases)
 
-#umwandeln der fehlenden Werte = NA's in 0
+#Change the NA's into 0
 dengue_data_com[is.na(dengue_data_com)] = 0
 
 print(dengue_data_com)
 
-#locales Speichern der dengue_data_com ohne die Klimadaten
+#safe the new dataframe 
 filePath = paste(getwd(), "dengue_data_com.csv",sep = "/")
 write.csv(dengue_data_com, filePath)
 ```
 
-##Lets load the realtive humidity data 
+#5.Let's creat a merged dataframe with the dengue data and the humidity data 
+
 ```{r}
 library(readxl)
 
 sheet_names = excel_sheets("../era5_data_2006_2020_thailand_monmean.xlsx")
 
-#laden von den einzelnen sheets
+#load the seperate sheets 
 T.huss.mon = read_excel("../era5_data_2006_2020_thailand_monmean.xlsx", sheet="era5_huss_2006_2020_thailand_mo")
 
 T.hussmon = as.data.frame(T.huss.mon)
-#reporting areas spalten namen ändern 
+
+#adjust the column name for reporting area 
 colnames(T.huss.mon)[2] <- "Reporting_Area"
 
 ```
@@ -284,7 +298,8 @@ colnames(T.huss.mon)[2] <- "Reporting_Area"
 T.huss.mon.com =T.huss.mon
 ```
 
-#formatieren wir den datensatz um in das gleiche formt wie die dengue data 
+##5.1 Change the format of the climat dataframe 
+
 ```{r}
 library(tidyverse)
 
@@ -300,12 +315,14 @@ T.huss_reshaped <- T.huss.mon.com %>%
 # Check the resulting dataframe
 print(T.huss_reshaped)
 ```
-#order the T.huss datafrme alphabetically and add numbers 
+
+##5.2order the T.huss datafrme alphabetically and add numbers
+
 ```{r}
 T.huss_reshaped = T.huss_reshaped[order(T.huss_reshaped$"Reporting_Area"),]
 head(T.huss_reshaped)
 
-#entfernen der Numbers spalte 
+#Delete the numbers column 
 T.huss_reshaped = T.huss_reshaped[,2:7]
 head(T.huss_reshaped)
 
@@ -314,22 +331,23 @@ library(dplyr)
 T.huss_reshaped <- T.huss_reshaped %>% 
   mutate(row_number = row_number())
 
-# Überprüfe den DataFrame mit der hinzugefügten Nummerierung
 print(T.huss_reshaped)
 ```
+##5.3 Remove the total Values of the dengue data frame denge_data_com and save as dengue_data_com_2
 ```{r}
-# entfernen wir jetzt die Total values aus dem dengue_data_com 
 i.remove = which(dengue_data_com$Month %in% c("Total"))
 i.remove 
 
 dengue_data_com_2 = dengue_data_com[-i.remove,]
 print(dengue_data_com_2)
 ```
-#nummerieren wir jetzt die dengue_data_com.2 neu
+
+##5.4 Order the dengue_data_com_2 
+
 ```{r}
 dengue_data_com_2
 
-#ordnen wir den dataframe alpahbetisch
+#Order the dataframe alphabetically 
 
 dengue_data_com_2 = dengue_data_com_2[order(dengue_data_com_2$"Reporting_area"),]
                                       
@@ -342,16 +360,15 @@ dengue_data_com_2 <- dengue_data_com_2 %>%
 #lets set the row index to the row_numbers 
 rownames(dengue_data_com_2) = dengue_data_com_2$row_number
 
-# Überprüfe den DataFrame mit der hinzugefügten Nummerierung
 print(dengue_data_com_2)
 
 ```
 
-#umbennenung von Bueng Kan in T.huss_reshaped into Bungkan from dengue_data_com_2
+##5.5 Rename Bueng Kan in T.huss_reshaped into Bungkan from dengue_data_com_2 and also other names of the Reporting area column 
+
 ```{r}
 library(dplyr)
 
-#ÄNDERN DES CHARACTERS IN JEDER SPALte die ihn enthält 
 T.huss_reshaped <- T.huss_reshaped %>% 
   mutate (Reporting_Area = ifelse(Reporting_Area == "Bueng Kan", "Bungkan", Reporting_Area))
 print(T.huss_reshaped)
@@ -365,8 +382,7 @@ dengue_data_com_2 <- dengue_data_com_2 %>%
 print(dengue_data_com_2)
 ```
 
-#jetzt können wir beide dataframes mergen
-#aber davor vergleichen wir ob die datensätze gleich groß sind 
+##5.6 Compare the dataframes before merge
 
 ```{r}
 
@@ -379,55 +395,59 @@ print(dengue_data_com_2)
 #zz = dengue_data_com_2[-vv,]
 #zz
 ```
-#exclude Bungkan 2006 - 2010 data from T.huss_reshaped since there are no dengue data available for this timeframe 
+
+##5.7 exclude Bungkan 2006 - 2010 data from T.huss_reshaped since there is no dengue data available for this timeframe
+
 ```{r}
 library(dplyr)
 
-# Annahme: DataFrame heißt "T.huss_reshaped" und die Spalte mit den Jahren heißt "year"
-
-# Lösche die Zeilen mit den Jahren 2006 bis 2010 für bungkan 
+# delete the rows 2006 bis 2010 for bungkan 
 T.huss_reshaped <- T.huss_reshaped %>%
   filter(!(Reporting_Area == "Bungkan" & year >= 2006 & year <= 2010))
 
-# Überprüfe den DataFrame nach dem Löschen der Zeilen
 print(T.huss_reshaped)
 ```
-#gleichen wir die spaltenbezeichung der beiden dataframes noch an vor dem merge 
-```{r} 
-#als ertes die monatsnamen aus dengue data in zahlen umwandeln
+
+##5.8 Adjust the names of the columns before merge 
+
+```{r}
 library(dplyr)
 
-# Annahme: DataFrame heißt "dengue_data_com_2" und die Spalte mit den Monaten heißt "Month"
+# Turn the Months into numbers 
 
-# Definiere die Umwandlung der Monatsnamen
+# Define the change in months and numbers 
 monat_umwandlung <- c(Jan = "01", Feb = "02", Mar = "03", Apr = "04", May = "05", June = "06",
                       July = "07", Aug = "08", Sept = "09", Oct = "10", Nov = "11", Dec = "12")
 
-# Wandele die Monate in numerische Werte um
+# Change the months in numeric values 
 dengue_data_com_2 <- dengue_data_com_2 %>%
   mutate(Month = recode(Month, !!!monat_umwandlung))
 
-# Überprüfe den DataFrame nach der Umwandlung der Monate
+
 print(dengue_data_com_2)
 
-# Ändere den Spaltennamen
+#Change the Column names 
 colnames(dengue_data_com_2)[colnames(dengue_data_com_2) == "Reporting_area"] <- "Reporting_Area"
 colnames(dengue_data_com_2)[colnames(dengue_data_com_2) == "dengue_cases"] <- "Dengue_Cases"
 colnames(T.huss_reshaped)[colnames(T.huss_reshaped) == "year"] <- "Year"
 colnames(T.huss_reshaped)[colnames(T.huss_reshaped) == "month"] <- "Month"
 colnames(T.huss_reshaped)[colnames(T.huss_reshaped) == "relative_humidity"] <- "Relative_Humidity"
-# Überprüfe den DataFrame nach der Umbenennung
+
+
 print(dengue_data_com_2)
 print(T.huss_reshaped)
 ```
-#lets save the new climat data format 
+
+##5.9 lets save the new climat data format
+
 ```{r}
-#locales Speichern der dengue_hum 
+#locally safe the new climat data dataframe 
 filePath = paste(getwd(), "T.huss_reshaped.csv",sep = "/")
 write.csv(T.huss_reshaped, filePath)
 ```
 
-#lets merge the two dataframes by the shared column (row_number) 
+##5.10 let's merge the two dataframes by the shared column (row_number)
+
 ```{r}
 dengue_hum = merge(dengue_data_com_2, T.huss_reshaped, by = "row_number")
 
@@ -439,7 +459,7 @@ dengue_hum = dengue_hum[,- c.remove]
 
 print(dengue_hum)
 
-#umbennen der Spalten 
+#rename the columns 
 colnames(dengue_hum)[colnames(dengue_hum) == "Reporting_Area.x"] <- "Reporting_Area"
 colnames(dengue_hum)[colnames(dengue_hum) == "Month.x"] <- "Month"
 colnames(dengue_hum)[colnames(dengue_hum) == "Year.x"] <- "Year"
@@ -447,29 +467,31 @@ colnames(dengue_hum)[colnames(dengue_hum) == "Year.x"] <- "Year"
 #reorder the columns 
 dengue_hum = dengue_hum[,c(1,2,6,7,5,4,3,8)]
 
-#umwandeln der dengue_cases von chr in dbl 
+#change the dengue_cases from chr into dbl 
 dengue_hum$Dengue_Cases = as.numeric(dengue_hum$Dengue_Cases)
 
-#umwandeln der fehlenden Werte = NA's in 0
+#change the missing values NA's into 0
 dengue_hum[is.na(dengue_hum)] = 0
 
-#umwandeln von month von chr in dbl 
+#Schnage the chr class in month to dbl
 dengue_hum$Month = as.numeric(dengue_hum$Month)
 
 ```
-#speichern 
+
+##5.11 Safe the merged dataframe 
+
 ```{r}
-#locales Speichern der dengue_hum 
+#locally safe dengue_hum 
 filePath = paste(getwd(), "dengue_hum.csv",sep = "/")
 write.csv(dengue_hum, filePath)
 ```
 
-#Datafrem in der Form der Klima daten erstellen 
-```{r}
-#ausgangsdataframe sind die einzelmnen von 2006 - 2020 
-#zuerst müssen wir alle Spalten umbennen
+#6. Creat a Datafrem in a differnt format (the one of the era5 dataset) 
 
-# Datenrahmen für die Jahre 2006 bis 2019 kopieren und umbenennen
+```{r}
+#Rename all the columns 
+
+# copy and rename the dataframe for all the years 
 
 colnames(dengue2006)[2:14] <- c(paste(2006, "total", sep = "."), paste(2006, sprintf('%02d', 1:12), sep = "."))
 
@@ -503,13 +525,15 @@ colnames(dengue2020)[2:14] <- c(paste(2020, "total", sep = "."), paste(2020, spr
 
 ```
 
-#Bungkan Zeile für jahre 2006 -2009 hinzufügen 
+##6.1 add a row for Bungkan for the Years 2006 - 2010 
+
 ```{r}
-# Vektor erstellen
-vektor <- c("Bungkan", rep(0, 13))
+# Creat a vector 
+vektor <- c("Bungkan", rep(NA,13))
 
 print(vektor)
 
+#Add the row 
 dengue2006 = rbind(dengue2006,vektor)
 dengue2007 = rbind(dengue2007,vektor)
 dengue2008 = rbind(dengue2008,vektor)
@@ -517,21 +541,20 @@ dengue2009 = rbind(dengue2009,vektor)
 dengue2010 = rbind(dengue2010,vektor)
 ```
 
-#alles nochmal alphabetisch ordnen 
-```{r}
-#Zeilen alphabetisch sortieren 
+##6.2 Order the dataframes alphabteically 
 
-dataframes <- ls(pattern = "dengue\\d{4}")  # Liste der Dataframes, die dem Muster "dengueXXXX" entsprechen
+```{r}
+
+dataframes <- ls(pattern = "dengue\\d{4}")  #List of dataframes 
 
 for (df_name in dataframes) {
-  df <- get(df_name)  # Dataframe abrufen
-  df <- df[order(df$`Reporting areas`), ]  # Sortierung nach "Reporting areas"
-  assign(df_name, df)  # Aktualisierten Dataframe speichern
+  df <- get(df_name)  # get Dataframe 
+  df <- df[order(df$`Reporting areas`), ]  # Sort after Reporting areas
+  assign(df_name, df)  # safe 
 }
 ```
 
-#anhand der spalte Reporting_area die datendätze zusammenfügen 
-
+##6.3 Merge the dataframes according to the column Reporting_areas
 ```{r}
  library(dplyr)
 
@@ -568,28 +591,22 @@ print(merged_df)
 dengue_data_com2 = merged_df
 ```
 
+##6.4 Change all the class values to numeric 
 
-#alle spalten in anderen kategoerien in numeric umwandeln 
 ```{r}
 library(dplyr)
 
-# Alle Spalten außer der ersten Spalte in numerischen Datentyp umwandeln
+# change all the variables into numerics except for the Reporting Area column 
 dengue_data_com2 <- mutate_at(dengue_data_com2, vars(-1), as.numeric)
 
 print(dengue_data_com2)
 ```
-#alle NA IN O umwandwandeln 
+
+
+##6.5 Safe the new format for the combined dataframe as dengue_data_com2
 
 ```{r}
-# Werte "-" in 0 umwandeln
-dengue_data_com2[is.na(dengue_data_com2)] = 0
-
-print(dengue_data_com2)
-```
-#lets save the format for the dengue_data
-```{r}
-#locales Speichern der dengue_hum 
+#locally safe the dataframe 
 filePath = paste(getwd(), "dengue_data_com2.csv",sep = "/")
 write.csv(dengue_data_com2, filePath)
-
 ```
