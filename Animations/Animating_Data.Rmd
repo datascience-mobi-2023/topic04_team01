@@ -33,6 +33,14 @@ Note that the `echo = FALSE` parameter was added to the code chunk to prevent pr
 # 0. Load the Data
 
 ```{r}
+install.packages("gganimate")
+install.packages("gifski")
+install.packages("ggmap")
+install.packages("maps")
+library(maps)
+library(ggmap)
+library(gifski)
+library(gganimate)
 library(sp)
 library(sf)
 library(terra)
@@ -55,7 +63,32 @@ T.tp.mon = read_excel("../era5_data_2006_2020_thailand_monmean.xlsx", sheet="era
 T.t2m.mon = read_excel("../era5_data_2006_2020_thailand_monmean.xlsx", sheet="era5_t2m_2006_2020_thailand_mon")
 
 ```
+## Defining T.Huss.mon 
+```{r}
+T.huss.mon.ordered = arrange(T.huss.mon, ADM1_EN) 
+numbers <- c(1:77)
+T.huss.mon.ordered <- cbind(T.huss.mon.ordered,numbers)
 
+
+```
+
+## Loading the Geography Data
+```{r}
+
+
+shapefilePath <- "../geo_data/gadm36_THA_shp"
+layers <- st_layers(shapefilePath)
+geography <- st_read(shapefilePath, layer = "gadm36_THA_1")
+numbers <- c(1:77)
+geography <- cbind(geography,numbers)
+
+
+```
+
+```{r}
+View(geography)
+```
+ 
 # 1. Load the Clustered Plots for Climate Data from 2006 to 2020
 
 ```{r}
@@ -144,4 +177,14 @@ print(ggplot() +
 
 
 ```
+Now that we have the maps with the different clusters, let's try to animate them over the years 
+```{r}
+# Get the base map data for Thailand
+base_map <- ggplot() +
+  geom_sf(data = geography ,aes(geometry = geometry))+
+  labs(title = "Thailand") +
+  labs(x="Longitude", y= "Latitude")
+base_map
+```
+
 
