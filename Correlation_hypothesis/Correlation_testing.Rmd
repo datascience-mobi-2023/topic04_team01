@@ -16,6 +16,8 @@ dengue_norm <- read.csv("C:\\Users\\paula\\Documents\\Uni Heidelberg\\4. Semeste
 T.huss.mon = read_excel("../era5_data_2006_2020_thailand_monmean.xlsx", sheet="era5_huss_2006_2020_thailand_mo")
 stacked_hum_den <- read.csv("C:\\Users\\paula\\Documents\\Uni Heidelberg\\4. Semester\\Bioinformatik\\github\\topic04_team01\\Correlation_hypothesis\\mon_dengue_hum.csv")
 stacked_hum_den
+dengue_norm <- read.csv("C:\\Users\\paula\\Documents\\Uni Heidelberg\\4. Semester\\Bioinformatik\\github\\topic04_team01\\dengue_data\\dengue_norm.csv")
+popu_06_20 <- read.csv("C:\\Users\\paula\\Documents\\Uni Heidelberg\\4. Semester\\Bioinformatik\\github\\topic04_team01\\population_data\\population_06_20.csv")
 ```
 First let's look at the correlation between the respective seasons, so between the intermonsoon humdidity and the intermonsoon cases from the years 2006-2020, as well as all other seasons 
 ```{r}
@@ -41,7 +43,7 @@ cor(stacked_hum_den$intermonH, stacked_hum_den$premon, use = "pairwise.complete.
 cor(stacked_hum_den$premonH, stacked_hum_den$mon, use = "pairwise.complete.obs")
 
 #correlation between monsoon humidity and post-monsoon dengue cases
-cor(stacked_hum_den$premonH, stacked_hum_den$postmon, use = "pairwise.complete.obs")
+cor(stacked_hum_den$monH, stacked_hum_den$postmon, use = "pairwise.complete.obs")
 
 #correlation between post-monsoon humidity and inter-monsoon dengue cases 
 cor(stacked_hum_den$postmonH, stacked_hum_den$intermon, use = "pairwise.complete.obs")
@@ -135,21 +137,16 @@ summary(model)
 ```
 We can see that the regression model can explain 54% of the variance in this relationship as well as with a p-value smaller than 0.05 using the linear regression model here would be significantly better to predict the monsoon dengue cases than the zero model. 
 
+Dengue cases are also associated with population density and urban areas
+
 ```{r}
-cases = c()
-dengue_monthly = data.frame()
+#we need to stack the total dengue cases per province for the years form 2006 to 2020 and compare the normalized dengue cases to the total population
 
+total_cases_stacked <- c(dengue_norm$X2006.total, dengue_norm$X2007.total,dengue_norm$X2008.total, dengue_norm$X2009.total, dengue_norm$X2010.total,dengue_norm$X2011.total,dengue_norm$X2012.total,dengue_norm$X2013.total,dengue_norm$X2014.total,dengue_norm$X2015.total,dengue_norm$X2016.total,dengue_norm$X2017.total,dengue_norm$X2018.total, dengue_norm$X2019.total,dengue_norm$X2020.total)
 
-for(i in 0:14){
-    position = as.vector(5+(13*i))
-    cases = dengue_norm[,position]
-    if (i == 0){
-      dengue = cases
-    }
-      else {
-        dengue = c(dengue_jan, cases)
-      }
-}  
-  print(dengue)
+population_stacked <- c(popu_06_20$X2006, popu_06_20$X2007, popu_06_20$X2008, popu_06_20$X2009, popu_06_20$X2010, popu_06_20$X2011, popu_06_20$X2012, popu_06_20$X2013, popu_06_20$X2014, popu_06_20$X2015, popu_06_20$X2016, popu_06_20$X2017, popu_06_20$X2018, popu_06_20$X2019, popu_06_20$X2020)
+
+#have a look at the correlation 
+cor(total_cases_stacked, population_stacked, use = "pairwise.complete.obs")
 ```
 

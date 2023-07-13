@@ -45,6 +45,7 @@ Humidity dataframe unwichtige Daten entfernen und correlation für Januar 2006 a
 #unwichtige Columns entfernen 
 i.remove <- which(colnames(T.huss.mon) %in% c("Number","Longitude", "Latitude"))
 T.huss.mon1 <- T.huss.mon[,-i.remove]
+T.huss.mon1 <- T.huss.mon1[order(T.huss.mon1$ADM1_EN), ]
 
 #alphabetisch ordnen
 sorted_df <- T.huss.mon1[order(T.huss.mon1$ADM1_EN), ]
@@ -132,6 +133,11 @@ popu_06_20 <- cbind(popu_06, "2007" = popu_07$`Total population`, "2008" = popu_
 
 #2006 umbennen
 names(popu_06_20)[names(popu_06_20) == "Total population"] <- "2006"
+
+#save this as a csv file as well
+
+filePath = paste(dirname(getwd()), "population_data", "population_06_20.csv",sep = "/")
+write.csv(popu_06_20, filePath)
 
 ```
 

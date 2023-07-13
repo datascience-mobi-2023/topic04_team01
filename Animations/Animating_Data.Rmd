@@ -130,7 +130,9 @@ huss_data <- list(
 ```
 
 ```{r}
-
+#empty list 
+plot_list <- list() 
+  
 ##Clustering
 
 for (year in 2006:2020){
@@ -159,7 +161,7 @@ centers.clusters.years.geography = merge(centers.clusters.years, geography, by= 
 
 
 ## ggplot
-print(ggplot() +
+plot <- (ggplot() +
   geom_sf(data = centers.clusters.years.geography ,aes(geometry = geometry, fill= Center)) +
   coord_sf() +  
   theme_minimal() +
@@ -170,11 +172,11 @@ print(ggplot() +
   colorspace::scale_fill_continuous_sequential(palette= "plasma")+
   guides(fill = guide_legend(title = "Legende", override.aes = list(shape = 22))))
 
-
+plot_list[[year - 2005]] <- plot
   
 }
 
-
+gifski(plot_list, file.path("C:\\Users\\paula\\Documents\\Uni Heidelberg\\4. Semester\\Bioinformatik\\github\\topic04_team01\\Animations\\animated_map.gif"))
 
 ```
 Now that we have the maps with the different clusters, let's try to animate them over the years 
@@ -185,6 +187,12 @@ base_map <- ggplot() +
   labs(title = "Thailand") +
   labs(x="Longitude", y= "Latitude")
 base_map
+```
+```{r}
+output_filename <- "animated_map.gif"
+frame_duration <- 500  # milliseconds (adjust as needed)
+year_range <- 2006:2020
+
 ```
 
 
