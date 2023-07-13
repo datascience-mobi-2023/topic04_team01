@@ -437,6 +437,9 @@ colnames(T.huss_reshaped)[colnames(T.huss_reshaped) == "relative_humidity"] <- "
 print(dengue_data_com_2)
 print(T.huss_reshaped)
 ```
+```{r}
+den
+```
 
 ##5.9 lets save the new climat data format
 
@@ -475,6 +478,12 @@ dengue_hum[is.na(dengue_hum)] = 0
 
 #Schnage the chr class in month to dbl
 dengue_hum$Month = as.numeric(dengue_hum$Month)
+
+```
+```{r}
+dengue_hum[,]
+al = which(dengue_hum$Dengue_Cases > 70000)
+al
 
 ```
 
