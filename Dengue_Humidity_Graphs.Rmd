@@ -1,0 +1,717 @@
+---
+title: "Dengue_Climate_Plots_New"
+author: "Manon Manddernach"
+date: "2023-07-14"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# 0. Loading the Data 
+
+```{r}
+## Dengue Data 
+dengue.norm <- subset(dengue.norm, select = setdiff(colnames(dengue.norm), c("X", "X.1","X2006.total", "X2007.total", "X2008.total","X2009.total", "X2010.total", "X2011.total","X2012.total", "X2013.total", "X2014.total","X2015.total", "X2016.total", "X2017.total","X2018.total", "X2019.total", "X2020.total")))
+dengue.norm['numbers']=c(1:77)
+# Replace Bungkan with Nong Khai Data 
+dengue.norm[4,2:181] <- dengue.norm[35,2:181]
+#dengue.norm <- replace(dengue.norm, is.na(dengue.norm), 0)
+as.data.frame(dengue.norm)
+
+## Humidity Data 
+T.huss.mon.ordered <- read.csv("../geo_data/T.huss.mon_correct_provinces.csv")
+T.huss.mon.ordered <- subset(T.huss.mon.ordered, select = -X)
+T.huss.mon.ordered$Number <- c(1:77)
+names(T.huss.mon.ordered)[names(T.huss.mon.ordered) == "Number"] <- "numbers"
+
+## Geo Data 
+shapefilePath <- "./geo_data/gadm36_THA_shp"
+layers <- st_layers(shapefilePath)
+geography <- st_read(shapefilePath, layer = "gadm36_THA_1")
+numbers <- c(1:77)
+geography <- cbind(geography,numbers)
+
+```
+
+```{r}
+View(dengue.norm)
+```
+
+
+## 0.1 Preparing the Data 
+
+```{r}
+## Years and Months  
+
+Years <- c(2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020)
+Months <- c(1,2,3,4,5,6,7,8,9,10,11,12)
+
+
+## Dengue Data Mean values
+
+dengue.norm.2006.mean.absolute <- as.data.frame(apply(dengue.norm.2006.mean,1,mean))
+dengue.norm.2007.mean.absolute <- as.data.frame(apply(dengue.norm.2007.mean,1,mean))
+dengue.norm.2008.mean.absolute <- as.data.frame(apply(dengue.norm.2008.mean,1,mean))
+dengue.norm.2009.mean.absolute <- as.data.frame(apply(dengue.norm.2009.mean,1,mean))
+dengue.norm.2010.mean.absolute <- as.data.frame(apply(dengue.norm.2010.mean,1,mean))
+dengue.norm.2011.mean.absolute <- as.data.frame(apply(dengue.norm.2011.mean,1,mean))
+dengue.norm.2012.mean.absolute <- as.data.frame(apply(dengue.norm.2012.mean,1,mean))
+dengue.norm.2013.mean.absolute <- as.data.frame(apply(dengue.norm.2013.mean,1,mean))
+dengue.norm.2014.mean.absolute <- as.data.frame(apply(dengue.norm.2014.mean,1,mean))
+dengue.norm.2015.mean.absolute <- as.data.frame(apply(dengue.norm.2015.mean,1,mean))
+dengue.norm.2016.mean.absolute <- as.data.frame(apply(dengue.norm.2016.mean,1,mean))
+dengue.norm.2017.mean.absolute <- as.data.frame(apply(dengue.norm.2017.mean,1,mean))
+dengue.norm.2018.mean.absolute <- as.data.frame(apply(dengue.norm.2018.mean,1,mean))
+dengue.norm.2019.mean.absolute <- as.data.frame(apply(dengue.norm.2019.mean,1,mean))
+dengue.norm.2020.mean.absolute <- as.data.frame(apply(dengue.norm.2020.mean,1,mean))
+
+Dengue.mean <- c(dengue.norm.2006.mean.absolute,
+                 dengue.norm.2007.mean.absolute,
+                 dengue.norm.2008.mean.absolute,
+                 dengue.norm.2009.mean.absolute, 
+                 dengue.norm.2010.mean.absolute,
+                 dengue.norm.2011.mean.absolute,
+                 dengue.norm.2012.mean.absolute, 
+                 dengue.norm.2013.mean.absolute, 
+                 dengue.norm.2014.mean.absolute, 
+                 dengue.norm.2015.mean.absolute, 
+                 dengue.norm.2016.mean.absolute,
+                 dengue.norm.2017.mean.absolute, 
+                 dengue.norm.2018.mean.absolute, 
+                 dengue.norm.2019.mean.absolute,
+                 dengue.norm.2020.mean.absolute)
+
+Dengue.mean <- lapply(Dengue.mean, unlist)
+Dengue.mean <- lapply(Dengue.mean, mean)
+
+Dengue.mean <- list(
+  `apply(dengue.norm.2006.mean, 1, mean)` = 5.570221,
+  `apply(dengue.norm.2007.mean, 1, mean)` = 8.742932,
+  `apply(dengue.norm.2008.mean, 1, mean)` = 11.76473,
+  `apply(dengue.norm.2009.mean, 1, mean)` = 7.219884,
+  `apply(dengue.norm.2010.mean, 1, mean)` = 14.7395,
+  `apply(dengue.norm.2011.mean, 1, mean)` = 8.785111,
+  `apply(dengue.norm.2012.mean, 1, mean)` = 9.955709,
+  `apply(dengue.norm.2013.mean, 1, mean)` = 20.17376,
+  `apply(dengue.norm.2014.mean, 1, mean)` = 5.596716,
+  `apply(dengue.norm.2015.mean, 1, mean)` = 17.39642,
+  `apply(dengue.norm.2016.mean, 1, mean)` = 9.211036,
+  `apply(dengue.norm.2017.mean, 1, mean)` = 6.315424,
+  `apply(dengue.norm.2018.mean, 1, mean)` = 10.47807,
+  `apply(dengue.norm.2019.mean, 1, mean)` = 14.60038,
+  `apply(dengue.norm.2020.mean, 1, mean)` = 14.0717
+)
+
+Dengue.mean <- data.frame(Code = names(Dengue.mean), Value = unlist(Dengue.mean))
+Dengue.mean <- Dengue.mean$Value
+
+
+## Humidity Data Mean values 
+
+
+huss.2006<- as.data.frame(T.huss.mon.ordered[,5:16])
+huss.2007<- as.data.frame(T.huss.mon.ordered[,17:28])
+huss.2008<- as.data.frame(T.huss.mon.ordered[,29:40])
+huss.2009<- as.data.frame(T.huss.mon.ordered[,41:52])
+huss.2010<- as.data.frame(T.huss.mon.ordered[,53:64])
+huss.2011<- as.data.frame(T.huss.mon.ordered[,65:76])
+huss.2012<- as.data.frame(T.huss.mon.ordered[,77:88])
+huss.2013<- as.data.frame(T.huss.mon.ordered[,89:100])
+huss.2014<- as.data.frame(T.huss.mon.ordered[,101:112])
+huss.2015<- as.data.frame(T.huss.mon.ordered[,113:124])
+huss.2016<- as.data.frame(T.huss.mon.ordered[,125:136])
+huss.2017<- as.data.frame(T.huss.mon.ordered[,137:148])
+huss.2018<- as.data.frame(T.huss.mon.ordered[,149:150])
+huss.2019<- as.data.frame(T.huss.mon.ordered[,151:162])
+huss.2020<- as.data.frame(T.huss.mon.ordered[,163:174])
+
+
+
+
+huss.2006.mean.absolute <- as.data.frame(apply(huss.2006.mean,1,mean))
+huss.2007.mean.absolute <- as.data.frame(apply(huss.2007.mean,1,mean))
+huss.2008.mean.absolute <- as.data.frame(apply(huss.2008.mean,1,mean))
+huss.2009.mean.absolute <- as.data.frame(apply(huss.2009.mean,1,mean))
+huss.2010.mean.absolute <- as.data.frame(apply(huss.2010.mean,1,mean))
+huss.2011.mean.absolute <- as.data.frame(apply(huss.2011.mean,1,mean))
+huss.2012.mean.absolute <- as.data.frame(apply(huss.2012.mean,1,mean))
+huss.2013.mean.absolute <- as.data.frame(apply(huss.2013.mean,1,mean))
+huss.2014.mean.absolute <- as.data.frame(apply(huss.2014.mean,1,mean))
+huss.2015.mean.absolute <- as.data.frame(apply(huss.2015.mean,1,mean))
+huss.2016.mean.absolute <- as.data.frame(apply(huss.2016.mean,1,mean))
+huss.2017.mean.absolute <- as.data.frame(apply(huss.2017.mean,1,mean))
+huss.2018.mean.absolute <- as.data.frame(apply(huss.2018.mean,1,mean))
+huss.2019.mean.absolute <- as.data.frame(apply(huss.2019.mean,1,mean))
+huss.2020.mean.absolute <- as.data.frame(apply(huss.2020.mean,1,mean))
+
+Huss.mean <- c(huss.2006.mean.absolute,
+               huss.2007.mean.absolute,
+               huss.2008.mean.absolute,
+               huss.2009.mean.absolute, 
+               huss.2010.mean.absolute,
+               huss.2011.mean.absolute,
+               huss.2012.mean.absolute, 
+               huss.2013.mean.absolute, 
+               huss.2014.mean.absolute, 
+               huss.2015.mean.absolute, 
+               huss.2016.mean.absolute,
+               huss.2017.mean.absolute,
+               huss.2018.mean.absolute, 
+               huss.2019.mean.absolute,
+               huss.2020.mean.absolute)
+
+Huss.mean <- lapply(Huss.mean,unlist)
+Huss.mean <- lapply(Huss.mean,mean)
+
+Huss.mean <- list(
+  `$apply(huss.2006.mean, 1, mean)` = 74.8919,
+  `$apply(huss.2007.mean, 1, mean)` = 56.53615,
+  `$apply(huss.2008.mean, 1, mean)` = 57.60083,
+  `$apply(huss.2009.mean, 1, mean)` = 57.32692,
+  `$apply(huss.2010.mean, 1, mean)` = 57.13848,
+  `$apply(huss.2011.mean, 1, mean)` = 58.08443,
+  `$apply(huss.2012.mean, 1, mean)` = 57.97239,
+  `$apply(huss.2013.mean, 1, mean)` = 57.40518,
+  `$apply(huss.2014.mean, 1, mean)` = 57.16852,
+  `$apply(huss.2015.mean, 1, mean)` = 56.8422,
+  `$apply(huss.2016.mean, 1, mean)` = 56.88025,
+  `$apply(huss.2017.mean, 1, mean)` = 58.00465,
+  `$apply(huss.2018.mean, 1, mean)` = 55.85306,
+  `$apply(huss.2019.mean, 1, mean)` = 57.80723,
+  `$apply(huss.2020.mean, 1, mean)` = 55.99571
+)
+
+Huss.mean <- data.frame(Code = names(Huss.mean), Value = unlist(Huss.mean))
+Huss.mean <- Huss.mean$Value
+
+
+Dengue.Humidity.Plot <- data.frame(Years=Years,
+                                   Dengue.mean = Dengue.mean,
+                                   Huss.mean = Huss.mean
+                                   )
+
+
+```
+
+## 0.2 Defining single Provinces 
+```{r}
+
+MahaSarakham <- data.frame(T.huss.mon.ordered[24, ])
+MahaSarakhamD <- data.frame(dengue.norm[24, ])
+
+ChiangMai <- data.frame(T.huss.mon.ordered[10, ])
+ChiangMaiD <- data.frame(dengue.norm[10, ])
+
+Kalasin <- data.frame(T.huss.mon.ordered[14, ])
+KalasinD <- data.frame(dengue.norm[14, ])
+
+Chumphon <- data.frame(T.huss.mon.ordered[13, ])
+ChumphonD <- data.frame(dengue.norm[13, ])
+
+Songkhla <- data.frame(T.huss.mon.ordered[64, ])
+SongkhlaD <- data.frame(dengue.norm[64, ])
+
+####
+
+NakhonSiThammarat <- data.frame(T.huss.mon.ordered[31, ])
+NakhonSiThammaratD <- data.frame(dengue.norm[31, ])
+
+SuratThani <- data.frame(T.huss.mon.ordered[67, ])
+SuratThaniD <- data.frame(dengue.norm[67, ])
+
+
+##
+
+Phayao <- data.frame(T.huss.mon.ordered[67, ])
+PhayaoD <- data.frame(dengue.norm[67, ])
+
+
+```
+
+
+# 1. Geographic Provinces Diffrent Sea levels
+
+
+To understand the connection between dengue cases and different kinds of areas in Thailand exemplary provinces with different characteristics (position in the country, height of land) were chosen:
+
+-   Maha-Sarakham (north-east), 100-200m above sea level
+
+-   Chiang Mai (north to north-west), 1000-1500m above sea level
+
+-   Kalasin (central), 0-100m above sea level
+
+-   Chumphon
+
+-   Songkhla (south), 100-200m above sea level
+
+    *Diercke Weltatlas* (1st ed.). (2008). westermann
+    
+    
+## 1.1 Maha Sarakham
+```{r}
+## Creating Dataframes and Plotting GGPlots for Maha Sarakham
+data_frames <- list()
+
+for (year in 2006:2020) {
+  humidity_cols <- ((year - 2006) * 12 + 5):((year - 2006) * 12 + 16)
+  dengue_cols <- ((year - 2006) * 12 + 2):((year - 2006) * 12 + 13)
+  
+  humidity <- as.data.frame(t(MahaSarakham[, humidity_cols]))
+  colnames(humidity) <- paste0("Humidity.", year)
+  
+  dengue <- as.data.frame(t(MahaSarakhamD[, dengue_cols]))
+  colnames(dengue) <- paste0("Dengue.", year)
+  
+  data_frame <- data.frame(Humidity = humidity, Dengue = dengue, Months = Months)
+  
+  data_frames[[year - 2005]] <- data_frame
+}
+
+for (i in seq_along(data_frames)) {
+  assign(paste0("MahaSarakham.", i + 2005), data_frames[[i]])
+}
+
+plots <- list()
+
+for (year in years) {
+  MahaSarakham_year <- get(paste0("MahaSarakham.", year))
+  MahaSarakham_year$Dengue <- as.numeric(MahaSarakham_year$Dengue)
+  MahaSarakham_year$Humidity <- as.numeric(MahaSarakham_year$Humidity)
+  
+  correlation <- cor(MahaSarakham_year$Dengue, MahaSarakham_year$Humidity)
+  
+  plot <- ggplot(MahaSarakham_year, aes(x = Months)) +
+    geom_line(aes(y = Dengue, color = "Dengue Cases per 100,000"), type = "o") +
+    geom_line(aes(y = Humidity, color = "Humidity in %"), type = "o") +
+    labs(title = paste("Dengue Cases and Humidity in Maha Sarakham", year),
+         x = "Months",
+         y = "Dengue Cases per 100,000") +
+    geom_point(aes(y = Dengue, color = "Dengue Cases per 100,000"), shape = 16) +
+    geom_point(aes(y = Humidity, color = "Humidity in %"), shape = 16) +
+    scale_color_manual(values = c("Dengue Cases per 100,000" = "violet", "Humidity in %" = "orange"),
+                       labels = c("Dengue Cases per 100,000", "Humidity in %"),
+                       guide = guide_legend(title = "Legend Title")) +
+    scale_y_continuous(sec.axis = sec_axis(~. / 100, name = "Humidity in %", labels = scales::percent)) +
+    scale_x_continuous(breaks = 1:12, labels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")) +
+    annotate("text", x = 6, y = 50, label = paste0("Correlation: ", round(correlation, 2)), color = "black", size = 4, vjust = -0.5)
+  
+  plots[[year - 2005]] <- plot
+}
+
+for (i in seq_along(plots)) {
+  print(plots[[i]])
+}
+
+
+```
+
+## 1.2 Chiang Mai
+```{r}
+## Creating Dataframes and Plotting GGPlots for Chiang Mai
+data_frames <- list()
+
+for (year in 2006:2020) {
+  humidity_cols <- ((year - 2006) * 12 + 5):((year - 2006) * 12 + 16)
+  dengue_cols <- ((year - 2006) * 12 + 2):((year - 2006) * 12 + 13)
+  
+  humidity <- as.data.frame(t(ChiangMai[, humidity_cols]))
+  colnames(humidity) <- paste0("Humidity.", year)
+  
+  dengue <- as.data.frame(t(ChiangMaiD[, dengue_cols]))
+  colnames(dengue) <- paste0("Dengue.", year)
+  
+  data_frame <- data.frame(Humidity = humidity, Dengue = dengue, Months = Months)
+  
+  data_frames[[year - 2005]] <- data_frame
+}
+
+for (i in seq_along(data_frames)) {
+  assign(paste0("ChiangMai.", i + 2005), data_frames[[i]])
+}
+
+plots <- list()
+
+for (year in years) {
+  ChiangMai_year <- get(paste0("ChiangMai.", year))
+  ChiangMai_year$Dengue <- as.numeric(ChiangMai_year$Dengue)
+  ChiangMai_year$Humidity <- as.numeric(ChiangMai_year$Humidity)
+  
+  correlation <- cor(ChiangMai_year$Dengue, ChiangMai_year$Humidity)
+  
+  plot <- ggplot(ChiangMai_year, aes(x = Months)) +
+    geom_line(aes(y = Dengue, color = "Dengue Cases per 100,000"), type = "o") +
+    geom_line(aes(y = Humidity, color = "Humidity in %"), type = "o") +
+    labs(title = paste("Dengue Cases and Humidity in Chiang Mai", year),
+         x = "Months",
+         y = "Dengue Cases per 100,000") +
+    geom_point(aes(y = Dengue, color = "Dengue Cases per 100,000"), shape = 16) +
+    geom_point(aes(y = Humidity, color = "Humidity in %"), shape = 16) +
+    scale_color_manual(values = c("Dengue Cases per 100,000" = "violet", "Humidity in %" = "orange"),
+                       labels = c("Dengue Cases per 100,000", "Humidity in %"),
+                       guide = guide_legend(title = "Legend Title")) +
+    scale_y_continuous(sec.axis = sec_axis(~. / 100, name = "Humidity in %", labels = scales::percent)) +
+    scale_x_continuous(breaks = 1:12, labels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")) +
+    annotate("text", x = 6, y = 50, label = paste0("Correlation: ", round(correlation, 2)), color = "black", size = 4, vjust = -0.5)
+  
+  plots[[year - 2005]] <- plot
+}
+
+for (i in seq_along(plots)) {
+  print(plots[[i]])
+}
+
+```
+
+## 1.3 Kalasin 
+```{r}
+
+## Creating Dataframes and Plotting GGPlots for Kalasin
+data_frames <- list()
+
+for (year in 2006:2020) {
+  humidity_cols <- ((year - 2006) * 12 + 5):((year - 2006) * 12 + 16)
+  dengue_cols <- ((year - 2006) * 12 + 2):((year - 2006) * 12 + 13)
+  
+  humidity <- as.data.frame(t(Kalasin[, humidity_cols]))
+  colnames(humidity) <- paste0("Humidity.", year)
+  
+  dengue <- as.data.frame(t(KalasinD[, dengue_cols]))
+  colnames(dengue) <- paste0("Dengue.", year)
+  
+  data_frame <- data.frame(Humidity = humidity, Dengue = dengue, Months = Months)
+  
+  data_frames[[year - 2005]] <- data_frame
+}
+
+for (i in seq_along(data_frames)) {
+  assign(paste0("Kalasin.", i + 2005), data_frames[[i]])
+}
+
+plots <- list()
+
+for (year in years) {
+  Kalasin_year <- get(paste0("Kalasin.", year))
+  Kalasin_year$Dengue <- as.numeric(Kalasin_year$Dengue)
+  Kalasin_year$Humidity <- as.numeric(Kalasin_year$Humidity)
+  
+  correlation <- cor(Kalasin_year$Dengue, Kalasin_year$Humidity)
+  
+  plot <- ggplot(Kalasin_year, aes(x = Months)) +
+    geom_line(aes(y = Dengue, color = "Dengue Cases per 100,000"), type = "o") +
+    geom_line(aes(y = Humidity, color = "Humidity in %"), type = "o") +
+    labs(title = paste("Dengue Cases and Humidity in Kalasin", year),
+         x = "Months",
+         y = "Dengue Cases per 100,000") +
+    geom_point(aes(y = Dengue, color = "Dengue Cases per 100,000"), shape = 16) +
+    geom_point(aes(y = Humidity, color = "Humidity in %"), shape = 16) +
+    scale_color_manual(values = c("Dengue Cases per 100,000" = "violet", "Humidity in %" = "orange"),
+                       labels = c("Dengue Cases per 100,000", "Humidity in %"),
+                       guide = guide_legend(title = "Legend Title")) +
+    scale_y_continuous(sec.axis = sec_axis(~. / 100, name = "Humidity in %", labels = scales::percent)) +
+    scale_x_continuous(breaks = 1:12, labels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")) +
+    annotate("text", x = 6, y = 50, label = paste0("Correlation: ", round(correlation, 2)), color = "black", size = 4, vjust = -0.5)
+  
+  plots[[year - 2005]] <- plot
+}
+
+for (i in seq_along(plots)) {
+  print(plots[[i]])
+}
+```
+
+
+## 1.4 Chumphom
+```{r}
+## Creating Dataframes and Plotting GGPlots for Chumphon
+data_frames <- list()
+
+for (year in 2006:2020) {
+  humidity_cols <- ((year - 2006) * 12 + 5):((year - 2006) * 12 + 16)
+  dengue_cols <- ((year - 2006) * 12 + 2):((year - 2006) * 12 + 13)
+  
+  humidity <- as.data.frame(t(Chumphon[, humidity_cols]))
+  colnames(humidity) <- paste0("Humidity.", year)
+  
+  dengue <- as.data.frame(t(ChumphonD[, dengue_cols]))
+  colnames(dengue) <- paste0("Dengue.", year)
+  
+  data_frame <- data.frame(Humidity = humidity, Dengue = dengue, Months = Months)
+  
+  data_frames[[year - 2005]] <- data_frame
+}
+
+for (i in seq_along(data_frames)) {
+  assign(paste0("Chumphon.", i + 2005), data_frames[[i]])
+}
+
+plots <- list()
+
+for (year in years) {
+  Chumphon_year <- get(paste0("Chumphon.", year))
+  Chumphon_year$Dengue <- as.numeric(Chumphon_year$Dengue)
+  Chumphon_year$Humidity <- as.numeric(Chumphon_year$Humidity)
+  
+  correlation <- cor(Chumphon_year$Dengue, Chumphon_year$Humidity)
+  
+  plot <- ggplot(Chumphon_year, aes(x = Months)) +
+    geom_line(aes(y = Dengue, color = "Dengue Cases per 100,000"), type = "o") +
+    geom_line(aes(y = Humidity, color = "Humidity in %"), type = "o") +
+    labs(title = paste("Dengue Cases and Humidity in Chumphon", year),
+         x = "Months",
+         y = "Dengue Cases per 100,000") +
+    geom_point(aes(y = Dengue, color = "Dengue Cases per 100,000"), shape = 16) +
+    geom_point(aes(y = Humidity, color = "Humidity in %"), shape = 16) +
+    scale_color_manual(values = c("Dengue Cases per 100,000" = "violet", "Humidity in %" = "orange"),
+                       labels = c("Dengue Cases per 100,000", "Humidity in %"),
+                       guide = guide_legend(title = "Legend Title")) +
+    scale_y_continuous(sec.axis = sec_axis(~. / 100, name = "Humidity in %", labels = scales::percent)) +
+    scale_x_continuous(breaks = 1:12, labels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")) +
+    annotate("text", x = 6, y = 50, label = paste0("Correlation: ", round(correlation, 2)), color = "black", size = 4, vjust = -0.5)
+  
+  plots[[year - 2005]] <- plot
+}
+
+for (i in seq_along(plots)) {
+  print(plots[[i]])
+}
+
+```
+
+## 1.5 Songkhla 
+```{r}
+## Creating Dataframes and Plotting GGPlots for Songkhla
+data_frames <- list()
+
+for (year in 2006:2020) {
+  humidity_cols <- ((year - 2006) * 12 + 5):((year - 2006) * 12 + 16)
+  dengue_cols <- ((year - 2006) * 12 + 2):((year - 2006) * 12 + 13)
+  
+  humidity <- as.data.frame(t(Songkhla[, humidity_cols]))
+  colnames(humidity) <- paste0("Humidity.", year)
+  
+  dengue <- as.data.frame(t(SongkhlaD[, dengue_cols]))
+  colnames(dengue) <- paste0("Dengue.", year)
+  
+  data_frame <- data.frame(Humidity = humidity, Dengue = dengue, Months = Months)
+  
+  data_frames[[year - 2005]] <- data_frame
+}
+
+for (i in seq_along(data_frames)) {
+  assign(paste0("Songkhla.", i + 2005), data_frames[[i]])
+}
+
+plots <- list()
+
+for (year in years) {
+  Songkhla_year <- get(paste0("Songkhla.", year))
+  Songkhla_year$Dengue <- as.numeric(Songkhla_year$Dengue)
+  Songkhla_year$Humidity <- as.numeric(Songkhla_year$Humidity)
+  
+  correlation <- cor(Songkhla_year$Dengue, Songkhla_year$Humidity)
+  
+  plot <- ggplot(Songkhla_year, aes(x = Months)) +
+    geom_line(aes(y = Dengue, color = "Dengue Cases per 100,000"), type = "o") +
+    geom_line(aes(y = Humidity, color = "Humidity in %"), type = "o") +
+    labs(title = paste("Dengue Cases and Humidity in Songkhla", year),
+         x = "Months",
+         y = "Dengue Cases per 100,000") +
+    geom_point(aes(y = Dengue, color = "Dengue Cases per 100,000"), shape = 16) +
+    geom_point(aes(y = Humidity, color = "Humidity in %"), shape = 16) +
+    scale_color_manual(values = c("Dengue Cases per 100,000" = "violet", "Humidity in %" = "orange"),
+                       labels = c("Dengue Cases per 100,000", "Humidity in %"),
+                       guide = guide_legend(title = "Legend Title")) +
+    scale_y_continuous(sec.axis = sec_axis(~. / 100, name = "Humidity in %", labels = scales::percent)) +
+    scale_x_continuous(breaks = 1:12, labels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")) +
+    annotate("text", x = 6, y = 50, label = paste0("Correlation: ", round(correlation, 2)), color = "black", size = 4, vjust = -0.5)
+  
+  plots[[year - 2005]] <- plot
+}
+
+for (i in seq_along(plots)) {
+  print(plots[[i]])
+}
+
+```
+
+
+# 2. Possible to be hit by the gulf of Thailand 
+
+## 2.1 Nakhon Si Thammarat
+```{r}
+## Creating Dataframes and Plotting GGPlots for Nakhon Si Thammarat
+data_frames <- list()
+
+for (year in 2006:2020) {
+  humidity_cols <- ((year - 2006) * 12 + 5):((year - 2006) * 12 + 16)
+  dengue_cols <- ((year - 2006) * 12 + 2):((year - 2006) * 12 + 13)
+  
+  humidity <- as.data.frame(t(Nakhon.Si.Thammarat[, humidity_cols]))
+  colnames(humidity) <- paste0("Humidity.", year)
+  
+  dengue <- as.data.frame(t(Nakhon.Si.ThammaratD[, dengue_cols]))
+  colnames(dengue) <- paste0("Dengue.", year)
+  
+  data_frame <- data.frame(Humidity = humidity, Dengue = dengue, Months = Months)
+  
+  data_frames[[year - 2005]] <- data_frame
+}
+
+for (i in seq_along(data_frames)) {
+  assign(paste0("Nakhon.Si.Thammarat.", i + 2005), data_frames[[i]])
+}
+
+plots <- list()
+
+for (year in years) {
+  Nakhon.Si.Thammarat_year <- get(paste0("Nakhon.Si.Thammarat.", year))
+  Nakhon.Si.Thammarat_year$Dengue <- as.numeric(Nakhon.Si.Thammarat_year$Dengue)
+  Nakhon.Si.Thammarat_year$Humidity <- as.numeric(Nakhon.Si.Thammarat_year$Humidity)
+  
+  correlation <- cor(Nakhon.Si.Thammarat_year$Dengue, Nakhon.Si.Thammarat_year$Humidity)
+  
+  plot <- ggplot(Nakhon.Si.Thammarat_year, aes(x = Months)) +
+    geom_line(aes(y = Dengue, color = "Dengue Cases per 100,000"), type = "o") +
+    geom_line(aes(y = Humidity, color = "Humidity in %"), type = "o") +
+    labs(title = paste("Dengue Cases and Humidity in Nakhon Si Thammarat", year),
+         x = "Months",
+         y = "Dengue Cases per 100,000") +
+    geom_point(aes(y = Dengue, color = "Dengue Cases per 100,000"), shape = 16) +
+    geom_point(aes(y = Humidity, color = "Humidity in %"), shape = 16) +
+    scale_color_manual(values = c("Dengue Cases per 100,000" = "violet", "Humidity in %" = "orange"),
+                       labels = c("Dengue Cases per 100,000", "Humidity in %"),
+                       guide = guide_legend(title = "Legend Title")) +
+    scale_y_continuous(sec.axis = sec_axis(~. / 100, name = "Humidity in %", labels = scales::percent)) +
+    scale_x_continuous(breaks = 1:12, labels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")) +
+    annotate("text", x = 6, y = 50, label = paste0("Correlation: ", round(correlation, 2)), color = "black", size = 4, vjust = -0.5)
+  
+  plots[[year - 2005]] <- plot
+}
+
+for (i in seq_along(plots)) {
+  print(plots[[i]])
+}
+```
+
+
+
+## 2.2 Surat Thani
+```{r}
+## Creating Dataframes and Plotting GGPlots for Surat Thani
+data_frames <- list()
+
+for (year in 2006:2020) {
+  humidity_cols <- ((year - 2006) * 12 + 5):((year - 2006) * 12 + 16)
+  dengue_cols <- ((year - 2006) * 12 + 2):((year - 2006) * 12 + 13)
+  
+  humidity <- as.data.frame(t(SuratThani[, humidity_cols]))
+  colnames(humidity) <- paste0("Humidity.", year)
+  
+  dengue <- as.data.frame(t(SuratThaniD[, dengue_cols]))
+  colnames(dengue) <- paste0("Dengue.", year)
+  
+  data_frame <- data.frame(Humidity = humidity, Dengue = dengue, Months = Months)
+  
+  data_frames[[year - 2005]] <- data_frame
+}
+
+for (i in seq_along(data_frames)) {
+  assign(paste0("SuratThani.", i + 2005), data_frames[[i]])
+}
+
+plots <- list()
+
+for (year in years) {
+  Surat.Thani_year <- get(paste0("SuratThani.", year))
+  Surat.Thani_year$Dengue <- as.numeric(Surat.Thani_year$Dengue)
+  Surat.Thani_year$Humidity <- as.numeric(Surat.Thani_year$Humidity)
+  
+  correlation <- cor(Surat.Thani_year$Dengue, Surat.Thani_year$Humidity)
+  
+  plot <- ggplot(Surat.Thani_year, aes(x = Months)) +
+    geom_line(aes(y = Dengue, color = "Dengue Cases per 100,000"), type = "o") +
+    geom_line(aes(y = Humidity, color = "Humidity in %"), type = "o") +
+    labs(title = paste("Dengue Cases and Humidity in Surat Thani", year),
+         x = "Months",
+         y = "Dengue Cases per 100,000") +
+    geom_point(aes(y = Dengue, color = "Dengue Cases per 100,000"), shape = 16) +
+    geom_point(aes(y = Humidity, color = "Humidity in %"), shape = 16) +
+    scale_color_manual(values = c("Dengue Cases per 100,000" = "violet", "Humidity in %" = "orange"),
+                       labels = c("Dengue Cases per 100,000", "Humidity in %"),
+                       guide = guide_legend(title = "Legend Title")) +
+    scale_y_continuous(sec.axis = sec_axis(~. / 100, name = "Humidity in %", labels = scales::percent)) +
+    scale_x_continuous(breaks = 1:12, labels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")) +
+    annotate("text", x = 6, y = 50, label = paste0("Correlation: ", round(correlation, 2)), color = "black", size = 4, vjust = -0.5)
+  
+  plots[[year - 2005]] <- plot
+}
+
+for (i in seq_along(plots)) {
+  print(plots[[i]])
+}
+
+```
+
+## 2.3 Chumphon 
+## 2.4 Songkhla 
+
+# 3. Focusing in high Provinces 
+
+```{r}
+## Creating Dataframes and Plotting GGPlots for Phayao
+data_frames <- list()
+
+for (year in 2006:2020) {
+  humidity_cols <- ((year - 2006) * 12 + 5):((year - 2006) * 12 + 16)
+  dengue_cols <- ((year - 2006) * 12 + 2):((year - 2006) * 12 + 13)
+  
+  humidity <- as.data.frame(t(Phayao[, humidity_cols]))
+  colnames(humidity) <- paste0("Humidity.", year)
+  
+  dengue <- as.data.frame(t(PhayaoD[, dengue_cols]))
+  colnames(dengue) <- paste0("Dengue.", year)
+  
+  data_frame <- data.frame(Humidity = humidity, Dengue = dengue, Months = Months)
+  
+  data_frames[[year - 2005]] <- data_frame
+}
+
+for (i in seq_along(data_frames)) {
+  assign(paste0("Phayao.", i + 2005), data_frames[[i]])
+}
+
+plots <- list()
+
+for (year in years) {
+  Phayao_year <- get(paste0("Phayao.", year))
+  Phayao_year$Dengue <- as.numeric(Phayao_year$Dengue)
+  Phayao_year$Humidity <- as.numeric(Phayao_year$Humidity)
+  
+  correlation <- cor(Phayao_year$Dengue, Phayao_year$Humidity)
+  
+  plot <- ggplot(Phayao_year, aes(x = Months)) +
+    geom_line(aes(y = Dengue, color = "Dengue Cases per 100,000"), type = "o") +
+    geom_line(aes(y = Humidity, color = "Humidity in %"), type = "o") +
+    labs(title = paste("Dengue Cases and Humidity in Phayao", year),
+         x = "Months",
+         y = "Dengue Cases per 100,000") +
+    geom_point(aes(y = Dengue, color = "Dengue Cases per 100,000"), shape = 16) +
+    geom_point(aes(y = Humidity, color = "Humidity in %"), shape = 16) +
+    scale_color_manual(values = c("Dengue Cases per 100,000" = "violet", "Humidity in %" = "orange"),
+                       labels = c("Dengue Cases per 100,000", "Humidity in %"),
+                       guide = guide_legend(title = "Legend Title")) +
+    scale_y_continuous(sec.axis = sec_axis(~. / 100, name = "Humidity in %", labels = scales::percent)) +
+    scale_x_continuous(breaks = 1:12, labels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")) +
+    annotate("text", x = 6, y = 50, label = paste0("Correlation: ", round(correlation, 2)), color = "black", size = 4, vjust = -0.5)
+  
+  plots[[year - 2005]] <- plot
+}
+
+for (i in seq_along(plots)) {
+  print(plots[[i]])
+}
+
+```
+
+
