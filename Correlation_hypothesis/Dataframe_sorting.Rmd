@@ -19,7 +19,7 @@ This markdown is mainly used to normalize and sort data into dataframes most use
 ```{r}
 #install and load needed Packages 
 install.packages("readxl")
-library(grepl)
+library(readxl)
 
 #load population data 
 popu_06 <- read_excel("C:\\Users\\paula\\Documents\\Uni Heidelberg\\4. Semester\\Bioinformatik\\github\\topic04_team01\\population_data\\2006_population.xlsx")
@@ -37,6 +37,8 @@ T.huss.mon = read_excel("../era5_data_2006_2020_thailand_monmean.xlsx", sheet="e
 #load the dengue data 
 dengue <- read.csv("C:\\Users\\paula\\Documents\\Uni Heidelberg\\4. Semester\\Bioinformatik\\github\\topic04_team01\\dengue_data\\dengue_data_com2.csv")
 ```
+
+## Creating a normalized dengue Data frame, without removing the NA's
 
 The humidity data is not sorted alphabetically and contains columns that aren't needed, let's remove them and sort the dataframe
 
@@ -94,11 +96,13 @@ filePath = paste(dirname(getwd()), "dengue_data", "dengue_norm.csv",sep = "/")
 write.csv(dengue_norm, filePath)
 ```
 
+## Dengue Dataframe that does not contain NA's
+
 This normalized dataframe might be useful for other observations but for the correlations between dengue seasons, it is important to replace NA's with an educated guess to avoid distortion of the correlation as the monsoon seasons of the dengue cases are calculated via the sum of the respective monsoon season months.
 This educated guess is constructed as followed:
 
 1\.
-For Provinces that are missing entire years and do not have a total per year given, the values from January to December for each year are replaced by the mean cases of each month during the year. 
+For Provinces that are missing entire years and do not have a total per year given, the values from January to December for each year are replaced by the mean cases of each month during the year.
 
 2\.
 The new total then has to be calculated and added to the total cases column of the year and respective province.
@@ -117,7 +121,8 @@ Again for example if the Amnat Charoen Province is missing a value for january 2
 
 I am aware that this process might still not match the actual cases exactly but it is a good attempt to minimize the effects of NA's on the correlation tests when the monsoon seasons (based on sums) are used as a base for the correlation tests.
 
-Step 1 and 2
+### Step 1 and 2
+
 ```{r}
 #make a copy of the dengue_data_com2 dataframe 
 dengue_wo_NAs = data.frame(dengue)
@@ -173,8 +178,8 @@ for(i in 2006 : 2013) {
 
 ```
 
-Step 3
-Step 3.1
+### Step 3 Step 3.1
+
 ```{r}
 #make percentage dataframe
 dengue_percentages = data.frame(dengue)
@@ -196,7 +201,8 @@ for(i in 2006 : 2020) {
 }
 ```
 
-step 3.2 and 3.3
+### step 3.2 and 3.3
+
 ```{r}
 # loops over all years in dengue dataframe without NAs 
 for(i in 2006 : 2020) {
@@ -225,7 +231,10 @@ write.csv(dengue_wo_NAs, filePath)
 #Through replacing the NA's with mean values, the total values might differ a little bit. However as these might be needed in further analysis, I would rather not distort these actual recorded case numbers
 ```
 
-Again this dataframe needs to be normalized with the population data 
+## Normalized dataframe without NA's
+
+Again this dataframe needs to be normalized with the population data
+
 ```{r}
 #create a new dataframe, where the normalized data will be saved 
 dengue_wo_NA_norm = data.frame(dengue_wo_NAs)
@@ -256,16 +265,22 @@ filePath = paste(dirname(getwd()), "dengue_data", "dengue_without_NAs_norm.csv",
 write.csv(dengue_wo_NA_norm, filePath)
 ```
 
+## Monsoon season dataframes
+
+### Normalized dengue Dataframe without NA's sorted into monsoon seasons
 
 As Thailand is strongly influenced by its monsoon seasons, we sort the dengue cases and humidity data into 4 different monsoon seasons.
-The inter-monsoon season months are December, January and February, the pre-monsoon seasons are March, April and May, the monsoon seasons are June, July, August and September and finally the post-monsoon seasons are October and November. The Dengue monsoon seasons will be calculated by summing the respective months up. As Bungkan has again gained NAs because the population data from 2006-2011 is missing, I decided to loose this one province. 
-The inter-monsoon season of 2006 will also have to be discarded in the correlation test, as it only comprises of a sum of 2 months instead of 3. 
-For the humidity data mean for the months mentioned above is used. To avoid clashes with different vector lengths, Bungkan will be removed here as well 
+The inter-monsoon season months are December, January and February, the pre-monsoon seasons are March, April and May, the monsoon seasons are June, July, August and September and finally the post-monsoon seasons are October and November.
+The Dengue monsoon seasons will be calculated by summing the respective months up.
+As Bungkan has again gained NAs because the population data from 2006-2011 is missing, I decided to loose this one province.
+The inter-monsoon season of 2006 will also have to be discarded in the correlation test, as it only comprises of a sum of 2 months instead of 3.
+For the humidity data mean for the months mentioned above is used.
+To avoid clashes with different vector lengths, Bungkan will be removed here as well
 
 ```{r}
 #normalized dengue data without NA's
 ##the bungkan province needs to be removed in row 4 
-dengue_wo_NA_norm <- dengue_wo_NA_norm[-4,]
+dengue_wo_NA_norm 
 
 ## means of the inter-monsoon seasons over the years 
 intermon_06_mean <- rowMeans(dengue_wo_NA_norm[, c( "X2006.01","X2006.02")])
@@ -339,7 +354,10 @@ postmon_20_mean <- rowMeans(dengue_wo_NA_norm[, c( "X2020.10", "X2020.11")])
 let's combine all these vectors into a dataframe
 
 ```{r}
+#we need the provinces 
 Provinces <- dengue_wo_NA_norm$Reporting.areas
+
+#let's save them all in a new dataframe 
 dengue_mon_mean <- cbind(Provinces, intermon_06_mean, premon_06_mean, mon_06_mean, postmon_06_mean,intermon_07_mean, premon_07_mean, mon_07_mean, postmon_07_mean,  intermon_08_mean, premon_08_mean, mon_08_mean, postmon_08_mean, intermon_09_mean, premon_09_mean, mon_09_mean, postmon_09_mean, intermon_10_mean, premon_10_mean, mon_10_mean, postmon_10_mean, intermon_11_mean, premon_11_mean, mon_11_mean, postmon_11_mean, intermon_12_mean, premon_12_mean, mon_12_mean, postmon_12_mean, intermon_13_mean, premon_13_mean, mon_13_mean, postmon_13_mean, intermon_14_mean, premon_14_mean, mon_14_mean, postmon_14_mean, intermon_15_mean, premon_15_mean, mon_15_mean, postmon_15_mean, intermon_16_mean, premon_16_mean, mon_16_mean, postmon_16_mean, intermon_17_mean, premon_17_mean, mon_17_mean, postmon_17_mean, intermon_18_mean, premon_18_mean, mon_18_mean, postmon_18_mean, intermon_19_mean, premon_19_mean, mon_19_mean, postmon_19_mean, intermon_20_mean, premon_20_mean, mon_20_mean, postmon_20_mean)
 
 #turn it into a dataframe
@@ -355,7 +373,95 @@ filePath = paste(dirname(getwd()), "dengue_data", "dengue_mon_mean.csv",sep = "/
 write.csv(dengue_mon_mean, filePath)
 ```
 
-let's just quickly stack them atop each other 
+### Humidity Dataframe without NA's sorted into monsoon seasons
+
+We need another dataframe with the means of the humidity during each monsoon season to be able to calculate the correlation between the two, so let's do that
+
+```{r}
+#first let's calculate the mean of the intermonsoon seasons 
+intermonH_06 <- rowMeans(T.huss.mon1[,c("2006.01.", "2006.02.")])
+intermonH_07 <- rowMeans(T.huss.mon1[,c("2006.12.", "2007.01.", "2007.02.")])
+intermonH_08 <- rowMeans(T.huss.mon1[,c("2007.12.", "2008.01.", "2008.02.")])
+intermonH_09 <- rowMeans(T.huss.mon1[,c("2008.12.", "2009.01.", "2009.02.")])
+intermonH_10 <- rowMeans(T.huss.mon1[,c("2009.12.", "2010.01.", "2010.02.")])
+intermonH_11 <- rowMeans(T.huss.mon1[,c("2010.12.", "2011.01.", "2011.02.")])
+intermonH_12 <- rowMeans(T.huss.mon1[,c("2011.12.", "2012.01.", "2012.02.")])
+intermonH_13 <- rowMeans(T.huss.mon1[,c("2012.12.", "2013.01.", "2013.02.")])
+intermonH_14 <- rowMeans(T.huss.mon1[,c("2013.12.", "2014.01.", "2014.02.")])
+intermonH_15 <- rowMeans(T.huss.mon1[,c("2014.12.", "2015.01.", "2015.02.")])
+intermonH_16 <- rowMeans(T.huss.mon1[,c("2015.12.", "2016.01.", "2016.02.")])
+intermonH_17 <- rowMeans(T.huss.mon1[,c("2016.12.", "2017.01.", "2017.02.")])
+intermonH_18 <- rowMeans(T.huss.mon1[,c("2017.12.", "2018.01.", "2018.02.")])
+intermonH_19 <- rowMeans(T.huss.mon1[,c("2018.12.", "2019.01.", "2019.02.")])
+intermonH_20 <- rowMeans(T.huss.mon1[,c("2019.12.", "2020.01.", "2020.02.")])
+
+#Do the same for the pre-monsoon months
+premonH_06 <- rowMeans(T.huss.mon1[,c("2006.03.", "2006.04.", "2006.05.")])
+premonH_07 <- rowMeans(T.huss.mon1[,c("2007.03.", "2007.04.", "2007.05.")])
+premonH_08 <- rowMeans(T.huss.mon1[,c("2008.03.", "2008.04.", "2008.05.")])
+premonH_09 <- rowMeans(T.huss.mon1[,c("2009.03.", "2009.04.", "2009.05.")])
+premonH_10 <- rowMeans(T.huss.mon1[,c("2010.03.", "2010.04.", "2010.05.")])
+premonH_11 <- rowMeans(T.huss.mon1[,c("2011.03.", "2011.04.", "2011.05.")])
+premonH_12 <- rowMeans(T.huss.mon1[,c("2012.03.", "2012.04.", "2012.05.")])
+premonH_13 <- rowMeans(T.huss.mon1[,c("2013.03.", "2013.04.", "2013.05.")])
+premonH_14 <- rowMeans(T.huss.mon1[,c("2014.03.", "2014.04.", "2014.05.")])
+premonH_15 <- rowMeans(T.huss.mon1[,c("2015.03.", "2015.04.", "2015.05.")])
+premonH_16 <- rowMeans(T.huss.mon1[,c("2016.03.", "2016.04.", "2016.05.")])
+premonH_17 <- rowMeans(T.huss.mon1[,c("2017.03.", "2017.04.", "2017.05.")])
+premonH_18 <- rowMeans(T.huss.mon1[,c("2018.03.", "2018.04.", "2018.05.")])
+premonH_19 <- rowMeans(T.huss.mon1[,c("2019.03.", "2019.04.", "2019.05.")])
+premonH_20 <- rowMeans(T.huss.mon1[,c("2020.03.", "2020.04.", "2020.05.")])
+
+#again for the monsoon months
+monH_06 <- rowMeans(T.huss.mon1[,c("2006.06.", "2006.07.", "2006.08.", "2006.09.")])
+monH_07 <- rowMeans(T.huss.mon1[,c("2007.06.", "2007.07.", "2007.08.", "2007.09.")])
+monH_08 <- rowMeans(T.huss.mon1[,c("2008.06.", "2008.07.", "2008.08.", "2008.09.")])
+monH_09 <- rowMeans(T.huss.mon1[,c("2009.06.", "2009.07.", "2009.08.", "2009.09.")])
+monH_10 <- rowMeans(T.huss.mon1[,c("2010.06.", "2010.07.", "2010.08.", "2010.09.")])
+monH_11 <- rowMeans(T.huss.mon1[,c("2011.06.", "2011.07.", "2011.08.", "2011.09.")])
+monH_12 <- rowMeans(T.huss.mon1[,c("2012.06.", "2012.07.", "2012.08.", "2012.09.")])
+monH_13 <- rowMeans(T.huss.mon1[,c("2013.06.", "2013.07.", "2013.08.", "2013.09.")])
+monH_14 <- rowMeans(T.huss.mon1[,c("2014.06.", "2014.07.", "2014.08.", "2014.09.")])
+monH_15 <- rowMeans(T.huss.mon1[,c("2015.06.", "2015.07.", "2015.08.", "2015.09.")])
+monH_16 <- rowMeans(T.huss.mon1[,c("2016.06.", "2016.07.", "2016.08.", "2016.09.")])
+monH_17 <- rowMeans(T.huss.mon1[,c("2017.06.", "2017.07.", "2017.08.", "2017.09.")])
+monH_18 <- rowMeans(T.huss.mon1[,c("2018.06.", "2018.07.", "2018.08.", "2018.09.")])
+monH_19 <- rowMeans(T.huss.mon1[,c("2019.06.", "2019.07.", "2019.08.", "2019.09.")])
+monH_20 <- rowMeans(T.huss.mon1[,c("2020.06.", "2020.07.", "2020.08.", "2020.09.")])
+
+#again for the postmonsoon seasons
+postmonH_06 <- rowMeans(T.huss.mon1[,c("2006.10.", "2006.11.")])
+postmonH_07 <- rowMeans(T.huss.mon1[,c("2007.10.", "2007.11.")])
+postmonH_08 <- rowMeans(T.huss.mon1[,c("2008.10.", "2008.11.")])
+postmonH_09 <- rowMeans(T.huss.mon1[,c("2009.10.", "2009.11.")])
+postmonH_10 <- rowMeans(T.huss.mon1[,c("2010.10.", "2010.11.")])
+postmonH_11 <- rowMeans(T.huss.mon1[,c("2011.10.", "2011.11.")])
+postmonH_12 <- rowMeans(T.huss.mon1[,c("2012.10.", "2012.11.")])
+postmonH_13 <- rowMeans(T.huss.mon1[,c("2013.10.", "2013.11.")])
+postmonH_14 <- rowMeans(T.huss.mon1[,c("2014.10.", "2014.11.")])
+postmonH_15 <- rowMeans(T.huss.mon1[,c("2015.10.", "2015.11.")])
+postmonH_16 <- rowMeans(T.huss.mon1[,c("2016.10.", "2016.11.")])
+postmonH_17 <- rowMeans(T.huss.mon1[,c("2017.10.", "2017.11.")])
+postmonH_18 <- rowMeans(T.huss.mon1[,c("2018.10.", "2018.11.")])
+postmonH_19 <- rowMeans(T.huss.mon1[,c("2019.10.", "2019.11.")])
+postmonH_20 <- rowMeans(T.huss.mon1[,c("2020.10.", "2020.11.")])
+
+#put all the means together in a new dataframe
+Provinces <- T.huss.mon1$ADM1_EN
+humidity_mon <- cbind(Provinces, intermonH_06, premonH_06, monH_06, postmonH_06, intermonH_07, premonH_07, monH_07, postmonH_07, intermonH_08, premonH_08, monH_08, postmonH_08, intermonH_09, premonH_09, monH_09, postmonH_09, intermonH_10, premonH_10, monH_10, postmonH_10, intermonH_11, premonH_11, monH_11, postmonH_11, intermonH_12, premonH_12, monH_12, postmonH_12, intermonH_13, premonH_13, monH_13, postmonH_13, intermonH_14, premonH_14, monH_14, postmonH_14, intermonH_15, premonH_15, monH_15, postmonH_15, intermonH_16, premonH_16, monH_16, postmonH_16, intermonH_17, premonH_17, monH_17, postmonH_17, intermonH_18, premonH_18, monH_18, postmonH_18, intermonH_19, premonH_19, monH_19, postmonH_19, intermonH_20, premonH_20, monH_20, postmonH_20)
+
+#turn it into a dataframe
+humidity_mon <- as.data.frame(humidity_mon)
+
+#save the dataframe 
+filePath = paste(dirname(getwd()), "geo_data", "humidity_mon.csv",sep = "/")
+write.csv(humidity_mon, filePath)
+```
+
+## Yearly stacked monsoon season dataframe with both humidity and dengue cases
+
+let's just quickly stack them atop each other
+
 ```{r}
 ##let's stack the data for the years atop of each other for easier calculation with the cor() function 
 
@@ -372,8 +478,8 @@ stacked_mon_mean <- sapply(sprintf("mon_%02d_mean", 6:20), function(var_name) ge
 stacked_postmon_mean <- sapply(sprintf("postmon_%02d_mean", 6:20), function(var_name) get(var_name))
 
 #we need the provinces in the stacked dataframe too
-Provinces <- sort(Provinces)
-Provinces <- Provinces[-4]
+Provinces <- T.huss.mon1$ADM1_EN
+
 
 #stack them 14 times 
 stacked_provinces <- rep(Provinces, times = 15)
@@ -382,8 +488,6 @@ stacked_provinces <- rep(Provinces, times = 15)
 stacked_mon_mean <- cbind(stacked_provinces, stacked_intermon_mean, stacked_premon_mean, stacked_mon_mean, stacked_postmon_mean)
 
 ```
-
-
 
 ```{r}
 #normalized dengue data 
@@ -477,110 +581,6 @@ save the new dataframe that contains the normalized dengue cases merged into mon
 ```{r}
 filePath = paste(dirname(getwd()), "dengue_data", "dengue_mon.csv",sep = "/")
 write.csv(dengue_mon, filePath)
-```
-
-
-We need another dataframe with the means of the humidity during each monsoon season to be able to calculate the correlation between the two, so let's do that
-
-```{r}
-#first let's calculate the mean of the intermonsoon seasons 
-intermonH_06 <- rowMeans(T.huss.mon1[,c("2006.01.", "2006.02.")])
-intermonH_07 <- rowMeans(T.huss.mon1[,c("2006.12.", "2007.01.", "2007.02.")])
-intermonH_08 <- rowMeans(T.huss.mon1[,c("2007.12.", "2008.01.", "2008.02.")])
-intermonH_09 <- rowMeans(T.huss.mon1[,c("2008.12.", "2009.01.", "2009.02.")])
-intermonH_10 <- rowMeans(T.huss.mon1[,c("2009.12.", "2010.01.", "2010.02.")])
-intermonH_11 <- rowMeans(T.huss.mon1[,c("2010.12.", "2011.01.", "2011.02.")])
-intermonH_12 <- rowMeans(T.huss.mon1[,c("2011.12.", "2012.01.", "2012.02.")])
-intermonH_13 <- rowMeans(T.huss.mon1[,c("2012.12.", "2013.01.", "2013.02.")])
-intermonH_14 <- rowMeans(T.huss.mon1[,c("2013.12.", "2014.01.", "2014.02.")])
-intermonH_15 <- rowMeans(T.huss.mon1[,c("2014.12.", "2015.01.", "2015.02.")])
-intermonH_16 <- rowMeans(T.huss.mon1[,c("2015.12.", "2016.01.", "2016.02.")])
-intermonH_17 <- rowMeans(T.huss.mon1[,c("2016.12.", "2017.01.", "2017.02.")])
-intermonH_18 <- rowMeans(T.huss.mon1[,c("2017.12.", "2018.01.", "2018.02.")])
-intermonH_19 <- rowMeans(T.huss.mon1[,c("2018.12.", "2019.01.", "2019.02.")])
-intermonH_20 <- rowMeans(T.huss.mon1[,c("2019.12.", "2020.01.", "2020.02.")])
-```
-
-Do the same for the pre-monsoon months
-
-```{r}
-premonH_06 <- rowMeans(T.huss.mon1[,c("2006.03.", "2006.04.", "2006.05.")])
-premonH_07 <- rowMeans(T.huss.mon1[,c("2007.03.", "2007.04.", "2007.05.")])
-premonH_08 <- rowMeans(T.huss.mon1[,c("2008.03.", "2008.04.", "2008.05.")])
-premonH_09 <- rowMeans(T.huss.mon1[,c("2009.03.", "2009.04.", "2009.05.")])
-premonH_10 <- rowMeans(T.huss.mon1[,c("2010.03.", "2010.04.", "2010.05.")])
-premonH_11 <- rowMeans(T.huss.mon1[,c("2011.03.", "2011.04.", "2011.05.")])
-premonH_12 <- rowMeans(T.huss.mon1[,c("2012.03.", "2012.04.", "2012.05.")])
-premonH_13 <- rowMeans(T.huss.mon1[,c("2013.03.", "2013.04.", "2013.05.")])
-premonH_14 <- rowMeans(T.huss.mon1[,c("2014.03.", "2014.04.", "2014.05.")])
-premonH_15 <- rowMeans(T.huss.mon1[,c("2015.03.", "2015.04.", "2015.05.")])
-premonH_16 <- rowMeans(T.huss.mon1[,c("2016.03.", "2016.04.", "2016.05.")])
-premonH_17 <- rowMeans(T.huss.mon1[,c("2017.03.", "2017.04.", "2017.05.")])
-premonH_18 <- rowMeans(T.huss.mon1[,c("2018.03.", "2018.04.", "2018.05.")])
-premonH_19 <- rowMeans(T.huss.mon1[,c("2019.03.", "2019.04.", "2019.05.")])
-premonH_20 <- rowMeans(T.huss.mon1[,c("2020.03.", "2020.04.", "2020.05.")])
-```
-
-again for the monsoon months
-
-```{r}
-monH_06 <- rowMeans(T.huss.mon1[,c("2006.06.", "2006.07.", "2006.08.", "2006.09.")])
-monH_07 <- rowMeans(T.huss.mon1[,c("2007.06.", "2007.07.", "2007.08.", "2007.09.")])
-monH_08 <- rowMeans(T.huss.mon1[,c("2008.06.", "2008.07.", "2008.08.", "2008.09.")])
-monH_09 <- rowMeans(T.huss.mon1[,c("2009.06.", "2009.07.", "2009.08.", "2009.09.")])
-monH_10 <- rowMeans(T.huss.mon1[,c("2010.06.", "2010.07.", "2010.08.", "2010.09.")])
-monH_11 <- rowMeans(T.huss.mon1[,c("2011.06.", "2011.07.", "2011.08.", "2011.09.")])
-monH_12 <- rowMeans(T.huss.mon1[,c("2012.06.", "2012.07.", "2012.08.", "2012.09.")])
-monH_13 <- rowMeans(T.huss.mon1[,c("2013.06.", "2013.07.", "2013.08.", "2013.09.")])
-monH_14 <- rowMeans(T.huss.mon1[,c("2014.06.", "2014.07.", "2014.08.", "2014.09.")])
-monH_15 <- rowMeans(T.huss.mon1[,c("2015.06.", "2015.07.", "2015.08.", "2015.09.")])
-monH_16 <- rowMeans(T.huss.mon1[,c("2016.06.", "2016.07.", "2016.08.", "2016.09.")])
-monH_17 <- rowMeans(T.huss.mon1[,c("2017.06.", "2017.07.", "2017.08.", "2017.09.")])
-monH_18 <- rowMeans(T.huss.mon1[,c("2018.06.", "2018.07.", "2018.08.", "2018.09.")])
-monH_19 <- rowMeans(T.huss.mon1[,c("2019.06.", "2019.07.", "2019.08.", "2019.09.")])
-monH_20 <- rowMeans(T.huss.mon1[,c("2020.06.", "2020.07.", "2020.08.", "2020.09.")])
-```
-
-again for the postmonsoon seasons
-
-```{r}
-postmonH_06 <- rowMeans(T.huss.mon1[,c("2006.10.", "2006.11.")])
-postmonH_07 <- rowMeans(T.huss.mon1[,c("2007.10.", "2007.11.")])
-postmonH_08 <- rowMeans(T.huss.mon1[,c("2008.10.", "2008.11.")])
-postmonH_09 <- rowMeans(T.huss.mon1[,c("2009.10.", "2009.11.")])
-postmonH_10 <- rowMeans(T.huss.mon1[,c("2010.10.", "2010.11.")])
-postmonH_11 <- rowMeans(T.huss.mon1[,c("2011.10.", "2011.11.")])
-postmonH_12 <- rowMeans(T.huss.mon1[,c("2012.10.", "2012.11.")])
-postmonH_13 <- rowMeans(T.huss.mon1[,c("2013.10.", "2013.11.")])
-postmonH_14 <- rowMeans(T.huss.mon1[,c("2014.10.", "2014.11.")])
-postmonH_15 <- rowMeans(T.huss.mon1[,c("2015.10.", "2015.11.")])
-postmonH_16 <- rowMeans(T.huss.mon1[,c("2016.10.", "2016.11.")])
-postmonH_17 <- rowMeans(T.huss.mon1[,c("2017.10.", "2017.11.")])
-postmonH_18 <- rowMeans(T.huss.mon1[,c("2018.10.", "2018.11.")])
-postmonH_19 <- rowMeans(T.huss.mon1[,c("2019.10.", "2019.11.")])
-postmonH_20 <- rowMeans(T.huss.mon1[,c("2020.10.", "2020.11.")])
-```
-
-put all the means together in a new dataframe
-
-```{r}
-Provinces <- T.huss.mon1$ADM1_EN
-humidity_mon <- cbind(Provinces, intermonH_06, premonH_06, monH_06, postmonH_06, intermonH_07, premonH_07, monH_07, postmonH_07, intermonH_08, premonH_08, monH_08, postmonH_08, intermonH_09, premonH_09, monH_09, postmonH_09, intermonH_10, premonH_10, monH_10, postmonH_10, intermonH_11, premonH_11, monH_11, postmonH_11, intermonH_12, premonH_12, monH_12, postmonH_12, intermonH_13, premonH_13, monH_13, postmonH_13, intermonH_14, premonH_14, monH_14, postmonH_14, intermonH_15, premonH_15, monH_15, postmonH_15, intermonH_16, premonH_16, monH_16, postmonH_16, intermonH_17, premonH_17, monH_17, postmonH_17, intermonH_18, premonH_18, monH_18, postmonH_18, intermonH_19, premonH_19, monH_19, postmonH_19, intermonH_20, premonH_20, monH_20, postmonH_20)
-
-#turn it into a dataframe
-humidity_mon <- as.data.frame(humidity_mon)
-
-#the provinces aren't sorted alphabetically, order them 
-humidity_mon <- humidity_mon[order(humidity_mon$Provinces), ]
-ly(humidity_mon[numColumns], as.numeric)
-
-```
-
-save the dataframe
-
-```{r}
-filePath = paste(dirname(getwd()), "geo_data", "humidity_mon.csv",sep = "/")
-write.csv(humidity_mon, filePath)
 ```
 
 Now that the data is in a format we can work with let's finally look at the correlation between humidity and dengue cases
