@@ -9,9 +9,10 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 # 0. Loading the Data 
-
+I used the Dengue Data normalized with Population Data, Humidity Data and Geography Data. Because we sometimes used the same names for different Data frames , it is necessary to run this chunk in each Markdown.
 ```{r}
 ## Dengue Data 
+dengue.norm <- read.csv("./dengue_data/dengue_without_NAs_norm.csv")
 dengue.norm <- subset(dengue.norm, select = setdiff(colnames(dengue.norm), c("X", "X.1","X2006.total", "X2007.total", "X2008.total","X2009.total", "X2010.total", "X2011.total","X2012.total", "X2013.total", "X2014.total","X2015.total", "X2016.total", "X2017.total","X2018.total", "X2019.total", "X2020.total")))
 dengue.norm['numbers']=c(1:77)
 # Replace Bungkan with Nong Khai Data 
@@ -20,7 +21,7 @@ dengue.norm[4,2:181] <- dengue.norm[35,2:181]
 as.data.frame(dengue.norm)
 
 ## Humidity Data 
-T.huss.mon.ordered <- read.csv("../geo_data/T.huss.mon_correct_provinces.csv")
+T.huss.mon.ordered <- read.csv("./geo_data/T.huss.mon_correct_provinces.csv")
 T.huss.mon.ordered <- subset(T.huss.mon.ordered, select = -X)
 T.huss.mon.ordered$Number <- c(1:77)
 names(T.huss.mon.ordered)[names(T.huss.mon.ordered) == "Number"] <- "numbers"
@@ -44,11 +45,43 @@ View(dengue.norm)
 ```{r}
 ## Years and Months  
 
-Years <- c(2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020)
+years <- c(2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020)
 Months <- c(1,2,3,4,5,6,7,8,9,10,11,12)
 
 
 ## Dengue Data Mean values
+
+dengue.norm.2006 <- as.data.frame(dengue.norm[,2:13])
+dengue.norm.2007 <- as.data.frame(dengue.norm[,14:25])
+dengue.norm.2008 <- as.data.frame(dengue.norm[,26:37])
+dengue.norm.2009 <- as.data.frame(dengue.norm[,38:49])
+dengue.norm.2010 <- as.data.frame(dengue.norm[,50:61])
+dengue.norm.2011 <- as.data.frame(dengue.norm[,62:73])
+dengue.norm.2012 <- as.data.frame(dengue.norm[,74:85])
+dengue.norm.2013 <- as.data.frame(dengue.norm[,86:97])
+dengue.norm.2014 <- as.data.frame(dengue.norm[,98:109])
+dengue.norm.2015 <- as.data.frame(dengue.norm[,110:121])
+dengue.norm.2016 <- as.data.frame(dengue.norm[,122:133])
+dengue.norm.2017 <- as.data.frame(dengue.norm[,134:145])
+dengue.norm.2018 <- as.data.frame(dengue.norm[,146:157])
+dengue.norm.2019 <- as.data.frame(dengue.norm[,158:169])
+dengue.norm.2020 <- as.data.frame(dengue.norm[,170:181])
+
+dengue.norm.2006.mean <- as.data.frame(apply(dengue.norm.2006,1,mean))
+dengue.norm.2007.mean <- as.data.frame(apply(dengue.norm.2007,1,mean))
+dengue.norm.2008.mean <- as.data.frame(apply(dengue.norm.2008,1,mean))
+dengue.norm.2009.mean <- as.data.frame(apply(dengue.norm.2009,1,mean))
+dengue.norm.2010.mean <- as.data.frame(apply(dengue.norm.2010,1,mean))
+dengue.norm.2011.mean <- as.data.frame(apply(dengue.norm.2011,1,mean))
+dengue.norm.2012.mean <- as.data.frame(apply(dengue.norm.2012,1,mean))
+dengue.norm.2013.mean <- as.data.frame(apply(dengue.norm.2013,1,mean))
+dengue.norm.2014.mean <- as.data.frame(apply(dengue.norm.2014,1,mean))
+dengue.norm.2015.mean <- as.data.frame(apply(dengue.norm.2015,1,mean))
+dengue.norm.2016.mean <- as.data.frame(apply(dengue.norm.2016,1,mean))
+dengue.norm.2017.mean <- as.data.frame(apply(dengue.norm.2017,1,mean))
+dengue.norm.2018.mean <- as.data.frame(apply(dengue.norm.2018,1,mean))
+dengue.norm.2019.mean <- as.data.frame(apply(dengue.norm.2019,1,mean))
+dengue.norm.2020.mean <- as.data.frame(apply(dengue.norm.2020,1,mean))
 
 dengue.norm.2006.mean.absolute <- as.data.frame(apply(dengue.norm.2006.mean,1,mean))
 dengue.norm.2007.mean.absolute <- as.data.frame(apply(dengue.norm.2007.mean,1,mean))
@@ -127,7 +160,53 @@ huss.2019<- as.data.frame(T.huss.mon.ordered[,151:162])
 huss.2020<- as.data.frame(T.huss.mon.ordered[,163:174])
 
 
+huss.2006.mean <- as.data.frame(apply(huss.2006, 1, mean))
+huss.2006.mean['numbers'] <- c(1:77)
 
+huss.2007.mean <- as.data.frame(apply(huss.2007, 1, mean))
+huss.2007.mean['numbers'] <- c(1:77)
+
+
+huss.2008.mean <- as.data.frame(apply(huss.2008, 1, mean))
+huss.2008.mean['numbers'] <- c(1:77)
+
+
+huss.2009.mean <- as.data.frame(apply(huss.2009, 1, mean))
+huss.2009.mean['numbers'] <- c(1:77)
+
+
+huss.2010.mean <- as.data.frame(apply(huss.2010, 1, mean))
+huss.2010.mean['numbers'] <- c(1:77)
+
+huss.2011.mean <- as.data.frame(apply(huss.2011, 1, mean))
+huss.2011.mean['numbers'] <- c(1:77)
+
+huss.2012.mean <- as.data.frame(apply(huss.2012, 1, mean))
+huss.2012.mean['numbers'] <- c(1:77)
+
+huss.2013.mean <- as.data.frame(apply(huss.2013, 1, mean))
+huss.2013.mean['numbers'] <- c(1:77)
+
+huss.2014.mean <- as.data.frame(apply(huss.2014, 1, mean))
+huss.2014.mean['numbers'] <- c(1:77)
+
+huss.2015.mean <- as.data.frame(apply(huss.2015, 1, mean))
+huss.2015.mean['numbers'] <- c(1:77)
+
+huss.2016.mean <- as.data.frame(apply(huss.2016, 1, mean))
+huss.2016.mean['numbers'] <- c(1:77)
+
+huss.2017.mean <- as.data.frame(apply(huss.2017, 1, mean))
+huss.2017.mean['numbers'] <- c(1:77)
+
+huss.2018.mean <- as.data.frame(apply(huss.2018, 1, mean))
+huss.2018.mean['numbers'] <- c(1:77)
+
+huss.2019.mean <- as.data.frame(apply(huss.2019, 1, mean))
+huss.2019.mean['numbers'] <- c(1:77)
+
+huss.2020.mean <- as.data.frame(apply(huss.2020, 1, mean))
+huss.2020.mean['numbers'] <- c(1:77)
 
 huss.2006.mean.absolute <- as.data.frame(apply(huss.2006.mean,1,mean))
 huss.2007.mean.absolute <- as.data.frame(apply(huss.2007.mean,1,mean))
@@ -229,6 +308,11 @@ PhayaoD <- data.frame(dengue.norm[67, ])
 
 ```
 
+```{r}
+view(Kalasin)
+view(KalasinD)
+```
+
 
 # 1. Geographic Provinces Diffrent Sea levels
 
@@ -266,6 +350,7 @@ for (year in 2006:2020) {
   data_frame <- data.frame(Humidity = humidity, Dengue = dengue, Months = Months)
   
   data_frames[[year - 2005]] <- data_frame
+  
 }
 
 for (i in seq_along(data_frames)) {
@@ -355,6 +440,7 @@ for (year in years) {
     annotate("text", x = 6, y = 50, label = paste0("Correlation: ", round(correlation, 2)), color = "black", size = 4, vjust = -0.5)
   
   plots[[year - 2005]] <- plot
+  
 }
 
 for (i in seq_along(plots)) {
@@ -380,6 +466,8 @@ for (year in 2006:2020) {
   colnames(dengue) <- paste0("Dengue.", year)
   
   data_frame <- data.frame(Humidity = humidity, Dengue = dengue, Months = Months)
+  
+  print(data_frame)
   
   data_frames[[year - 2005]] <- data_frame
 }
@@ -420,6 +508,9 @@ for (i in seq_along(plots)) {
 }
 ```
 
+```{r}
+view()
+```
 
 ## 1.4 Chumphom
 ```{r}
@@ -658,6 +749,7 @@ for (i in seq_along(plots)) {
 
 # 3. Focusing in high Provinces 
 
+## 3.1 Phayao
 ```{r}
 ## Creating Dataframes and Plotting GGPlots for Phayao
 data_frames <- list()
