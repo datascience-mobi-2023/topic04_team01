@@ -12,11 +12,11 @@ editor_options:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# Sorting of Dataframes
+# Sorting of Data Frames
 
-This markdown is mainly used to normalize and sort data into dataframes most useful for correlation tests and other test.
+This markdown is mainly used to normalize and sort data into data frames most useful for correlation tests and other test.
 
-## 1. Load the packages and dataframes
+## 1. Load the packages and data frames
 
 ```{r}
 #install and load needed Packages 
@@ -47,11 +47,11 @@ popu_density <- read_excel("C:\\Users\\paula\\Documents\\Uni Heidelberg\\4. Seme
 
 ## 2. Creating a normalized dengue Data frame, without removing the NA's
 
-The humidity data is not sorted alphabetically and contains columns that aren't needed, let's remove them and sort the dataframe
+The humidity data is not sorted alphabetically and contains columns that aren't needed, let's remove them and sort the data frame.
 
 ```{r}
 #the dengue data provinces have different names than the ones in the dengue dataframe and are therefore sorted differently, let's make sure they match 
-##we need a copy of the humidity dataframe 
+##we need a copy of the humidity dataframe because some poeple in the repository are working with the initial data frame 
 T.huss.mon1 <- data.frame(T.huss.mon)
 
 ##which names don't match up 
@@ -74,7 +74,7 @@ i.remove <- which(colnames(T.huss.mon) %in% c("Number","Longitude", "Latitude"))
 T.huss.mon1 <- T.huss.mon[,-i.remove]
 ```
 
-The population data is stored in different excel files and to work with them, we need them in one single dataframe
+The population data is stored in different excel files and to work with them, we need them in one single data frame and save them into a single file.
 
 ```{r}
 #bind the coloumns in the different excel files together in one new dataframe
@@ -93,7 +93,7 @@ To avoid the correlation being distorted by the differences in population, it is
 To do this the cases in each year and province are divided by the population of the respective province and respective year and then multiplied by 100'000.
 
 ```{r}
-#create a new dataframe, where the normalized data will be saved 
+#create a new dataframe, where the normalized data will be saved, we can use a copy of the non normalized data frame
 dengue_norm = data.frame(dengue)
 
 # loops over all years in population dataframe
@@ -127,34 +127,49 @@ For correlation tests, it is easier to work with dataframes in the longformat.
 ```{r}
 
 #stack the months of each year atop of each other 
+#2006
 stacked_06 <- c(dengue_norm$X2006.01, dengue_norm$X2006.02, dengue_norm$X2006.03, dengue_norm$X2006.04, dengue_norm$X2006.05, dengue_norm$X2006.06, dengue_norm$X2006.07, dengue_norm$X2006.08, dengue_norm$X2006.09, dengue_norm$X2006.10, dengue_norm$X2006.11, dengue_norm$X2006.12)
 
+#2007
 stacked_07 <- c(dengue_norm$X2007.01, dengue_norm$X2007.02, dengue_norm$X2007.03, dengue_norm$X2007.04, dengue_norm$X2007.05, dengue_norm$X2007.06, dengue_norm$X2007.07, dengue_norm$X2007.08, dengue_norm$X2007.09, dengue_norm$X2007.10, dengue_norm$X2007.11, dengue_norm$X2007.12)
 
+#2008
 stacked_08 <- c(dengue_norm$X2008.01, dengue_norm$X2008.02, dengue_norm$X2008.03, dengue_norm$X2008.04, dengue_norm$X2008.05, dengue_norm$X2008.06, dengue_norm$X2008.07, dengue_norm$X2008.08, dengue_norm$X2008.09, dengue_norm$X2008.10, dengue_norm$X2008.11, dengue_norm$X2008.12)
 
+#2009
 stacked_09 <- c(dengue_norm$X2009.01, dengue_norm$X2009.02, dengue_norm$X2009.03, dengue_norm$X2009.04, dengue_norm$X2009.05, dengue_norm$X2009.06, dengue_norm$X2009.07, dengue_norm$X2009.08, dengue_norm$X2009.09, dengue_norm$X2009.10, dengue_norm$X2009.11, dengue_norm$X2009.12)
 
+#2010
 stacked_10 <- c(dengue_norm$X2010.01, dengue_norm$X2010.02, dengue_norm$X2010.03, dengue_norm$X2010.04, dengue_norm$X2010.05, dengue_norm$X2010.06, dengue_norm$X2010.07, dengue_norm$X2010.08, dengue_norm$X2010.09, dengue_norm$X2010.10, dengue_norm$X2010.11, dengue_norm$X2010.12)
 
+#2011
 stacked_11 <- c(dengue_norm$X2011.01, dengue_norm$X2011.02, dengue_norm$X2011.03, dengue_norm$X2011.04, dengue_norm$X2011.05, dengue_norm$X2011.06, dengue_norm$X2011.07, dengue_norm$X2011.08, dengue_norm$X2011.09, dengue_norm$X2011.10, dengue_norm$X2011.11, dengue_norm$X2011.12)
 
+#2012
 stacked_12 <- c(dengue_norm$X2012.01, dengue_norm$X2012.02, dengue_norm$X2012.03, dengue_norm$X2012.04, dengue_norm$X2012.05, dengue_norm$X2012.06, dengue_norm$X2012.07, dengue_norm$X2012.08, dengue_norm$X2012.09, dengue_norm$X2012.10, dengue_norm$X2012.11, dengue_norm$X2012.12)
 
+#2013
 stacked_13 <- c(dengue_norm$X2013.01, dengue_norm$X2013.02, dengue_norm$X2013.03, dengue_norm$X2013.04, dengue_norm$X2013.05, dengue_norm$X2013.06, dengue_norm$X2013.07, dengue_norm$X2013.08, dengue_norm$X2013.09, dengue_norm$X2013.10, dengue_norm$X2013.11, dengue_norm$X2013.12)
 
+#2014
 stacked_14 <- c(dengue_norm$X2014.01, dengue_norm$X2014.02, dengue_norm$X2014.03, dengue_norm$X2014.04, dengue_norm$X2014.05, dengue_norm$X2014.06, dengue_norm$X2014.07, dengue_norm$X2014.08, dengue_norm$X2014.09, dengue_norm$X2014.10, dengue_norm$X2014.11, dengue_norm$X2014.12)
 
+#2015
 stacked_15 <- c(dengue_norm$X2015.01, dengue_norm$X2015.02, dengue_norm$X2015.03, dengue_norm$X2015.04, dengue_norm$X2015.05, dengue_norm$X2015.06, dengue_norm$X2015.07, dengue_norm$X2015.08, dengue_norm$X2015.09, dengue_norm$X2015.10, dengue_norm$X2015.11, dengue_norm$X2015.12)
 
+#2016
 stacked_16 <- c(dengue_norm$X2016.01, dengue_norm$X2016.02, dengue_norm$X2016.03, dengue_norm$X2016.04, dengue_norm$X2016.05, dengue_norm$X2016.06, dengue_norm$X2016.07, dengue_norm$X2016.08, dengue_norm$X2016.09, dengue_norm$X2016.10, dengue_norm$X2016.11, dengue_norm$X2016.12)
 
+#2017
 stacked_17 <- c(dengue_norm$X2017.01, dengue_norm$X2017.02, dengue_norm$X2017.03, dengue_norm$X2017.04, dengue_norm$X2017.05, dengue_norm$X2017.06, dengue_norm$X2017.07, dengue_norm$X2017.08, dengue_norm$X2017.09, dengue_norm$X2017.10, dengue_norm$X2017.11, dengue_norm$X2017.12)
 
+#2018
 stacked_18 <- c(dengue_norm$X2018.01, dengue_norm$X2018.02, dengue_norm$X2018.03, dengue_norm$X2018.04, dengue_norm$X2018.05, dengue_norm$X2018.06, dengue_norm$X2018.07, dengue_norm$X2018.08, dengue_norm$X2018.09, dengue_norm$X2018.10, dengue_norm$X2018.11, dengue_norm$X2018.12)
 
+#2019
 stacked_19 <- c(dengue_norm$X2019.01, dengue_norm$X2019.02, dengue_norm$X2019.03, dengue_norm$X2019.04, dengue_norm$X2019.05, dengue_norm$X2019.06, dengue_norm$X2019.07, dengue_norm$X2019.08, dengue_norm$X2019.09, dengue_norm$X2019.10, dengue_norm$X2019.11, dengue_norm$X2019.12)
 
+#2020
 stacked_20 <- c(dengue_norm$X2020.01, dengue_norm$X2020.02, dengue_norm$X2020.03, dengue_norm$X2020.04, dengue_norm$X2020.05, dengue_norm$X2020.06, dengue_norm$X2020.07, dengue_norm$X2020.08, dengue_norm$X2020.09, dengue_norm$X2020.10, dengue_norm$X2020.11, dengue_norm$X2020.12)
 
 #now stack the years on top of each other 
@@ -170,6 +185,7 @@ years <- rep(2006:2020, each = 12 * 77)  # Repeat each year 12 months * 77 provi
 months <- rep(rep(c("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"), each = 77), times = 15)  # Repeat each season 77 provinces * 15 years times
 
 # Repeat the province names to match the length of the combined_dataframe
+Provinces <- dengue_norm$Reporting.areas
 province_names <- rep(Provinces, length.out = nrow(dengue_longformat))
 
 # Add the Provinces, the years and seasons to the dataframe
@@ -181,45 +197,60 @@ dengue_longformat$Province <- province_names
 dengue_longformat <- data.frame(Province = province_names, Year = years, Month = months, Dengue = stacked_years)
 ```
 
-To be able to use this dataframe for correlation testing, the humidity data needs to be added as well
+To be able to use this data frame for correlation testing, the humidity data needs to be added as well
 
 ```{r}
 #we need to stack the humidity data in the same year 
+#2006
 stackedH_06 <- c(T.huss.mon1$"2006.01.", T.huss.mon1$"2006.02.", T.huss.mon1$"2006.03.", T.huss.mon1$"2006.04.", T.huss.mon1$"2006.05.", T.huss.mon1$"2006.06.", T.huss.mon1$"2006.07.", T.huss.mon1$"2006.08.", T.huss.mon1$"2006.09.", T.huss.mon1$"2006.10.", T.huss.mon1$"2006.11.", T.huss.mon1$"2006.12.")
 
+#2007
 stackedH_07 <- c(T.huss.mon1$"2007.01.", T.huss.mon1$"2007.02.", T.huss.mon1$"2007.03.", T.huss.mon1$"2007.04.", T.huss.mon1$"2007.05.", T.huss.mon1$"2007.06.", T.huss.mon1$"2007.07.", T.huss.mon1$"2007.08.", T.huss.mon1$"2007.09.", T.huss.mon1$"2007.10.", T.huss.mon1$"2007.11.", T.huss.mon1$"2007.12.")
 
+#2008
 stackedH_08 <- c(T.huss.mon1$"2008.01.", T.huss.mon1$"2008.02.", T.huss.mon1$"2008.03.", T.huss.mon1$"2008.04.", T.huss.mon1$"2008.05.", T.huss.mon1$"2008.06.", T.huss.mon1$"2008.07.", T.huss.mon1$"2008.08.", T.huss.mon1$"2008.09.", T.huss.mon1$"2008.10.", T.huss.mon1$"2008.11.", T.huss.mon1$"2008.12.")
 
+#2009
 stackedH_09 <- c(T.huss.mon1$"2009.01.", T.huss.mon1$"2009.02.", T.huss.mon1$"2009.03.", T.huss.mon1$"2009.04.", T.huss.mon1$"2009.05.", T.huss.mon1$"2009.06.", T.huss.mon1$"2009.07.", T.huss.mon1$"2009.08.", T.huss.mon1$"2009.09.", T.huss.mon1$"2009.10.", T.huss.mon1$"2009.11.", T.huss.mon1$"2009.12.")
 
+#2010
 stackedH_10 <- c(T.huss.mon1$"2010.01.", T.huss.mon1$"2010.02.", T.huss.mon1$"2010.03.", T.huss.mon1$"2010.04.", T.huss.mon1$"2010.05.", T.huss.mon1$"2010.06.", T.huss.mon1$"2010.07.", T.huss.mon1$"2010.08.", T.huss.mon1$"2010.09.", T.huss.mon1$"2010.10.", T.huss.mon1$"2010.11.", T.huss.mon1$"2010.12.")
 
+#2011
 stackedH_11 <- c(T.huss.mon1$"2011.01.", T.huss.mon1$"2011.02.", T.huss.mon1$"2011.03.", T.huss.mon1$"2011.04.", T.huss.mon1$"2011.05.", T.huss.mon1$"2011.06.", T.huss.mon1$"2011.07.", T.huss.mon1$"2011.08.", T.huss.mon1$"2011.09.", T.huss.mon1$"2011.10.", T.huss.mon1$"2011.11.", T.huss.mon1$"2011.12.")
 
+#2012
 stackedH_12 <- c(T.huss.mon1$"2012.01.", T.huss.mon1$"2012.02.", T.huss.mon1$"2012.03.", T.huss.mon1$"2012.04.", T.huss.mon1$"2012.05.", T.huss.mon1$"2012.06.", T.huss.mon1$"2012.07.", T.huss.mon1$"2012.08.", T.huss.mon1$"2012.09.", T.huss.mon1$"2012.10.", T.huss.mon1$"2012.11.", T.huss.mon1$"2012.12.")
 
+#2013
 stackedH_13 <- c(T.huss.mon1$"2013.01.", T.huss.mon1$"2013.02.", T.huss.mon1$"2013.03.", T.huss.mon1$"2013.04.", T.huss.mon1$"2013.05.", T.huss.mon1$"2013.06.", T.huss.mon1$"2013.07.", T.huss.mon1$"2013.08.", T.huss.mon1$"2013.09.", T.huss.mon1$"2013.10.", T.huss.mon1$"2013.11.", T.huss.mon1$"2013.12.")
 
+#2014
 stackedH_14 <- c(T.huss.mon1$"2014.01.", T.huss.mon1$"2014.02.", T.huss.mon1$"2014.03.", T.huss.mon1$"2014.04.", T.huss.mon1$"2014.05.", T.huss.mon1$"2014.06.", T.huss.mon1$"2014.07.", T.huss.mon1$"2014.08.", T.huss.mon1$"2014.09.", T.huss.mon1$"2014.10.", T.huss.mon1$"2014.11.", T.huss.mon1$"2014.12.")
 
+#2015
 stackedH_15 <- c(T.huss.mon1$"2015.01.", T.huss.mon1$"2015.02.", T.huss.mon1$"2015.03.", T.huss.mon1$"2015.04.", T.huss.mon1$"2015.05.", T.huss.mon1$"2015.06.", T.huss.mon1$"2015.07.", T.huss.mon1$"2015.08.", T.huss.mon1$"2015.09.", T.huss.mon1$"2015.10.", T.huss.mon1$"2015.11.", T.huss.mon1$"2015.12.")
 
+#2016
 stackedH_16 <- c(T.huss.mon1$"2016.01.", T.huss.mon1$"2016.02.", T.huss.mon1$"2016.03.", T.huss.mon1$"2016.04.", T.huss.mon1$"2016.05.", T.huss.mon1$"2016.06.", T.huss.mon1$"2016.07.", T.huss.mon1$"2016.08.", T.huss.mon1$"2016.09.", T.huss.mon1$"2016.10.", T.huss.mon1$"2016.11.", T.huss.mon1$"2016.12.")
 
+#2017
 stackedH_17 <- c(T.huss.mon1$"2017.01.", T.huss.mon1$"2017.02.", T.huss.mon1$"2017.03.", T.huss.mon1$"2017.04.", T.huss.mon1$"2017.05.", T.huss.mon1$"2017.06.", T.huss.mon1$"2017.07.", T.huss.mon1$"2017.08.", T.huss.mon1$"2017.09.", T.huss.mon1$"2017.10.", T.huss.mon1$"2017.11.", T.huss.mon1$"2017.12.")
 
+#2018
 stackedH_18 <- c(T.huss.mon1$"2018.01.", T.huss.mon1$"2018.02.", T.huss.mon1$"2018.03.", T.huss.mon1$"2018.04.", T.huss.mon1$"2018.05.", T.huss.mon1$"2018.06.", T.huss.mon1$"2018.07.", T.huss.mon1$"2018.08.", T.huss.mon1$"2018.09.", T.huss.mon1$"2018.10.", T.huss.mon1$"2018.11.", T.huss.mon1$"2018.12.")
 
+#2019
 stackedH_19 <- c(T.huss.mon1$"2019.01.", T.huss.mon1$"2019.02.", T.huss.mon1$"2019.03.", T.huss.mon1$"2019.04.", T.huss.mon1$"2019.05.", T.huss.mon1$"2019.06.", T.huss.mon1$"2019.07.", T.huss.mon1$"2019.08.", T.huss.mon1$"2019.09.", T.huss.mon1$"2019.10.", T.huss.mon1$"2019.11.", T.huss.mon1$"2019.12.")
 
+#2020
 stackedH_20 <- c(T.huss.mon1$"2020.01.", T.huss.mon1$"2020.02.", T.huss.mon1$"2020.03.", T.huss.mon1$"2020.04.", T.huss.mon1$"2020.05.", T.huss.mon1$"2020.06.", T.huss.mon1$"2020.07.", T.huss.mon1$"2020.08.", T.huss.mon1$"2020.09.", T.huss.mon1$"2020.10.", T.huss.mon1$"2020.11.", T.huss.mon1$"2020.12.")
 
 #let's stack all the years atop of each other 
 stackedH_years <- c(stackedH_06, stackedH_07, stackedH_08, stackedH_09, stackedH_10, stackedH_11, stackedH_12, stackedH_13, stackedH_14, stackedH_15, stackedH_16, stackedH_17, stackedH_18, stackedH_19, stackedH_20)
 ```
 
-Finally we can add these to the longformat dataframe as well and save the dataframe in the repository
+Finally we can add these to the longformat data frame as well and save the data frame in the repository.
 
 ```{r}
 #add the humidity data 
@@ -230,10 +261,10 @@ filePath = paste(dirname(getwd()), "Correlation_hypothesis", "den_hum_longformat
 write.csv(dengue_longformat, filePath)
 ```
 
-## 4. Dengue Dataframe that does not contain NA's
+## 4. Dengue Data frame that does not contain NA's
 
-This normalized dataframe might be useful for other observations but for the correlations between dengue seasons, it is important to replace NA's with an educated guess to avoid distortion of the correlation as the monsoon seasons of the dengue cases are calculated via the sum of the respective monsoon season months.
-This educated guess is constructed as followed:
+This normalized data frame might be useful for other observations where NA's might distort the results.
+This method of replacing is just an educated guess which is constructed as followed:
 
 1\.
 For Provinces that are missing entire years and do not have a total per year given, the values from January to December for each year are replaced by the mean cases of each month during the year.
@@ -244,16 +275,17 @@ The new total then has to be calculated and added to the total cases column of t
 3\.
 For Provinces where only some variables are missing and the total per year is given, we might try a different approach.
 
-3.1 Firstly we need to calculate a dataframe with the percentages of the cases in each month in comparision to the total cases per year.
-For example the percentage of cases in january 2018 in the Amnat Charoen Province is calculated by deviding the cases of january 2006 by the total cases of 2006.
+3.1 Firstly we need to calculate a data frame with the percentages of the cases in each month in comparison to the total cases per year.
+For example the percentage of cases in January 2018 in the Amnat Charoen Province is calculated by dividing the cases of January 2006 by the total cases of 2006.
 
 3.2 Secondly we need to calculate the mean of these percentages for each month.
-If we take the example of january 2006 again this means adding up all percentages in the january 2006 and deviding them by the number of values that where added up.
+If we take the example of January 2006 again this means adding up all percentages in the January 2006 and dividing them by the number of values that where added up.
 
 3.3 Lastly the single NA's are replaced by the percentage average of the respective month in the respective year multiplied by the total cases of the year.
-Again for example if the Amnat Charoen Province is missing a value for january 2006, one would multiply the mean of the january 2006 percentage as described in step 3.2 with the total cases in Amnat Charoen in 2006.
+Again for example if the Amnat Charoen Province is missing a value for January 2006, one would multiply the mean of the January 2006 percentage as described in step 3.2 with the total cases in Amnat Charoen in 2006.
 
-I am aware that this process might still not match the actual cases exactly but it is a good attempt to minimize the effects of NA's on the correlation tests when the monsoon seasons (based on sums) are used as a base for the correlation tests.
+I am aware that this process might still not match the actual cases exactly but it is a good attempt to minimize the effects of NA's on different tests and clusters.
+Another possibility would have been to replace the NA's through random values in a matching distribution.
 
 ### 4.1 Step 1 and 2
 
@@ -365,9 +397,9 @@ write.csv(dengue_wo_NAs, filePath)
 #Through replacing the NA's with mean values, the total values might differ a little bit. However as these might be needed in further analysis, I would rather not distort these actual recorded case numbers
 ```
 
-## 5. Normalized dataframe without NA's
+## 5. Normalized data frame without NA's
 
-Again this dataframe needs to be normalized with the population data
+Again this data frame needs to be normalized with the population data.
 
 ```{r}
 #create a new dataframe, where the normalized data will be saved 
@@ -399,9 +431,9 @@ filePath = paste(dirname(getwd()), "dengue_data", "dengue_without_NAs_norm.csv",
 write.csv(dengue_wo_NA_norm, filePath)
 ```
 
-## 6. Monsoon season dataframes
+## 6. Monsoon season Data Frames
 
-### 6.1 Normalized dengue Dataframe sorted into monsoon seasons
+### 6.1 Normalized Dengue Data Frame sorted into Monsoon Seasons
 
 As Thailand is strongly influenced by its monsoon seasons, we sort the dengue cases and humidity data into 4 different monsoon seasons.
 The inter-monsoon season months are December, January and February, the pre-monsoon seasons are March, April and May, the monsoon seasons are June, July, August and September and finally the post-monsoon seasons are October and November.
@@ -499,7 +531,7 @@ filePath = paste(dirname(getwd()), "dengue_data", "dengue_mon_mean.csv",sep = "/
 write.csv(dengue_mon_mean, filePath)
 ```
 
-### 6.2 Humidity Dataframe sorted into monsoon seasons
+### 6.2 Humidity Data Frame sorted into Monsoon Seasons
 
 We need another dataframe with the means of the humidity during each monsoon season to be able to calculate the correlation between the two, so let's do that.
 We will use the mean here as well.
@@ -584,9 +616,9 @@ filePath = paste(dirname(getwd()), "geo_data", "humidity_mon.csv",sep = "/")
 write.csv(humidity_mon, filePath)
 ```
 
-## 7. Yearly stacked monsoon season dataframe with both humidity and dengue cases
+## 7. Yearly stacked Monsoon Season Data Frame with both Humidity and Dengue cases longformat
 
-Let's try a long format, so that the monsoon seasons of each year are stacked atop of each other of every year with one column for the dengue cases and one column for the humidity data
+Let's try a long format, so that the monsoon seasons of each year are stacked atop of each other of every year with one column for the dengue cases and one column for the humidity data.
 
 ```{r}
 # Create an empty vector to store the stacked seasons
@@ -643,7 +675,7 @@ for (year in years) {
 ```
 
 These are just giant vectors now.
-To be able to work with them they need to be combined into a dataframe.
+To be able to work with them they need to be combined into a data frame.
 
 ```{r}
 # Create a dataframe by combining the two vectors
@@ -665,13 +697,17 @@ monsoon_longformat$Province <- province_names
 monsoon_longformat <- data.frame(Province = province_names, Year = years, Season = seasons, Dengue = stacked_seasonsD, Humidity = stacked_seasonsH)
 ```
 
-let's save this dataframe in the repository
+let's save this data frame in the repository.
 
 ```{r}
 #save the dataframe 
 filePath = paste(dirname(getwd()), "Correlation_hypothesis", "monsoon_longformat.csv",sep = "/")
 write.csv(monsoon_longformat, filePath)
 ```
+
+### 7.1 Wide-format of the Monsoon seasons Dengue cases and humidity. 
+
+This is the same data but in the wideformat.
 
 let's just quickly stack them atop each other
 
@@ -724,7 +760,7 @@ stacked_monsoon_mean[numColumns1] <- lapply(stacked_monsoon_mean[numColumns1], a
 str(stacked_monsoon_mean)
 ```
 
-Let's save this dataframe in the repository to avoid having to run all this code just to use the dataframe
+Let's save this data frame in the repository to avoid having to run all this code just to use the data frame.
 
 ```{r}
 filePath = paste(dirname(getwd()), "Correlation_hypothesis", "stacked_monsoon_seasons_mean.csv",sep = "/")

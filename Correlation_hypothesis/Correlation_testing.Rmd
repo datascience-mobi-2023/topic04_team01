@@ -16,22 +16,22 @@ knitr::opts_chunk$set(echo = TRUE)
 
 The relationship between relative humidity and dengue cases seems to be
 an unclear one. Some papers were able to report a positive relationship
-while others reported a negative relationship. However for this dataset
+while others reported a negative relationship. However for this data set
 we assume a positive relationship. This document is used to test that
 theory, while looking at non-lagged correlation and lagged correlation
 for the initial data and the data sorted into their respective monsoon
-seasons. To understand how the dataframes that are used here, were
+seasons. To understand how the data frames that are used here, were
 designed, please have a look at the "Dataframe_sorting" markdown
 document in the repository.
 
-# 1. Correlation between humidity and dengue without the monsoon seasons
+# 1. Correlation between Humidity and Dengue without the Monsoon Seasons
 
-### 1.1 Loading the relevant packages and the needed dataframes
+### 1.1 Loading the Relevant Packages and the Needed Data Frames
 
-The humidity and dengue case data is now sorted into their respective
-monsoon seasons and stacked atop of each other. Let's load it again and
-do some basic correlation tests First load the packages we need and the
-data
+The humidity and dengue case data is now both sorted into their
+respective monsoon seasons and stacked atop of each other but one data
+frame also contains stacked data but without being sorted into the
+monsoon seasons. First load the packages we need and the data frames.
 
 ```{r}
 #load the needed packages 
@@ -48,7 +48,7 @@ monsoon_longformat <- read.csv("C:\\Users\\paula\\Documents\\Uni Heidelberg\\4. 
 popu_density_den_hum <- read.csv("C:\\Users\\paula\\Documents\\Uni Heidelberg\\4. Semester\\Bioinformatik\\github\\topic04_team01\\Correlation_hypothesis\\stacked_dengue_population_density_humidity.csv")
 ```
 
-### 1.2 Summary of the variables
+### 1.2 Summary of the Variables
 
 It is always good to have an overview over your variables before testing
 for correlation so let's have a look.
@@ -77,11 +77,11 @@ extreme of over 300 cases per 100'000 people, it might be useful to work
 within the 95% quantile range to avoid the correlation being distorted
 by these extremes. This can also be seen in the scatter plot very well.
 
-### 1.3 Data cleanup
+### 1.3 Data Cleanup
 
 To cleanup the data, let's remove the NA's and only look at the 95%
 quantile range to get rid of outliers. The bottom 5% quantile will be
-left in the dataframe as they also contain the actual zero cases.
+left in the data frame as they also contain the actual zero cases.
 
 ```{r}
 #remove the NA's
@@ -102,7 +102,7 @@ plot(filtered_data$Humidity, filtered_data$Dengue,
      main = "scatterplot within the 95% quantile")
 ```
 
-### 1.4 Non-lagged correlation
+### 1.4 Non-lagged Correlation
 
 Let's look at the correlation between dengue cases and humidity without
 lag to see if there is a correlation overall.
@@ -134,18 +134,18 @@ summary(linear_modell)
 ```
 
 The output indicates that there is a statistically significant positive
-relationship between "Dengue" and "Humidity" in the dataframe that only
+relationship between "Dengue" and "Humidity" in the data frame that only
 contains the 95% quantile range. However, the model has a low R-squared
 value, suggesting that "Humidity" explains only a small portion of the
 variability in "Dengue" of around 6%. This might be improved by using
 other environmental factors but these weren't analysed in this project.
 
-### 1.4 lagged correlation between relative humidity and dengue cases
+### 1.4 Lagged Correlation between Relative Humidity and Dengue Cases
 
-Because of the NA's in the dataframe, the time series needs to be
+Because of the NA's in the data frame, the time series needs to be
 manually lagged, as removing the rows that contain the NA's might change
 each year. For example if in one year January contains NA's in the first
-province and the first province is then removed and in Feburary the 3.
+province and the first province is then removed and in February the 3.
 province contains NA's the if the time series is lagged with the ccf()
 function, different provinces will the compared to one another. Because
 the mosquitoes that transmit the dengue virus from one human to the next
@@ -153,7 +153,7 @@ need a few weeks to develop from larvae to full mosquitoes after enough
 rain and a suitable temperature, a lag of 1 month, 2 months and 3 months
 might be of interest
 
-#### 1.4.1 Correlation with 1 month lag
+#### 1.4.1 Correlation with 1 Month Lag
 
 ```{r}
 #we need the complete dataframe again, with the NA's otherwise calculating the lag is very difficult 
@@ -163,10 +163,10 @@ den_hum_longformat1 <- read.csv("C:\\Users\\paula\\Documents\\Uni Heidelberg\\4.
 lag1 <- c(rep(NA, 77))
 #get the dengue data from the longformat dataframe 
 dengue_lag1 <- den_hum_longformat1$Dengue
-#add the NA's on top of the dengue case Data in the longformat dataframe 
-dengue_lag1 <- c(lag1, dengue_lag1)
-#remove the last 77 values from the vector 
-dengue_lag1 <- head(dengue_lag1, -77)
+#add the NA's at the botoom of the dengue case Data in the longformat dataframe 
+dengue_lag1 <- c(dengue_lag1, lag1)
+#remove the first 77 values from the vector 
+dengue_lag1 <- tail(dengue_lag1, -77)
 
 #replace the dengue vector in the longformat dataframe with the lagged dengue data 
 den_hum_longformat1$Dengue <- dengue_lag1
@@ -194,7 +194,7 @@ linear_modell1 <- lm(Dengue ~ Humidity, data = filtered_data1)
 summary(linear_modell1)
 ```
 
-#### 1.4.2 Correlation with 2 months lag
+#### 1.4.2 Correlation with 2 Months Lag
 
 ```{r}
 #we need the complete dataframe again, with the NA's otherwise calculating the lag is very difficult 
@@ -204,10 +204,10 @@ den_hum_longformat2 <- read.csv("C:\\Users\\paula\\Documents\\Uni Heidelberg\\4.
 lag2 <- c(rep(NA, 154))
 #get the dengue data from the longformat dataframe 
 dengue_lag2 <- den_hum_longformat2$Dengue
-#add the NA's on top of the dengue case Data in the longformat dataframe 
-dengue_lag2 <- c(lag2, dengue_lag2)
-#remove the last 77 values from the vector 
-dengue_lag2 <- head(dengue_lag2, -154)
+#add the NA's at the bottom of the dengue case Data in the longformat dataframe 
+dengue_lag2 <- c(dengue_lag2, lag2)
+#remove the first 154 values from the vector 
+dengue_lag2 <- tail(dengue_lag2, -154)
 
 #replace the dengue vector in the longformat dataframe with the lagged dengue data 
 den_hum_longformat2$Dengue <- dengue_lag2
@@ -235,7 +235,7 @@ linear_modell2 <- lm(Dengue ~ Humidity, data = filtered_data2)
 summary(linear_modell2)
 ```
 
-#### 1.4.3 Correlation with 3 months lag
+#### 1.4.3 Correlation with 3 Months Lag
 
 ```{r}
 #we need the complete dataframe again, with the NA's otherwise calculating the lag is very difficult 
@@ -245,10 +245,10 @@ den_hum_longformat3 <- read.csv("C:\\Users\\paula\\Documents\\Uni Heidelberg\\4.
 lag3 <- c(rep(NA, 231))
 #get the dengue data from the longformat dataframe 
 dengue_lag3 <- den_hum_longformat3$Dengue
-#add the NA's on top of the dengue case Data in the longformat dataframe 
-dengue_lag3 <- c(lag3, dengue_lag3)
-#remove the last 77 values from the vector 
-dengue_lag3 <- head(dengue_lag3, -231)
+#add the NA's at the bottom of the dengue case Data in the longformat dataframe 
+dengue_lag3 <- c(dengue_lag3, lag3)
+#remove the first 231 values from the vector 
+dengue_lag3 <- tail(dengue_lag3, -231)
 
 #replace the dengue vector in the longformat dataframe with the lagged dengue data 
 den_hum_longformat3$Dengue <- dengue_lag3
@@ -276,22 +276,22 @@ linear_modell3 <- lm(Dengue ~ Humidity, data = filtered_data3)
 summary(linear_modell3)
 ```
 
-#### 1.4.4 Conclusion about the correlation
+#### 1.4.4 Conclusion about the Correlation
 
 It seems like the non-lagged correlation explains the highest amount of
-variability in the dengue cases, although a the one month lag explains
-about the same amount. The non-lagged correlation has a R-Squared value
-of 0.05837, the one month lag has an R-Square value of 0.05547, the two
-month lag has an R-Square value of 0.03035 and the three month lag has
-an R-Square value of 0.002979.
+variability in the dengue cases, the one month lag explains a little
+less. The 2 and 3 month lag seems to be very insignificant. The
+non-lagged correlation has a R-Squared value of 0.05837, the one month
+lag has an R-Square value of 0.03008, the two month lag has an R-Square
+value of 0.0007 and the three month lag has an R-Square value of 0.0181.
 
-## 2. Correlation between humidity and dengue sorted into monsoon seasons
+## 2. Correlation between Relative Humidity and Dengue sorted into Monsoon Seasons
 
 The previous results don't suggest that looking at the monsoon seasons
 will make much of a difference, but just for these tests to be
 comprehensive let's look at them as well.
 
-### 2.1 Summary of the variables
+### 2.1 Summary of the Variables
 
 ```{r}
 #summary of each variable and histogram
@@ -341,11 +341,11 @@ plot(monsoon_longformat$Humidity, monsoon_longformat$Dengue,
 
 ```
 
-### 2.2 Data cleanup
+### 2.2 Data Cleanup
 
 To cleanup the data, let's remove the NA's and only look at the 95%
 quantile range to get rid of outliers. The bottom 5% quantile will be
-left in the dataframe as they also contain the actual zero cases.
+left in the data frame as they also contain the actual zero cases.
 
 ```{r}
 #remove the NA's
@@ -363,10 +363,10 @@ plot(filtered_data_mon$Humidity, filtered_data_mon$Dengue,
      pch=20,
      xlab="relative Humidity",
      ylab="Dengue cases per 100'000",
-     main = "scatterplot within the 95% quantile")
+     main = "Scatterplot within the 95% quantile")
 ```
 
-### 3.2 Non-lagged correlation between monsoon seasons
+### 3.2 Non-lagged Correlation between Monsoon Seasons
 
 Let's look at the correlation between dengue cases and humidity without
 lag to see if there is a correlation within the seasons.
@@ -397,7 +397,7 @@ the total variance in the dengue cases within the monsoon seasons, which
 is about 1.5% less than the linear model of the data set not sorted into
 the monsoon seasons.
 
-### 3.3 Correlation with 1 month lag in the monsoon seasons 
+### 3.3 Correlation with 1 Month Lag in the Monsoon Seasons 
 
 ```{r}
 #we need the complete dataframe again, with the NA's otherwise calculating the lag is very difficult 
@@ -407,10 +407,10 @@ monsoon_longformat1 <- read.csv("C:\\Users\\paula\\Documents\\Uni Heidelberg\\4.
 lag1_mon <- c(rep(NA, 77))
 #get the dengue data from the longformat dataframe 
 dengue_lag1_mon <- monsoon_longformat1$Dengue
-#add the NA's on top of the dengue case Data in the longformat dataframe 
-dengue_lag1_mon <- c(lag1_mon, dengue_lag1_mon)
-#remove the last 77 values from the vector 
-dengue_lag1_mon <- head(dengue_lag1_mon, -77)
+#add the NA's at the bottom of the dengue case Data in monsoon seasons in the longformat dataframe 
+dengue_lag1_mon <- c(dengue_lag1_mon, lag1_mon)
+#remove the first 77 values from the vector 
+dengue_lag1_mon <- tail(dengue_lag1_mon, -77)
 
 #replace the dengue vector in the longformat dataframe with the lagged dengue data 
 monsoon_longformat1$Dengue <- dengue_lag1_mon
@@ -438,10 +438,11 @@ linear_modell1_mon <- lm(Dengue ~ Humidity, data = filtered_data1_mon)
 summary(linear_modell1_mon)
 ```
 
-The correlation between the one season lag only explains less than 1% of
-the variability in the dengue cases. This is not a suitable model.
+The correlation between the one season lag only explains less around
+1.7% of the variability in the dengue cases. This is not a suitable
+model.
 
-## 3. Correlation between the population density and the dengue cases 
+## 3. Correlation between the Population Density and the Dengue Cases 
 
 One could assume a positive correlation between the total dengue cases
 of a year in respective province and the population density of a
@@ -486,7 +487,7 @@ linear_modell_popu <- lm(Dengue ~ Population_density, data = popu_density_den_hu
 summary(linear_modell_popu)
 ```
 
-## 4. Multiple linear regression model 
+## 4. Multiple Linear Regression Model 
 
 Maybe the combination of the population density data and the humidity
 data can give a little more insight into the variability of the dengue
