@@ -17,9 +17,9 @@ When you click the **Knit** button a document will be generated that includes bo
 #1- Einlesen der Humididy DATA
 
 ```{r}
-T.huss_reshaped = read_csv("../dengue_data/T.huss_reshaped.csv")
+mon_data = read_csv("../Correlation_hypothesis/mon_dengue_hum.csv")
 
-print(T.huss_reshaped)
+print(mon_data)
 ```
 
 ##1.1 Unwandlen der year, month spalte -\> in year.month
@@ -69,22 +69,25 @@ print(monthly_avg)
 ```
 
 ```{r}
-# Basiswerte für die Jahre 2006 und 2007 berechnen
-base_values <- monthly_avg %>%
-  filter(Time >= "2006.1" & Time <= "2007.12") %>%
-  summarise(Value = mean(Avg_Value))
-
-# Anomaliewerte berechnen
-anomaly_df <- monthly_avg %>%
-  filter(Time >= "2008.1") %>%
-  mutate(Anomaly = Avg_Value - base_values$Value)
 
 # Anomalie-Plot erstellen
-ggplot(anomaly_df, aes(x = Time, y = Anomaly)) +
-  geom_col(position = "identity", width = 0.01) +
-  labs(x = "Zeit", y = "Anomaliewert") +
+ggplot(monthly_avg, aes(x = Time, y = hum_anom)) +
+  geom_col(position = "identity", width = 0.1) +
+  labs(x = "Time", y = "hum_anom") +
   ggtitle("Anomalie-Plot für Relative Luftfeuchtigkeit") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 ```
+
+```{r}
+season = read.csv("../Correlation_hypothesis/mon_dengue_hum.csv")
+
+print(season)
+```
+
+#Add a new column that defines the years 
+```{r}
+sesonas
+```
+
