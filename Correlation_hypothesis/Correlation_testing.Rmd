@@ -397,7 +397,7 @@ the total variance in the dengue cases within the monsoon seasons, which
 is about 1.5% less than the linear model of the data set not sorted into
 the monsoon seasons.
 
-### 3.3 Correlation with 1 Month Lag in the Monsoon Seasons 
+### 3.3 Correlation with 1 Month Lag in the Monsoon Seasons
 
 ```{r}
 #we need the complete dataframe again, with the NA's otherwise calculating the lag is very difficult 
@@ -442,7 +442,7 @@ The correlation between the one season lag only explains less around
 1.7% of the variability in the dengue cases. This is not a suitable
 model.
 
-## 3. Correlation between the Population Density and the Dengue Cases 
+## 3. Correlation between the Population Density and the Dengue Cases
 
 One could assume a positive correlation between the total dengue cases
 of a year in respective province and the population density of a
@@ -487,7 +487,7 @@ linear_modell_popu <- lm(Dengue ~ Population_density, data = popu_density_den_hu
 summary(linear_modell_popu)
 ```
 
-## 4. Multiple Linear Regression Model 
+## 4. Multiple Linear Regression Model
 
 Maybe the combination of the population density data and the humidity
 data can give a little more insight into the variability of the dengue
