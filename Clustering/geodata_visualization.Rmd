@@ -29,12 +29,12 @@ T.huss.mon = read_excel("../era5_data_2006_2020_thailand_monmean.xlsx", sheet="e
 
 #loading dataframe with dengue data
 library(readxl)
-dengue_data_com2 = read.csv("./dengue_data/dengue_without_NAs_norm.csv")
+dengue_data_com2 = read.csv("../dengue_data/dengue_without_NAs_norm.csv")
 dengue_data_com2
 
 #loading the geo data
 library(sf)
-shapefilePath <- "./geo_data/gadm36_THA_shp"
+shapefilePath <- "../geo_data/gadm36_THA_shp"
 layers <- st_layers(shapefilePath)
 geography <- st_read(shapefilePath, layer = "gadm36_THA_1")
 #geography <- st_read("/Users/leamrowiec/Desktop/Datenanalyse SS23/other data/gadm36_THA_shp")
