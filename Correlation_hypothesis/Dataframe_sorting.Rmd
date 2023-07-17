@@ -705,7 +705,7 @@ filePath = paste(dirname(getwd()), "Correlation_hypothesis", "monsoon_longformat
 write.csv(monsoon_longformat, filePath)
 ```
 
-### 7.1 Wide-format of the Monsoon seasons Dengue cases and humidity. 
+### 7.1 Wide-format of the Monsoon seasons Dengue cases and humidity.
 
 This is the same data but in the wideformat.
 
@@ -767,7 +767,7 @@ filePath = paste(dirname(getwd()), "Correlation_hypothesis", "stacked_monsoon_se
 write.csv(stacked_monsoon_mean, filePath)
 ```
 
-## 8. Total dengue cases and population density stacked 
+## 8. Total dengue cases and population density stacked
 
 To calculate the correlation between the total dengue cases and the population density we need the total dengue cases stacked atop of each other and the population density as well.
 The population density is in population per square kilometer.
