@@ -1,4 +1,14 @@
 ---
+title: "GAM"
+output: html_document
+date: "2023-07-13"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+---
 title: "GAM_modeling"
 output: html_document
 date: "2023-07-04"
@@ -19,42 +29,118 @@ install.packages("ncdf4")
 ```
 
 ```{r}
-library(mgcv)
-library(readxl) 
-library(nlme) 
-library(gam) 
-library(sdm) 
-library(raster) 
+library(readxl)
+library(nlme)
+library(gam)
+library(sdm)
+library(raster)
 library(ncdf4)
+library(mgcv)
 ```
 
-#load the dataset 
-```{r}
-dengue_hum = read.csv("../dengue_data/dengue_hum.csv")
-print(dengue_hum)
-```
 #first lets vis. the dengue_cases and the corresponding relative_humidity 
 ```{r}
 # Lade die erforderlichen Bibliotheken
-library(ggplot2)
+#library(ggplot2)
 
 # Erstelle den Plot
-ggplot(dengue_hum, aes(x = Year, y = Dengue_Cases)) +
-  geom_point() +
-  labs(x = "Dengue Cases", y = "Relative Humidity", title = "Dengue Cases vs. Relative Humidity")
+#ggplot(dengue_hum, aes(x = Year, y = Dengue_Cases, z = Relative_Humidity)) +
+  #geom_point() +
+  #labs(y = "Dengue Cases", z = "Relative Humidity", title = "Dengue Cases vs. Relative Humidity")
 ```
 
-
-
-#lets model our first gam 
+#1.load and attache the new data 
 ```{r}
-attach(dengue_hum)
-model = gam(Dengue_Cases~s(Relative_Humidity),family = "quasipoisson")
-plot(model, rug = FALSE)
-
-summary(model)
+data2 <- read_excel("../dengue_data/dengue_hum.xlsx")
+View(data2)
+newdata = data.frame(data2)
 ```
 
 
+```{r}
+#colnames(newdata)[8] <- "RH"
 ```
 
+
+##1.1 Model our gam 
+```{r}
+model1 <- gam(newdata$Dengue_Cases~s(newdata$Relative_Humidity, k = 9),family="quasipoisson")
+```
+
+##1.2 Plot the GAM Model
+```{r}
+plot.gam(model1)
+```
+##1.3 Have a look at the parametrics 
+```{r}
+summary(model1)
+```
+
+##1.4 GAM evaluation - k value 
+```{r}
+k.check(model1)
+```
+-> the model indicates that k = 9 is the best fit 
+
+##1.5 GAM evaluation 
+```{r}
+gam.check(model1)
+```
+in a “perfect” model: - the q-q plot should no curves- the histogram have to be bell-shaped- residuals values should be evenly distributed around 0- the response vs fitted values should clusters around a one-one line- p-value should not be too low -> indicates that k is too low, especially if edf is close to k- gcv should be small 
+
+
+```{r}
+linear_model <- lm(newdata$Dengue_Cases~newdata$Relative_Humidity)
+smooth_model <- gam(newdata$Dengue_Cases~s(newdata$Relative_Humidity))
+```
+
+
+```{r}
+AIC(linear_model, smooth_model)
+```
+-> the AIC value is slightly smaller for the smooth_model (184511.8) compared to the liner_model (184555.0)
+-> a smooth_model is be a better fit to model the data 
+
+#1.6 predict the values 
+```{r}
+hurs <- stack ("hurs_SEA22_MPI_rcp85_2021-2040_grid_daymean_monmean_swm_timmean_thai.nc")
+names(hurs) <- "Relative_Humidity"
+
+newdata = data.frame(newdata)
+
+p1 <- raster::predict(data = hurs, model1, type="response")
+
+```
+
+
+#1.7 raster plot 
+```{r}
+thailand <- raster::getData('GADM', country='THA', level=1) 
+my.area <- extent(thailand) 
+```
+```{r}
+library(terra)
+my.p1 <- crop(p1, my.area)
+my.p1.mask <- mask(my.p1, thailand)
+
+?crop
+```
+
+# the extent of a map describes the area visible on the 
+mapmy.p0 <- crop(p0, my.area) 
+# crop returns a geographic subset of an object as specified by an Extent object 
+my.p0.mask <- mask(my.p0, thailand) 
+# mask function creates a MASK with values 1 and NULL, actually it plots 
+# values only over Thailand, the rest are setting to 
+zeropdf(file="thailand_precipitation__dengue.pdf") 
+# save the plot in pdf in your 
+directoryplot(my.p0.mask, legend.width=1, legend.shrink=0.75, axes= FALSE, box=FALSE) title("Predicted values: Influence of precipitation on dengue", line = -1)  
+plot(thailand, add=TRUE) 
+dev.off()
+```
+
+# 1 months lag ***attach dataframe***
+
+```{r}
+attach(GAM_data_1_Lag)
+```

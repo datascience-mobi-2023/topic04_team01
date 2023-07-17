@@ -1,4 +1,14 @@
 ---
+title: "ARIMA"
+output: html_document
+date: "2023-07-13"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+---
 title: "GAM"
 output: html_document
 date: "2023-06-14"
@@ -58,7 +68,8 @@ print(dengue_sum)
 #order the dataframe 
 
 dengue_sum = dengue_sum[order(dengue_sum$Year, dengue_sum$Month),]
-print(dengue_sum)
+print(dengue_sum) 
+
 ```
 
 #3. now lets convert the dataframe into a ts 
@@ -78,10 +89,18 @@ TSstudio::ts_plot(myTs, title = "Dengue Cases in Thailand between the years 2006
 # decompose() assumes the seasonal term to be fixed and repeating (constant throughout the entire time series)
 # stl() is more flexible and automatically determines the seasonal period from the data
 decomposedSeasonsal <- stl(myTs, s.window = "periodic")
+
+# Set the desired width, height, and resolution
+width <- 1200
+height <- 1200
+res <- 300
+
+# Save the plot with higher resolution
+png("decomposition_plot.png", width = width, height = height, res = res)
 plot(decomposedSeasonsal, main = "Decomposition of a periodic time series", xaxt = "n")
 grid(lty = 2, col = "gray")
+dev.off()
 
-?stl
 ```
 #5. Test for stationarity 
 ```{r}
@@ -112,22 +131,36 @@ subset_ts <- window(myTs, start = c(start_year, 1), end = c(end_year, 12))
 # PACF & ACF: 
 # Which lag fits the data best? --> order
 # Autocorrelation is the correlation of a Time Series with lags of itself
+width = 1400
+height = 1000
+res = 300 
 
 # autocorrelation
 # correlation of the time series with a lag of itself
 acfRes <- acf(dengue_sum$Dengue_Total)  # generates plots by default
+# Save the plot as an image file (e.g., PNG format)
+png("acf_plot.png", width = width, height = height, res = res)
+plot(acfRes, main = "Autocorrelation Function (ACF) Plot")
+dev.off()
 
 # partial autocorrelation
 # correlation of the time series with a lag of itself, 
 # with the linear dependence of all the lags between them removed
-pacfRes <- pacf(dengue_sum$Dengue_Total)  # generates plots by default
+pacfRes <- pacf(dengue_sum$Dengue_Total)# generates plots by default
+# Save the plot as an image file (e.g., PNG format)
+png("pacf_plot.png", width = width, height = height, res = res)
+plot(pacfRes, main = "Partial autocorrelation Function (pACF) Plot")
+dev.off()
 ```
 
 #7. Lets model 
 ```{r}
 library(forecast)
-best_model_auto  <- auto.arima(myTs)
+best_model_auto  <- auto.arima(myTs, seasonal = TRUE)
 best_model_auto
+```
+```{r}
+summary(best_model_auto)
 ```
 
 #8. FORCASTING
@@ -140,7 +173,7 @@ class(forecasted) # forcast
 
 # Access forecasted values and intervals
 forecastedTs <- forecasted$mean
-forecastedTs  <- ts(forecastedTs, frequency = 12, start = c(2019, 1) )
+forecastedTs  <- ts(forecastedTs, frequency = 12, start = c(2020, 12) )
 class(forecastedTs) 
 plot(forecastedTs)
 
@@ -151,7 +184,7 @@ names(forecastDf) <- c("point", "lo_80", "hi_80" , "lo_95", "hi_95", "time")
 class(forecastDf)
 
 # Plot both the original ts and the forecasts
-ggplot() +
+Last_plot <- ggplot() +
   geom_line(data = myTs, aes(x = time(myTs), y = myTs), color = "black") +
   geom_ribbon(data = forecastDf, aes(x = time, ymin = lo_95, ymax = hi_95), fill = "gray80") +
   geom_line(data = forecastDf, aes(x = time, y = point), color = "blue") +
@@ -159,18 +192,21 @@ ggplot() +
   xlab("Year") +
   ylab("Dengue Cases") +
   theme_minimal()
+  ggsave("arima_model.png",plot = Last_plot)
+Last_plot
 ```
 
 #9. PREDICTION EVALUATION
 ```{r}
 # Here are some evaluation metrics to compare our predicted and our actual data
-original <- ts(dengue_sum$Dengue_Total[157:180], frequency = 12 , start = c(2018,1) ) # create an object containing the original ts of 2018 - 2020
+original <- ts(dengue_sum$Dengue_Total[157:180], frequency = 12 , start = c(2019,1) ) # create an object containing the original ts of 2018 - 2020
 
-keep = which(dengue_sum$Year %in% c("2018","2019","2020"))
+keep = which(dengue_sum_2$Year %in% c(2019:2020))
 
-dengue_sum_test = dengue_sum[keep,]
+dengue_sum_test = dengue_sum_2[keep,]
 
 head(dengue_sum_test)
+dengue_sum_test
 
 predicted <- forecastedTs
 
@@ -195,7 +231,7 @@ rmse_value
 mape <- mape(predicted, original)*100
 mape
 # mean(abs((predicted - original) / original)) * 100
-# -> the average percentage difference between the predicted values and the actual values was 7.8%
+# -> the average percentage difference between the predicted values and the actual values was 12.44%
 
 
 ```

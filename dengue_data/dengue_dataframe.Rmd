@@ -437,9 +437,7 @@ colnames(T.huss_reshaped)[colnames(T.huss_reshaped) == "relative_humidity"] <- "
 print(dengue_data_com_2)
 print(T.huss_reshaped)
 ```
-```{r}
-den
-```
+
 
 ##5.9 lets save the new climat data format
 
