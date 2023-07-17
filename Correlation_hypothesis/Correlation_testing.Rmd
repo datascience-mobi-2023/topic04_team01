@@ -3,150 +3,501 @@ title: "Correlation_testing"
 author: "Paula"
 date: "2023-07-11"
 output: html_document
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-The humidity and dengue case data is now sorted into their respective monsoon seasons and stacked atop of each other. Let's load it again and do some basic correlation tests 
-First load the packages we need and the data 
-```{r}
-dengue_norm <- read.csv("C:\\Users\\paula\\Documents\\Uni Heidelberg\\4. Semester\\Bioinformatik\\github\\topic04_team01\\dengue_data\\dengue_norm.csv")
-T.huss.mon = read_excel("../era5_data_2006_2020_thailand_monmean.xlsx", sheet="era5_huss_2006_2020_thailand_mo")
-stacked_hum_den <- read.csv("C:\\Users\\paula\\Documents\\Uni Heidelberg\\4. Semester\\Bioinformatik\\github\\topic04_team01\\Correlation_hypothesis\\mon_dengue_hum.csv")
-stacked_hum_den
-dengue_norm <- read.csv("C:\\Users\\paula\\Documents\\Uni Heidelberg\\4. Semester\\Bioinformatik\\github\\topic04_team01\\dengue_data\\dengue_norm.csv")
-popu_06_20 <- read.csv("C:\\Users\\paula\\Documents\\Uni Heidelberg\\4. Semester\\Bioinformatik\\github\\topic04_team01\\population_data\\population_06_20.csv")
-```
-First let's look at the correlation between the respective seasons, so between the intermonsoon humdidity and the intermonsoon cases from the years 2006-2020, as well as all other seasons 
-```{r}
-#first non-lagged correlation 
-##inter-monsoon season
-cor(stacked_hum_den$intermon, stacked_hum_den$intermonH, use = "pairwise.complete.obs")
-##pre-monsoon season
-cor(stacked_hum_den$premon, stacked_hum_den$premonH, use = "pairwise.complete.obs")
-##monsoon season 
-cor(stacked_hum_den$mon, stacked_hum_den$monH, use = "pairwise.complete.obs")
-##post-monsoon season
-cor(stacked_hum_den$postmon, stacked_hum_den$postmonH, use = "pairwise.complete.obs")
-```
-We can see no significant correlation within the seasons.
-Therefore we can now look at the lagged correlation for 1 season and 2 seasons 
+# Correlation between relative humidity and dengue cases
+
+The relationship between relative humidity and dengue cases seems to be
+an unclear one. Some papers were able to report a positive relationship
+while others reported a negative relationship. However for this data set
+we assume a positive relationship. This document is used to test that
+theory, while looking at non-lagged correlation and lagged correlation
+for the initial data and the data sorted into their respective monsoon
+seasons. To understand how the data frames that are used here, were
+designed, please have a look at the "Dataframe_sorting" markdown
+document in the repository.
+
+# 1. Correlation between Humidity and Dengue without the Monsoon Seasons
+
+### 1.1 Loading the Relevant Packages and the Needed Data Frames
+
+The humidity and dengue case data is now both sorted into their
+respective monsoon seasons and stacked atop of each other but one data
+frame also contains stacked data but without being sorted into the
+monsoon seasons. First load the packages we need and the data frames.
 
 ```{r}
-#lag of one season
-#correlation between inter-monsoon humdity and pre-monsoon cases 
-cor(stacked_hum_den$intermonH, stacked_hum_den$premon, use = "pairwise.complete.obs" )
+#load the needed packages 
+install.packages("ggplot2")
+install.packages("stats")
+install.packages("readxl")
+library(ggplot2)
+library(stats)
+library(readxl)
 
-#correlation between the pre-monsoon humidity season and the monsoon dengue cases 
-cor(stacked_hum_den$premonH, stacked_hum_den$mon, use = "pairwise.complete.obs")
-
-#correlation between monsoon humidity and post-monsoon dengue cases
-cor(stacked_hum_den$monH, stacked_hum_den$postmon, use = "pairwise.complete.obs")
-
-#correlation between post-monsoon humidity and inter-monsoon dengue cases 
-cor(stacked_hum_den$postmonH, stacked_hum_den$intermon, use = "pairwise.complete.obs")
-
-
-#lag of 2 seasons 
-#correlation between inter-monsoon humidity and monsoon dengue cases 
-cor(stacked_hum_den$intermonH, stacked_hum_den$mon, use = "pairwise.complete.obs")
-
-#correlation between pre-monsoon humidity and post-monsoon dengue cases 
-cor(stacked_hum_den$premonH, stacked_hum_den$postmon, use = "pairwise.complete.obs")
-
-#correlation between monsoon humidity and inter-monsoon dengue cases 
-cor(stacked_hum_den$monH, stacked_hum_den$intermon, use = "pairwise.complete.obs")
-
-#correlation between post-monsoon humidity and pre-monsoon dengue cases 
-cor(stacked_hum_den$postmonH, stacked_hum_den$premon, use = "pairwise.complete.obs")
+#load the needed dataframes
+den_hum_longformat <- read.csv("C:\\Users\\paula\\Documents\\Uni Heidelberg\\4. Semester\\Bioinformatik\\github\\topic04_team01\\Correlation_hypothesis\\den_hum_longformat.csv")
+monsoon_longformat <- read.csv("C:\\Users\\paula\\Documents\\Uni Heidelberg\\4. Semester\\Bioinformatik\\github\\topic04_team01\\Correlation_hypothesis\\monsoon_longformat.csv")
+popu_density_den_hum <- read.csv("C:\\Users\\paula\\Documents\\Uni Heidelberg\\4. Semester\\Bioinformatik\\github\\topic04_team01\\Correlation_hypothesis\\stacked_dengue_population_density_humidity.csv")
 ```
 
-The highest 3 correlations are between pre-monsoon humidity and monsoon dengue cases, monsoon humidity and post-monsoon dengue cases, and pre-monsoon humidity and post-monsoon dengue cases. 
-All correlations are still very small (between -0.145 and -0.164) and interestingly also negative. 
+### 1.2 Summary of the Variables
 
-Let's visualize these with scatterplots 
+It is always good to have an overview over your variables before testing
+for correlation so let's have a look.
+
 ```{r}
-#a linear model can be used to add the correlation to the scatterplot 
-lm1 <- lm(stacked_hum_den$premonH ~ stacked_hum_den$mon)
-lm2 <- lm(stacked_hum_den$monH ~ stacked_hum_den$postmon)
-lm3 <- lm(stacked_hum_den$premonH ~ stacked_hum_den$postmon)
+#summary of each variable and histogram
+summary(den_hum_longformat$Dengue)
+summary(den_hum_longformat$Humidity)
+hist(den_hum_longformat$Dengue, main = "Histogram of Dengue Cases", xlab = "Dengue cases per 100'000 people", breaks = 100)
+hist(den_hum_longformat$Humidity, main ="Histogram of relative Humidity", xlab = "relative humidity", breaks = 50)
 
-plot(stacked_hum_den$premonH, stacked_hum_den$mon,
+#relationship of the two variables 
+plot(den_hum_longformat$Humidity, den_hum_longformat$Dengue,
      pch=20,
-     xlab='pre-monsoon humidity',
-     ylab='monsoon dengue cases')
-abline(lm1, col = 4, lwd = 3)
-
-plot(stacked_hum_den$monH, stacked_hum_den$postmon,pch=20,
-     xlab='monsoon humidity',
-     ylab='post-monsoon dengue cases')
-abline(lm2, col = 4, lwd = 3)
-
-plot(stacked_hum_den$premonH, stacked_hum_den$postmon,pch=20,
-     xlab='pre-monsoon humidity',
-     ylab='post-monsoon dengue cases')
-abline(lm3, col = 4, lwd = 3)
+     xlab="relative Humidity",
+     ylab="Dengue cases per 100'000",
+     main = "Scatterplot of both variables")
 ```
 
-The most interesting correlation would be the correlation between pre-monsoon humidity and monsoon dengue cases or between the monsoon humidity and the post monsoon dengue cases.
-The correlation does not seem great, however let's test this with a correlation test to see if it might actually not exist at all.
-The H0 hypothesis assumes that the actual correlation between the pre-monsoon humidity and the monsoon season dengue cases is equal to zero 
-The H1 hypothesis assumes that the actual correlation between the pre-monsoon humidity and the monsoon season dengue cases is less than zero
+The Dengue cases are mostly around zero with a few very high outliers.
+One reason for this might be that the data is normalized with the
+population data. There are only a few actual zero cases in the original
+data frame. However in the normalized data frame, 25% of all data points
+are below 2.746 and 75% below 13.853. With the highest value being an
+extreme of over 300 cases per 100'000 people, it might be useful to work
+within the 95% quantile range to avoid the correlation being distorted
+by these extremes. This can also be seen in the scatter plot very well.
 
-The same H0 and H1 Hypothesis apply to the correlation between monsoon humidity and post-monsoon dengue cases.
-```{r}
-#correlation between pre-monsoon humidity and monsoon dengue cases 
-cor.test(stacked_hum_den$premonH, stacked_hum_den$mon, use = "pairwise.complete.obs", method = "pearson", alternative = "less")
+### 1.3 Data Cleanup
 
-#correlation between monsoon humidity and post-monsoon dengue cases
-cor.test(stacked_hum_den$monH, stacked_hum_den$postmon, use = "pairwise.complete.obs", method = "pearson", alternative = "less")
-```
-
-The correlation test returns a p-value that is smaller than 0.05 for both tests, which indicates that the H0 hypothesis is rejected and the H1 hypothesis is assumed. This is not what one would expect.
-
-Correlation between the monsoon seasons within the variables 
-A paper mentions, that even slightly higher pre-epidemic case numbers have a significant impact on the epidemic case numbers, maybe this same principle can be seen within the monsoon seasons if we assume the pre-monsoon season as the pre-epidemic stage and the monsoon season as the epidemic stage 
-```{r}
-cor(stacked_hum_den$intermon, stacked_hum_den$premon, use = "pairwise.complete.obs")
-cor(stacked_hum_den$premon, stacked_hum_den$mon, use = "pairwise.complete.obs" )
-cor(stacked_hum_den$mon, stacked_hum_den$postmon, use = "pairwise.complete.obs")
-cor(stacked_hum_den$postmon, stacked_hum_den$intermon, use = "pairwise.complete.obs")
-```
-The correlation between the pre-monsoon dengue cases and the monsoon dengue cases is by far the highest with an r-value of 0.73. 
-```{r}
-model <- lm(stacked_hum_den$mon ~ stacked_hum_den$premon)
-plot(stacked_hum_den$premon, stacked_hum_den$mon, pch=20,
-     xlab='pre-monsoon cases',
-     ylab='monsoon dengue cases'
-     )
-abline(model, col = 4, lwd = 3)
-```
-
-Let's test the correlation again with a correlation test 
-H0: the actual correlation between the pre-monsoon cases and the monsoon season dengue cases is equal to zero 
-H1: the actual correlation between the pre-monsoon cases and the monsoon season dengue cases is greater than zero 
-```{r}
-cor.test(stacked_hum_den$premon, stacked_hum_den$mon, use = "pairwise.complete.obs", method = "pearson", alternative = "greater")
-```
+To cleanup the data, let's remove the NA's and only look at the 95%
+quantile range to get rid of outliers. The bottom 5% quantile will be
+left in the data frame as they also contain the actual zero cases.
 
 ```{r}
-#the linear model was used before to plot an Abline in the scatterplot, we just need to summerize it
-summary(model)
-```
-We can see that the regression model can explain 54% of the variance in this relationship as well as with a p-value smaller than 0.05 using the linear regression model here would be significantly better to predict the monsoon dengue cases than the zero model. 
+#remove the NA's
+den_hum_longformat <- na.omit(den_hum_longformat)
 
-Dengue cases are also associated with population density and urban areas
+#only look at the 95% quantile range 
+## Calculate the 95th quantile of Dengue cases
+quantile_95 <- quantile(den_hum_longformat$Dengue, 0.95)
+
+# Filter the data to keep only values within the 95% quantile range
+filtered_data <- den_hum_longformat[den_hum_longformat$Dengue <= quantile_95, ]
+
+#new scatterplot to check if it looks better
+plot(filtered_data$Humidity, filtered_data$Dengue,
+     pch=20,
+     xlab="relative Humidity",
+     ylab="Dengue cases per 100'000",
+     main = "scatterplot within the 95% quantile")
+```
+
+### 1.4 Non-lagged Correlation
+
+Let's look at the correlation between dengue cases and humidity without
+lag to see if there is a correlation overall.
 
 ```{r}
-#we need to stack the total dengue cases per province for the years form 2006 to 2020 and compare the normalized dengue cases to the total population
+# Calculate the correlation between Humidity and the filtered Dengue cases
+correlation <- cor(filtered_data$Humidity, filtered_data$Dengue)
 
-total_cases_stacked <- c(dengue_norm$X2006.total, dengue_norm$X2007.total,dengue_norm$X2008.total, dengue_norm$X2009.total, dengue_norm$X2010.total,dengue_norm$X2011.total,dengue_norm$X2012.total,dengue_norm$X2013.total,dengue_norm$X2014.total,dengue_norm$X2015.total,dengue_norm$X2016.total,dengue_norm$X2017.total,dengue_norm$X2018.total, dengue_norm$X2019.total,dengue_norm$X2020.total)
-
-population_stacked <- c(popu_06_20$X2006, popu_06_20$X2007, popu_06_20$X2008, popu_06_20$X2009, popu_06_20$X2010, popu_06_20$X2011, popu_06_20$X2012, popu_06_20$X2013, popu_06_20$X2014, popu_06_20$X2015, popu_06_20$X2016, popu_06_20$X2017, popu_06_20$X2018, popu_06_20$X2019, popu_06_20$X2020)
-
-#have a look at the correlation 
-cor(total_cases_stacked, population_stacked, use = "pairwise.complete.obs")
+# Print the correlation
+print(correlation)
 ```
 
+The correlation between the dengue cases and relative humidity is
+slightly positive with 0.242 but not significantly. To see how much of
+the variance in the dengue data can be explained by the humidity data,
+we can use a linear model. The dependent variable are the dengue cases
+and the independend variable is the relative humidity. The linear model
+can be used here as the dengue cases are no longer discrete values
+(which would indicate a poisson modell) because of the normalization
+with the population data.
+
+```{r}
+# make a linear modell
+linear_modell <- lm(Dengue ~ Humidity, data = filtered_data)
+
+# Summarize the modell
+summary(linear_modell)
+
+```
+
+The output indicates that there is a statistically significant positive
+relationship between "Dengue" and "Humidity" in the data frame that only
+contains the 95% quantile range. However, the model has a low R-squared
+value, suggesting that "Humidity" explains only a small portion of the
+variability in "Dengue" of around 6%. This might be improved by using
+other environmental factors but these weren't analysed in this project.
+
+### 1.4 Lagged Correlation between Relative Humidity and Dengue Cases
+
+Because of the NA's in the data frame, the time series needs to be
+manually lagged, as removing the rows that contain the NA's might change
+each year. For example if in one year January contains NA's in the first
+province and the first province is then removed and in February the 3.
+province contains NA's the if the time series is lagged with the ccf()
+function, different provinces will the compared to one another. Because
+the mosquitoes that transmit the dengue virus from one human to the next
+need a few weeks to develop from larvae to full mosquitoes after enough
+rain and a suitable temperature, a lag of 1 month, 2 months and 3 months
+might be of interest
+
+#### 1.4.1 Correlation with 1 Month Lag
+
+```{r}
+#we need the complete dataframe again, with the NA's otherwise calculating the lag is very difficult 
+den_hum_longformat1 <- read.csv("C:\\Users\\paula\\Documents\\Uni Heidelberg\\4. Semester\\Bioinformatik\\github\\topic04_team01\\Correlation_hypothesis\\den_hum_longformat.csv")
+
+#make a vector with 77 NA's
+lag1 <- c(rep(NA, 77))
+#get the dengue data from the longformat dataframe 
+dengue_lag1 <- den_hum_longformat1$Dengue
+#add the NA's at the botoom of the dengue case Data in the longformat dataframe 
+dengue_lag1 <- c(dengue_lag1, lag1)
+#remove the first 77 values from the vector 
+dengue_lag1 <- tail(dengue_lag1, -77)
+
+#replace the dengue vector in the longformat dataframe with the lagged dengue data 
+den_hum_longformat1$Dengue <- dengue_lag1
+
+#now we can do the same steps as with the non lagged correlation 
+
+#remove the NA's
+den_hum_longformat1 <- na.omit(den_hum_longformat1)
+
+#only look at the 95% quantile range 
+## Calculate the 95th quantile of Dengue cases
+quantile_95 <- quantile(den_hum_longformat1$Dengue, 0.95)
+
+# Filter the data to keep only values within the 95% quantile range
+filtered_data1 <- den_hum_longformat1[den_hum_longformat1$Dengue <= quantile_95, ]
+
+# Calculate the correlation between Humidity and the filtered Dengue cases with a one month lag
+correlation_lag1 <- cor(filtered_data1$Humidity, filtered_data1$Dengue)
+correlation_lag1
+
+# make another linear modell 
+linear_modell1 <- lm(Dengue ~ Humidity, data = filtered_data1)
+
+# Summarize the modell
+summary(linear_modell1)
+```
+
+#### 1.4.2 Correlation with 2 Months Lag
+
+```{r}
+#we need the complete dataframe again, with the NA's otherwise calculating the lag is very difficult 
+den_hum_longformat2 <- read.csv("C:\\Users\\paula\\Documents\\Uni Heidelberg\\4. Semester\\Bioinformatik\\github\\topic04_team01\\Correlation_hypothesis\\den_hum_longformat.csv")
+
+#make a vector with 77 NA's
+lag2 <- c(rep(NA, 154))
+#get the dengue data from the longformat dataframe 
+dengue_lag2 <- den_hum_longformat2$Dengue
+#add the NA's at the bottom of the dengue case Data in the longformat dataframe 
+dengue_lag2 <- c(dengue_lag2, lag2)
+#remove the first 154 values from the vector 
+dengue_lag2 <- tail(dengue_lag2, -154)
+
+#replace the dengue vector in the longformat dataframe with the lagged dengue data 
+den_hum_longformat2$Dengue <- dengue_lag2
+
+#now we can do the same steps as with the non lagged correlation 
+
+#remove the NA's
+den_hum_longformat2 <- na.omit(den_hum_longformat2)
+
+#only look at the 95% quantile range 
+## Calculate the 95th quantile of Dengue cases
+quantile_95 <- quantile(den_hum_longformat2$Dengue, 0.95)
+
+# Filter the data to keep only values within the 95% quantile range
+filtered_data2 <- den_hum_longformat2[den_hum_longformat2$Dengue <= quantile_95, ]
+
+# Calculate the correlation between Humidity and the filtered Dengue cases with a one month lag
+correlation_lag2 <- cor(filtered_data2$Humidity, filtered_data2$Dengue)
+correlation_lag2
+
+# make another linear modell 
+linear_modell2 <- lm(Dengue ~ Humidity, data = filtered_data2)
+
+# Summarize the modell
+summary(linear_modell2)
+```
+
+#### 1.4.3 Correlation with 3 Months Lag
+
+```{r}
+#we need the complete dataframe again, with the NA's otherwise calculating the lag is very difficult 
+den_hum_longformat3 <- read.csv("C:\\Users\\paula\\Documents\\Uni Heidelberg\\4. Semester\\Bioinformatik\\github\\topic04_team01\\Correlation_hypothesis\\den_hum_longformat.csv")
+
+#make a vector with 77 NA's
+lag3 <- c(rep(NA, 231))
+#get the dengue data from the longformat dataframe 
+dengue_lag3 <- den_hum_longformat3$Dengue
+#add the NA's at the bottom of the dengue case Data in the longformat dataframe 
+dengue_lag3 <- c(dengue_lag3, lag3)
+#remove the first 231 values from the vector 
+dengue_lag3 <- tail(dengue_lag3, -231)
+
+#replace the dengue vector in the longformat dataframe with the lagged dengue data 
+den_hum_longformat3$Dengue <- dengue_lag3
+
+#now we can do the same steps as with the non lagged correlation 
+
+#remove the NA's
+den_hum_longformat3 <- na.omit(den_hum_longformat3)
+
+#only look at the 95% quantile range 
+## Calculate the 95th quantile of Dengue cases
+quantile_95 <- quantile(den_hum_longformat3$Dengue, 0.95)
+
+# Filter the data to keep only values within the 95% quantile range
+filtered_data3 <- den_hum_longformat3[den_hum_longformat3$Dengue <= quantile_95, ]
+
+# Calculate the correlation between Humidity and the filtered Dengue cases with a one month lag
+correlation_lag3 <- cor(filtered_data3$Humidity, filtered_data3$Dengue)
+correlation_lag3
+
+# make another linear modell 
+linear_modell3 <- lm(Dengue ~ Humidity, data = filtered_data3)
+
+# Summarize the modell
+summary(linear_modell3)
+```
+
+#### 1.4.4 Conclusion about the Correlation
+
+It seems like the non-lagged correlation explains the highest amount of
+variability in the dengue cases, the one month lag explains a little
+less. The 2 and 3 month lag seems to be very insignificant. The
+non-lagged correlation has a R-Squared value of 0.05837, the one month
+lag has an R-Square value of 0.03008, the two month lag has an R-Square
+value of 0.0007 and the three month lag has an R-Square value of 0.0181.
+
+## 2. Correlation between Relative Humidity and Dengue sorted into Monsoon Seasons
+
+The previous results don't suggest that looking at the monsoon seasons
+will make much of a difference, but just for these tests to be
+comprehensive let's look at them as well.
+
+### 2.1 Summary of the Variables
+
+```{r}
+#summary of each variable and histogram
+summary(monsoon_longformat$Dengue)
+summary(monsoon_longformat$Humidity)
+hist(monsoon_longformat$Dengue, main = "Histogram of Dengue Cases in monsoon seasons", xlab = "Dengue cases per 100'000 people", breaks = 100)
+hist(den_hum_longformat$Humidity, main ="Histogram of relative Humidity in monsoon seasons", xlab = "relative humidity", breaks = 50)
+
+#mean of the respective seasons over all years of dengue and humidity 
+intermon <- subset(monsoon_longformat, monsoon_longformat$Season == "intermon")
+mean_humidity_intermon <- mean(intermon$Humidity)
+mean_dengue_intermon <- mean(intermon$Dengue, na.rm = TRUE)
+
+premon <- subset(monsoon_longformat, monsoon_longformat$Season == "premon")
+mean_humidity_premon <- mean(premon$Humidity)
+mean_dengue_premon <- mean(premon$Dengue, na.rm = TRUE)
+
+mon <- subset(monsoon_longformat, monsoon_longformat$Season == "mon")
+mean_humidity_mon <- mean(mon$Humidity)
+mean_dengue_mon <- mean(mon$Dengue, na.rm = TRUE)
+
+postmon <- subset(monsoon_longformat, monsoon_longformat$Season == "postmon")
+mean_humidity_postmon <- mean(postmon$Humidity)
+mean_dengue_postmon <- mean(postmon$Dengue, na.rm = TRUE)
+
+#humidity seasons means
+mean_humidity_intermon
+mean_humidity_premon
+mean_humidity_mon
+mean_humidity_postmon
+
+#dengue seasons means
+mean_dengue_intermon
+mean_dengue_premon
+mean_dengue_mon
+mean_dengue_postmon
+
+#relationship of the two variables 
+plot(monsoon_longformat$Humidity, monsoon_longformat$Dengue,
+     pch=20,
+     xlab="relative Humidity",
+     ylab="Dengue cases per 100'000",
+     main = "Scatterplot of both variables")
+
+
+
+
+```
+
+### 2.2 Data Cleanup
+
+To cleanup the data, let's remove the NA's and only look at the 95%
+quantile range to get rid of outliers. The bottom 5% quantile will be
+left in the data frame as they also contain the actual zero cases.
+
+```{r}
+#remove the NA's
+monsoon_longformat <- na.omit(monsoon_longformat)
+
+#only look at the 95% quantile range 
+## Calculate the 95th quantile of Dengue cases
+quantile_95 <- quantile(monsoon_longformat$Dengue, 0.95)
+
+# Filter the data to keep only values within the 95% quantile range
+filtered_data_mon <- monsoon_longformat[monsoon_longformat$Dengue <= quantile_95, ]
+
+#new scatterplot to check if it looks better
+plot(filtered_data_mon$Humidity, filtered_data_mon$Dengue,
+     pch=20,
+     xlab="relative Humidity",
+     ylab="Dengue cases per 100'000",
+     main = "Scatterplot within the 95% quantile")
+```
+
+### 3.2 Non-lagged Correlation between Monsoon Seasons
+
+Let's look at the correlation between dengue cases and humidity without
+lag to see if there is a correlation within the seasons.
+
+```{r}
+# Calculate the correlation between Humidity and the filtered Dengue cases
+correlation_mon <- cor(filtered_data_mon$Humidity, filtered_data_mon$Dengue)
+
+# Print the correlation
+print(correlation_mon)
+```
+
+Looking at the correlation non-lagged between the dengue seasons is
+worse that if the dengue cases and relative humidity are not sorted into
+the different monsoon seasons. But let's also see how the linear model
+compares.
+
+```{r}
+# make a linear modell
+linear_modell_mon <- lm(Dengue ~ Humidity, data = filtered_data_mon)
+
+# Summarize the modell
+summary(linear_modell_mon)
+```
+
+For the monsoon seasons, the linear model can only explain about 4.2% of
+the total variance in the dengue cases within the monsoon seasons, which
+is about 1.5% less than the linear model of the data set not sorted into
+the monsoon seasons.
+
+### 3.3 Correlation with 1 Month Lag in the Monsoon Seasons 
+
+```{r}
+#we need the complete dataframe again, with the NA's otherwise calculating the lag is very difficult 
+monsoon_longformat1 <- read.csv("C:\\Users\\paula\\Documents\\Uni Heidelberg\\4. Semester\\Bioinformatik\\github\\topic04_team01\\Correlation_hypothesis\\monsoon_longformat.csv")
+
+#make a vector with 77 NA's
+lag1_mon <- c(rep(NA, 77))
+#get the dengue data from the longformat dataframe 
+dengue_lag1_mon <- monsoon_longformat1$Dengue
+#add the NA's at the bottom of the dengue case Data in monsoon seasons in the longformat dataframe 
+dengue_lag1_mon <- c(dengue_lag1_mon, lag1_mon)
+#remove the first 77 values from the vector 
+dengue_lag1_mon <- tail(dengue_lag1_mon, -77)
+
+#replace the dengue vector in the longformat dataframe with the lagged dengue data 
+monsoon_longformat1$Dengue <- dengue_lag1_mon
+
+#now we can do the same steps as with the non lagged correlation 
+
+#remove the NA's
+monsoon_longformat1 <- na.omit(monsoon_longformat1)
+
+#only look at the 95% quantile range 
+## Calculate the 95th quantile of Dengue cases
+quantile_95 <- quantile(monsoon_longformat1$Dengue, 0.95)
+
+# Filter the data to keep only values within the 95% quantile range
+filtered_data1_mon <- monsoon_longformat1[monsoon_longformat1$Dengue <= quantile_95, ]
+
+# Calculate the correlation between Humidity and the filtered Dengue cases with a lag of one monsoon season
+correlation_lag1_mon <- cor(filtered_data1_mon$Humidity, filtered_data1_mon$Dengue)
+correlation_lag1_mon
+
+# make another linear modell 
+linear_modell1_mon <- lm(Dengue ~ Humidity, data = filtered_data1_mon)
+
+# summarize the modell
+summary(linear_modell1_mon)
+```
+
+The correlation between the one season lag only explains less around
+1.7% of the variability in the dengue cases. This is not a suitable
+model.
+
+## 3. Correlation between the Population Density and the Dengue Cases 
+
+One could assume a positive correlation between the total dengue cases
+of a year in respective province and the population density of a
+province. As the population data is only for each year and not on a
+monthly basis the total values need to be used for the dengue cases.
+However, this also means that there are less values with which the
+correlation can be calculated. Let's see if this can be seen in this
+data set as well.
+
+```{r}
+#remove the NA's
+popu_density_den_hum <- na.omit(popu_density_den_hum)
+
+#summary of each variable and histogram
+summary(popu_density_den_hum$Dengue)
+summary(popu_density_den_hum$Population_density)
+hist(popu_density_den_hum$Dengue, main = "Histogram of Dengue Cases yearls", xlab = "Dengue cases per 100'000 people per year", breaks = 100)
+hist(popu_density_den_hum$Population_density, main ="Histogram of population density", xlab = "population density", breaks = 50)
+
+#relationship of the two variables 
+plot(popu_density_den_hum$Population_density, popu_density_den_hum$Dengue,
+     pch=20,
+     xlab="Population density",
+     ylab="Dengue cases per 100'000",
+     main = "Scatterplot of both variables")
+
+
+#correlation between population density and dengeu cases 
+cor(popu_density_den_hum$Dengue,popu_density_den_hum$Population_density, )
+
+```
+
+The correlation is extremely small, but let's do a linear model to
+confirm this. We can see that the linear model explains less than 1 % of
+the variability of the dengue cases.
+
+```{r}
+# make another linear modell 
+linear_modell_popu <- lm(Dengue ~ Population_density, data = popu_density_den_hum)
+
+# summarize the modell
+summary(linear_modell_popu)
+```
+
+## 4. Multiple Linear Regression Model 
+
+Maybe the combination of the population density data and the humidity
+data can give a little more insight into the variability of the dengue
+data. But even the multiple regression model can only explain around
+1.5% of the varibility.
+
+```{r}
+# Fit the multiple regression model
+multiple_regression_model <- lm(Dengue ~ Humidity + Population_density, data = popu_density_den_hum)
+
+# Get the summary of the model
+summary(multiple_regression_model)
+```
