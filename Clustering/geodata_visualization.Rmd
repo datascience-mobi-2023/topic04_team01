@@ -1,0 +1,1071 @@
+---
+title: "geodata"
+output: html_document
+date: "2023-06-01"
+author: Lea Mrowiec
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 0) Loading Point Data
+
+```{r}
+#install.packages("readxl")
+library(readxl)
+
+sheet_names = excel_sheets("../era5_data_2006_2020_thailand_monmean.xlsx")
+
+#laden von den einzelnen sheets
+T.huss.mon = read_excel("../era5_data_2006_2020_thailand_monmean.xlsx", sheet="era5_huss_2006_2020_thailand_mo")
+
+
+```
+
+# 1) Map With Coordinate Points of the Centroids
+
+```{r}
+
+#loading dataframe with dengue data
+library(readxl)
+dengue_data_com2 = read.csv("./dengue_data/dengue_without_NAs_norm.csv")
+dengue_data_com2
+
+#loading the geo data
+library(sf)
+shapefilePath <- "./geo_data/gadm36_THA_shp"
+layers <- st_layers(shapefilePath)
+geography <- st_read(shapefilePath, layer = "gadm36_THA_1")
+#geography <- st_read("/Users/leamrowiec/Desktop/Datenanalyse SS23/other data/gadm36_THA_shp")
+geography= as.data.frame(geography)
+geography
+
+#assuming that longitude and latitude data in climate data are the centroids
+centroids = T.huss.mon[,2:4] #including the names of the province to join the data later
+
+# downloading the geo data (borders of districts)
+library(sf)
+
+```
+
+```{r}
+#install.packages("dplyr")
+library(dplyr)
+
+# zeilen der dataframe centroids nach der reihenfolge der Distrikte in geography ordnen
+centroids.ordered <- arrange(centroids, ADM1_EN) 
+#aber: namen der distrikte sind nicht immer gleich -> hinzufügen einer Nummerierung der Dsitrikte, um gleiche spalte zu bekommen
+centroids.ordered['numbers'] = c(1:77)
+#geography["numbers"] = c(1:77)
+
+
+```
+
+```{r}
+#install.packages("dplyr")
+library(dplyr)
+```
+
+```{r}
+# ordering the rows alphabetically
+centroids.sorted = arrange(centroids, ADM1_EN) #geography is already ordered alphabetically
+
+#names of the districs are not always exactly the same: to make sure that the order of rows is correct I add extra column for merging the dataframes (has to be the same in both dataframes)
+
+centroids.sorted['numbers'] = c(1:77)
+#geography["numbers"] = c(1:77)
+
+
+```
+
+```{r}
+# combining the two dataframes 
+centroids.geography = cbind(centroids.sorted, geography)
+# verview of data structure
+class(centroids.geography)
+head(centroids.geography)
+summary(centroids.geography)
+str(centroids.geography)
+
+```
+
+```{r}
+#install.packages("ggplot2")
+library(ggplot2)
+library(sf)
+```
+
+```{r}
+#install.packages("rgdal")
+#install.packages("data.table")
+
+library(rgdal)
+library(data.table)
+```
+
+```{r}
+#ploting
+ggplot() +
+  geom_sf(data = centroids.geography, aes(geometry=geometry),col = "black", fill = NA) +  # adds geometric layer of polygons stored in the data object
+  geom_point(data = centroids.geography, aes(x = Longitude, y = Latitude)) # adds coordinate points
+  
+```
+
+# 2) Maps with data plotted over district area
+
+## 2.1) Mean Relative Humidity of All Reported Years (2006 to 2020)
+
+```{r}
+# plotting polygon data with ggplot2
+# geography is dataframe with polygon data
+class(geography)
+
+# to plot the data we need a new dataframe combining geography data and relative humidity data
+
+# 1. putting lines of dataframe T.huss.mon in alphabetical order of the province names
+library(dplyr)
+T.huss.mon.ordered = arrange(T.huss.mon, ADM1_EN) 
+
+# 2. adding numbers for each row
+T.huss.mon.ordered['numbers'] = c(1:77)
+# geography["numbers"] = c(1:77); numbers have already been added
+
+
+```
+
+```{r}
+
+# using mean data of each province as a mean over all reported months
+T.huss.mon.mean = apply(T.huss.mon.ordered[-c(1,2)], 1, mean)
+T.huss.mon.mean.df = as.data.frame(T.huss.mon.mean)
+
+# adding another column of numbers 
+T.huss.mon.mean.df['numbers'] = c(1:77)
+
+# 3. merging the two dataframes of relative humidtiy and geography
+huss.geography = cbind(T.huss.mon.mean.df, geography)
+
+
+```
+
+```{r}
+library(ggplot2)
+ggplot() +
+  geom_sf(data = huss.geography, aes(geometry = geometry, fill= T.huss.mon.mean)) +
+  coord_sf() +  
+  theme_minimal() +
+  labs(title = "Mean Relative Humidity (2006 to 2020)", fill = "relative humidity [%]")+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")
+
+```
+
+## 2.2) Plotting Maximal Values of relative humidity over all months
+
+```{r}
+library(dplyr)
+library(ggplot2)
+# using maximal value of relative humidity to plot a geomap with the maximal reported value in each province
+## removing all unnecessary columns
+T.huss.mon.ordered$numbers = NULL
+T.huss.mon.ordered$Number = NULL
+T.huss.mon.ordered$ADM1_EN = NULL
+T.huss.mon.ordered$Latitude = NULL
+T.huss.mon.ordered$Longitude = NULL
+## computing the maximal reported value
+T.huss.mon.max = apply(T.huss.mon.ordered[-c(1,2)], 1, max)
+T.huss.mon.max.df = as.data.frame(T.huss.mon.max)
+
+# adding another column of numberst to merge the dataframes
+T.huss.mon.max.df['numbers'] = c(1:77)
+geography['numbers'] = c(1:77)
+
+# merging the two dataframes of relative humidtiy and geography
+huss.geography.max = merge(T.huss.mon.max.df, geography, by= "numbers")
+
+# removing non-necessary colums of huss.geography.max because it seemed like the latitude data was plotted
+huss.geography.max.rmv = huss.geography.max[-c(3,4),]
+
+# renaming the "T.huss.mon.max" in the dataframe "huss.geography.max.rmv"
+huss.goegraphy.max=rename(huss.geography.max.rmv, mon.max= T.huss.mon.max)
+
+
+#
+install.packages("colorspace")
+library(colorspace)
+library(ggplot2)
+
+#making sure that the column I want to plot is numeric
+class(huss.goegraphy.max$mon.max)
+
+ggplot(huss.goegraphy.max, aes(geometry=geometry)) +
+  geom_sf (aes(fill = mon.max)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "viridis")+
+  labs(title = "Maximum Reported Relative Humidity (2006 to 2020)", fill = "relative humidity [%]")
+
+```
+
+## 2.3) Plotting Minimum Values (2006 to 2020)
+
+Minimum value that has been reported in over all months for each province is plotted.
+
+```{r}
+T.huss.mon.min = apply(T.huss.mon.ordered, 1, min)
+T.huss.mon.min.df = as.data.frame(T.huss.mon.min)
+
+# adding another column of numbers to merge the dataframes
+#T.huss.mon.min.df['numbers'] = c(1:77)
+
+# 3. merging the two dataframes of relative humidtiy and geography
+huss.geography.min = cbind(T.huss.mon.min.df, geography)
+
+# umbenennen der Spalte "T.huss.mon.min" in der dataframe "huss.geography.min"
+library(dplyr)
+library(viridis)
+library(ggplot2)
+
+huss.goegraphy.min.1 = rename(huss.geography.min, min= T.huss.mon.min)
+
+ggplot(huss.goegraphy.min.1, aes(geometry=geometry)) +
+  geom_sf (aes(fill = min)) +
+  colorspace::scale_fill_continuous_sequential(palette= "viridis")+
+  labs(title = "Minimum Repoted Relative Humidity (2006-2020)",fill = "relative humidity [%]")
+
+```
+
+## 2.4) Plotting Median Values (2006 to 2020)
+
+Median value that has been reported in over all months for each province is plotted.
+
+```{r}
+T.huss.mon.median = apply(T.huss.mon.ordered[-c(1,2)], 1, median)
+T.huss.mon.median.df = as.data.frame(T.huss.mon.median)
+
+# adding another column of numbers to merge the dataframes
+T.huss.mon.median.df['numbers'] = c(1:77)
+
+# 3. merging the two dataframes of relative humidtiy and geography
+huss.geography.median = merge(T.huss.mon.median.df, geography, by= "numbers")
+
+# umbenennen der Spalte "T.huss.mon.min" in der dataframe "huss.geography.min"
+library(dplyr)
+huss.goegraphy.median.1 = rename(huss.geography.median, mon.median= T.huss.mon.median)
+
+library(viridis)
+library(ggplot2)
+
+ggplot(huss.goegraphy.median.1, aes(geometry=geometry)) +
+  geom_sf (aes(fill = mon.median)) +
+  colorspace::scale_fill_continuous_sequential(palette= "viridis")+
+  labs(title = "Median of Relative Humidity (2006-2020)",fill = "relative humidity [%]")
+  
+```
+
+# 3) Geoplot of Mean Relative Humidity of each month
+
+### 3.1) Assembling the Dataframe to plot
+
+```{r}
+install.packages("RColorBrewer")
+#install.packages("geofacet")
+#install.packages("magrittr")
+#install.packages("ggplot2")
+
+library(RColorBrewer)
+library(geofacet)
+library(ggplot2)
+library(dplyr)
+library(magrittr)
+
+
+# 1. making a dataframe that contains al mean values of each month over the years 2006-2010 to plot with 
+
+jan = c("2006.01.", "2007.01.", "2008.01.", "2009.01.", "2010.01.", "2011.01.", "2012.01.", "2013.01.", "2014.01.", "2015.01.", "2016.01.", "2017.01.", "2018.01." , "2019.01.", "2020.01.")
+
+feb = c("2006.02.", "2007.02.", "2008.02.", "2009.02.", "2010.02.", "2011.02.", "2012.02.", "2013.02.", "2014.02.", "2015.02.", "2016.02.", "2017.02.", "2018.02." , "2019.02.", "2020.02.")
+
+mar = c("2006.03.", "2007.03.", "2008.03.", "2009.03.", "2010.03.", "2011.03.", "2012.03.", "2013.03.", "2014.03.", "2015.03.", "2016.03.", "2017.03.", "2018.03." , "2019.03.", "2020.03.")
+
+apr = c("2006.04.", "2007.04.", "2008.04.", "2009.04.", "2010.04.", "2011.04.", "2012.04.", "2013.04.", "2014.04.", "2015.04.", "2016.04.", "2017.04.", "2018.04." , "2019.04.", "2020.04.")
+
+mai = c("2006.05.", "2007.05.", "2008.05.", "2009.05.", "2010.05.", "2011.05.", "2012.05.", "2013.05.", "2014.05.", "2015.05.", "2016.05.", "2017.05.", "2018.05." , "2019.05.", "2020.05.")
+
+jun = c("2006.06.", "2007.06.", "2008.06.", "2009.06.", "2010.06.", "2011.06.", "2012.06.", "2013.06.", "2014.06.", "2015.06.", "2016.06.", "2017.06.", "2018.06." , "2019.06.", "2020.06.")
+
+jul = c("2006.07.", "2007.07.", "2008.07.", "2009.07.", "2010.07.", "2011.07.", "2012.07.", "2013.07.", "2014.07.", "2015.07.", "2016.07.", "2017.07.", "2018.07." , "2019.07.", "2020.07.")
+
+aug = c("2006.08.", "2007.08.", "2008.08.", "2009.08.", "2010.08.", "2011.08.", "2012.08.", "2013.08.", "2014.08.", "2015.08.", "2016.08.", "2017.08.", "2018.08." , "2019.08.", "2020.08.")
+
+sep = c("2006.09.", "2007.09.", "2008.09.", "2009.09.", "2010.09.", "2011.09.", "2012.09.", "2013.09.", "2014.09.", "2015.09.", "2016.09.", "2017.09.", "2018.09." , "2019.09.", "2020.09.")
+
+oct = c("2006.10.", "2007.10.", "2008.10.", "2009.10.", "2010.10.", "2011.10.", "2012.10.", "2013.10.", "2014.10.", "2015.10.", "2016.10.", "2017.10.", "2018.10." , "2019.10.", "2020.10.")
+
+nov = c("2006.11.", "2007.11.", "2008.11.", "2009.11.", "2010.11.", "2011.11.", "2012.11.", "2013.11.", "2014.11.", "2015.11.", "2016.11.", "2017.11.", "2018.11." , "2019.11.", "2020.11.")
+
+dec = c("2006.12.", "2007.12.", "2008.12.", "2009.12.", "2010.12.", "2011.12.", "2012.12.", "2013.12.", "2014.12.", "2015.12.", "2016.12.", "2017.12.", "2018.12." , "2019.12.", "2020.12.")
+
+T.huss.mon.ordered.df = as.data.frame(T.huss.mon.ordered) #making sure that it is actualy a dataframe
+
+show(T.huss.mon.ordered)
+
+# defining single dataframes for each month (having single dataframes helps me to identify where future errors might be)
+means.jan = apply(T.huss.mon.ordered.df, 1, function(x) {rowMeans(T.huss.mon.ordered.df[,jan])})
+means.feb = apply(T.huss.mon.ordered.df, 1, function(x) {rowMeans(T.huss.mon.ordered.df[,feb])})
+means.mar = apply(T.huss.mon.ordered.df, 1, function(x) {rowMeans(T.huss.mon.ordered.df[,mar])})
+means.apr = apply(T.huss.mon.ordered.df, 1, function(x) {rowMeans(T.huss.mon.ordered.df[,apr])})
+means.mai = apply(T.huss.mon.ordered.df, 1, function(x) {rowMeans(T.huss.mon.ordered.df[,mai])})
+means.apr = apply(T.huss.mon.ordered.df, 1, function(x) {rowMeans(T.huss.mon.ordered.df[,apr])})
+means.jun = apply(T.huss.mon.ordered.df, 1, function(x) {rowMeans(T.huss.mon.ordered.df[,jun])})
+means.jul = apply(T.huss.mon.ordered.df, 1, function(x) {rowMeans(T.huss.mon.ordered.df[,jul])})
+means.aug = apply(T.huss.mon.ordered.df, 1, function(x) {rowMeans(T.huss.mon.ordered.df[,aug])})
+means.sep = apply(T.huss.mon.ordered.df, 1, function(x) {rowMeans(T.huss.mon.ordered.df[,sep])})
+means.oct = apply(T.huss.mon.ordered.df, 1, function(x) {rowMeans(T.huss.mon.ordered.df[,oct])})
+means.nov = apply(T.huss.mon.ordered.df, 1, function(x) {rowMeans(T.huss.mon.ordered.df[,nov])})
+means.dec = apply(T.huss.mon.ordered.df, 1, function(x) {rowMeans(T.huss.mon.ordered.df[,dec])})
+
+library(dplyr)
+
+# I had formating issues with the colums of the future dataframe, so I made sure to define them as vectors and ot helped :)
+means.jan.v = means.jan[,1]
+means.feb.v = means.feb[,1]
+means.mar.v = means.mar[,1]
+means.apr.v = means.apr[,1]
+means.mai.v = means.mai[,1]
+means.jun.v = means.jun[,1]
+means.jul.v = means.jul[,1]
+means.aug.v = means.aug[,1]
+means.sep.v = means.sep[,1]
+means.oct.v = means.oct[,1]
+means.nov.v = means.nov[,1]
+means.dec.v = means.dec[,1]
+
+#assembling the dataframe
+#new_cols = T.huss.mon.ordered.df[, c("ADM1_EN","numbers")]
+
+means.jan.df = cbind(ADM1_EN = geography[,"NAME_1"], numbers = geography[,"numbers"], jan = means.jan.v)
+
+means.feb.df = cbind(ADM1_EN = geography[,"NAME_1"], numbers = geography[,"numbers"], feb = means.feb.v)
+
+means.mar.df = cbind(ADM1_EN = geography[,"NAME_1"], numbers = geography[,"numbers"], mar = means.mar.v)
+
+means.apr.df = cbind(ADM1_EN= geography[,"NAME_1"], numbers = geography[,"numbers"], apr = means.apr.v)
+
+means.mai.df = cbind(ADM1_EN = geography[,"NAME_1"], numbers = geography[,"numbers"], mai = means.mai.v)
+
+means.jun.df = cbind(ADM1_EN = geography[,"NAME_1"], numbers = geography[,"numbers"], jun = means.jun.v)
+
+means.jul.df = cbind(ADM1_EN = geography[,"NAME_1"], numbers = geography[,"numbers"], jul = means.jul.v)
+
+means.aug.df = cbind(ADM1_EN = geography[,"NAME_1"], numbers = geography[,"numbers"], aug = means.aug.v)
+
+means.sep.df = cbind(ADM1_EN = geography[,"NAME_1"], numbers = geography[,"numbers"], sept = means.sep.v)
+
+means.oct.df = cbind(ADM1_EN = geography[,"NAME_1"], numbers = geography[,"numbers"], oct = means.oct.v)
+
+means.nov.df = cbind(geography[,"NAME_1"], numbers = geography[,"numbers"], nov = means.nov.v)
+
+means.dec.df = cbind(ADM1_EN = geography[,"NAME_1"], numbers = geography[,"numbers"], dec = means.dec.v)
+
+jan.combined = cbind(means.jan.df, geography)
+feb.combined = cbind(means.feb.df, geography)
+mar.combined = cbind(means.mar.df, geography)
+apr.combined = cbind(means.apr.df, geography)
+mai.combined = cbind(means.mai.df, geography)
+jun.combined = cbind(means.jun.df, geography)
+jul.combined = cbind(means.jul.df, geography)
+aug.combined = cbind(means.aug.df, geography)
+sep.combined = cbind(means.sep.df, geography)
+oct.combined = cbind(means.oct.df, geography)
+nov.combined = cbind(means.nov.df, geography)
+dec.combined = cbind(means.dec.df, geography)
+
+
+```
+
+### 3.2) Geoplot: January to December
+
+```{r}
+library(dplyr)
+library(colorspace)
+library(viridis)
+library(ggplot2)
+
+#PLOT JANUARY---------------------------------------------------------------------------------
+
+#defining as numeric
+class(jan.combined$jan)
+jan.num = as.numeric(jan.combined$jan)
+jan.combined$jan = jan.num
+
+#plot
+ggplot(jan.combined, aes(geometry=geometry)) +
+  geom_sf (aes(fill = jan.num)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "Mean Relative Humidity of Jauary (2006 to 2020)", fill = "mean relative humidity [%]")
+#purp geht auch als Farbpalette
+
+#PLOT FEBUARY--------------------------------------------------------------------------------
+
+#defining as numeric
+class(feb.combined$feb)
+feb.num = as.numeric(feb.combined$feb)
+feb.combined$feb = feb.num
+
+#plot
+ggplot(feb.combined, aes(geometry=geometry)) +
+  geom_sf (aes(fill = feb.num)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "Mean Relative Humidity of February (2006 to 2020)", fill = "mean relative humidity [%]")
+
+#PLOT MARCH-----------------------------------------------------------------------------------
+
+#defining as numeric
+class(mar.combined$mar)
+mar.num = as.numeric(mar.combined$mar)
+mar.combined$mar = mar.num
+
+#plot
+ggplot(mar.combined, aes(geometry=geometry)) +
+  geom_sf (aes(fill = mar.num)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "Mean Relative Humidity of March (2006 to 2020)", fill = "mean relative humidity [%]")
+
+#PLOT APRIL-----------------------------------------------------------------------------------
+  
+#defining as numeric
+class(apr.combined$apr)
+apr.num = as.numeric(apr.combined$apr)
+apr.combined$apr = apr.num
+
+#plot
+ggplot(apr.combined, aes(geometry=geometry)) +
+  geom_sf (aes(fill = apr.num)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "Mean Relative Humidity of April (2006 to 2020)", fill = "mean relative humidity [%]")
+
+#PLOT MAI-------------------------------------------------------------------------------------
+  
+#defining as numeric
+class(mai.combined$mai)
+mai.num = as.numeric(mai.combined$mai)
+mai.combined$mai = mai.num
+
+#plot
+ggplot(mai.combined, aes(geometry=geometry)) +
+  geom_sf (aes(fill = mai.num)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "Mean Relative Humidity of May (2006 to 2020)", fill = "mean relative humidity")
+
+#PLOT JUNE------------------------------------------------------------------------------------
+
+#defining as numeric
+class(jun.combined$jun)
+jun.num = as.numeric(jun.combined$jun)
+jun.combined$jun = jun.num
+
+#plot
+ggplot(jun.combined, aes(geometry=geometry)) +
+  geom_sf (aes(fill = jun.num)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "Mean Relative Humidity of June (2006 to 2020)", fill = "mean relative humidity [%]")
+
+#PLOT JULI------------------------------------------------------------------------------------
+
+#defining as numeric
+class(jul.combined$jul)
+jul.num = as.numeric(jul.combined$jul)
+jul.combined$mai = jul.num
+
+#plot
+ggplot(jul.combined, aes(geometry=geometry)) +
+  geom_sf (aes(fill = jul.num)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "Mean Relative Humidity of Juli (2006 to 2020)", fill = "mean relative humidity [%]")
+#PLOT AUGUST-----------------------------------------------------------------------------------
+
+#defining as numeric
+class(aug.combined$aug)
+aug.num = as.numeric(aug.combined$aug)
+aug.combined$mai = mai.num
+
+#plot
+ggplot(aug.combined, aes(geometry=geometry)) +
+  geom_sf (aes(fill = aug.num)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "Mean Relative Humidity of August (2006 to 2020)",fill = "mean relative humidity [%]")
+
+#PLOT SEPTEMBER--------------------------------------------------------------------------------
+
+#defining as numeric
+class(sep.combined$sep)
+sep.num = as.numeric(sep.combined$sep)
+sep.combined$sep = sep.num
+
+#plot
+ggplot(sep.combined, aes(geometry=geometry)) +
+  geom_sf (aes(fill = sep.num)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "Mean Relative Humidity of September (2006 to 2020)", fill = "mean relative humidity [%]")
+
+#PLOT OCTOBER---------------------------------------------------------------------------------
+
+#defining as numeric
+class(oct.combined$oct)
+oct.num = as.numeric(oct.combined$oct)
+oct.combined$oct = oct.num
+
+#plot
+ggplot(oct.combined, aes(geometry=geometry)) +
+  geom_sf (aes(fill = oct.num)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "Mean Relative Humidity of October (2006 to 2020)",fill = "mean relative humidity [%]")
+
+#PLOT NOVEMBER--------------------------------------------------------------------------------
+
+#defining as numeric
+nov.num = as.numeric(nov.combined$nov)
+nov.combined$nov = nov.num
+
+#plot
+ggplot(nov.combined, aes(geometry=geometry)) +
+  geom_sf (aes(fill = nov.num)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "Mean Relative Humidity of November (2006 to 2020)",fill = "mean relative humidity [%]")
+
+#PLOT DECEMBER---------------------------------------------------------------------------------
+
+#defining as numeric
+class(dec.combined$dec)
+dec.num = as.numeric(dec.combined$dec)
+dec.combined$dec= dec.num
+
+#plot
+ggplot(dec.combined, aes(geometry=geometry)) +
+  geom_sf (aes(fill = dec.num)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "Mean Relative Humidity of December (2006 to 2020) ", fill = "mean relative humidity [%]")
+
+```
+
+### 3.3) Geoplot of Monsoon Seasons
+
+```{r}
+season_huss= cbind(means.jan.v, means.feb.v, means.mar.v, means.apr.v, means.mai.v, means.jun.v, means.jul.v, means.aug.v, means.sep.v, means.oct.v, means.nov.v, means.dec.v)
+as.data.frame(season_huss)
+#pre-monsoon: march, april, may
+#monsoon: june, july, august, september
+#post-monsoon: october, november
+pre.monsoon= apply(season_huss[,c(3,4,5)], 1, mean)
+monsoon= apply(season_huss[,c(6,7,8,9)],1,mean)
+post.monsoon= apply(season_huss[,c(10,11)],1,mean)
+inter.monsoon= apply(season_huss[,c(12,1,2)],1,mean)
+monsoon_df = cbind(pre.monsoon, monsoon, post.monsoon, inter.monsoon, geography)
+monsoon_df
+
+# pre monsoon----------------------------------------------------------------------------------
+ggplot(monsoon_df, aes(geometry=geometry)) +
+  geom_sf (aes(fill = pre.monsoon)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "Mean Relative Humidity: Pre-Monsoon Season",fill = "mean relative humidity [%]")+
+  labs(caption= "pre-monsoon season (March, April, May)")
+
+# inter monsoon--------------------------------------------------------------------------------
+ggplot(monsoon_df, aes(geometry=geometry)) +
+  geom_sf (aes(fill = monsoon)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "Mean Relative Humidity: Monsoon Season",fill = "mean relative humidity [%]")+
+  labs(caption= "inter-monsoon season (June, July, August, September)")
+
+#post monsoon---------------------------------------------------------------------------------
+ggplot(monsoon_df, aes(geometry=geometry)) +
+  geom_sf (aes(fill = post.monsoon)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "Mean Relative humidity: Post-Monsoon Season",fill = "mean relative humidity [%]")+
+  labs(caption= "post-monsoon season (October, November)")
+
+#post monsoon---------------------------------------------------------------------------------
+ggplot(monsoon_df, aes(geometry=geometry)) +
+  geom_sf (aes(fill = inter.monsoon)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "Mean Relative humidity: Inter-Monsoon Season",fill = "mean relative humidity [%]")+
+  labs(caption= "inter-monsoon season (December, January, Fabruary)")
+```
+
+## 4) Boxplot of Mean Relative Humidity of Every Year
+
+### 4.1) Arranging a Corresponding Dataframe
+
+Here I am working with the dataframe T.huss.mon I previously used. i want to have a look at the boxplots to have a look at the confidence intervals, median and outliers of relative humidity.
+
+```{r}
+print(T.huss.mon) #defining a dataframe for each year (means of all months in one year) 
+T.huss.2006= T.huss.mon[,c(2,5:16)] 
+T.huss.2007= T.huss.mon[,c(2,17:28)] 
+T.huss.2008= T.huss.mon[,c(2,29:40)] 
+T.huss.2009= T.huss.mon[,c(2,41:52)] 
+T.huss.2010= T.huss.mon[,c(2,53:64)] 
+T.huss.2011= T.huss.mon[,c(2,65:76)] 
+T.huss.2012= T.huss.mon[,c(2,77:88)] 
+T.huss.2013= T.huss.mon[,c(2,89:100)] 
+T.huss.2014= T.huss.mon[,c(2,101:112)] 
+T.huss.2015= T.huss.mon[,c(2,113:124)] 
+T.huss.2016= T.huss.mon[,c(2,125:136)] 
+T.huss.2017= T.huss.mon[,c(2,137:148)] 
+T.huss.2018= T.huss.mon[,c(2,149:160)] 
+T.huss.2019= T.huss.mon[,c(2,161:172)] 
+T.huss.2020= T.huss.mon[,c(2,173:184)]
+
+m.T.huss.2006= apply(T.huss.2006[,2:13], 1, mean) 
+m.T.huss.2007= apply(T.huss.2007[,2:13], 1, mean) 
+m.T.huss.2008= apply(T.huss.2008[,2:13], 1, mean) 
+m.T.huss.2009= apply(T.huss.2009[,2:13], 1, mean) 
+m.T.huss.2010= apply(T.huss.2010[,2:13], 1, mean) 
+m.T.huss.2011= apply(T.huss.2011[,2:13], 1, mean) 
+m.T.huss.2012= apply(T.huss.2012[,2:13], 1, mean) 
+m.T.huss.2013= apply(T.huss.2013[,2:13], 1, mean) 
+m.T.huss.2014= apply(T.huss.2014[,2:13], 1, mean) 
+m.T.huss.2015= apply(T.huss.2015[,2:13], 1, mean) 
+m.T.huss.2016= apply(T.huss.2016[,2:13], 1, mean) 
+m.T.huss.2017= apply(T.huss.2017[,2:13], 1, mean) 
+m.T.huss.2018= apply(T.huss.2018[,2:13], 1, mean) 
+m.T.huss.2019= apply(T.huss.2019[,2:13], 1, mean) 
+m.T.huss.2020= apply(T.huss.2020[,2:13], 1, mean)
+
+#merging the dataframes 
+m.T.huss= cbind(m.T.huss.2006, m.T.huss.2007,m.T.huss.2008,m.T.huss.2009, m.T.huss.2010, m.T.huss.2011, m.T.huss.2012,m.T.huss.2013,m.T.huss.2014,m.T.huss.2015,m.T.huss.2016,m.T.huss.2017,m.T.huss.2018,m.T.huss.2019,m.T.huss.2020) 
+m.T.huss = as.data.frame(m.T.huss) 
+colnames(m.T.huss) = c("mean of 2006", "mean of 2007", "mean of 2008", "mean of 2009", "mean of 2010", "mean of 2011", "mean of 2012", "mean of 2013", "mean of 2014", "mean of 2015", "mean of 2016", "mean of 2017", "mean of 2018", "mean of 2019", "mean of 2020") 
+print(m.T.huss)
+
+
+```
+
+### 4.2) Plotting Mean Relative Humidity in Boxplots for Each Year
+
+```{r}
+row.means= apply(m.T.huss, 1, mean) 
+length (row.means)
+
+m.T.huss.tot= cbind("total mean of each province"= row.means, m.T.huss) 
+print(m.T.huss.tot)
+
+#starting to plot
+
+#install.packages("tidyverse") 
+#install.packages("hrbrthemes") 
+library(ggplot2) 
+library(tidyverse) 
+library(hrbrthemes) 
+library(viridis) 
+#install.packages("cowplot") 
+library(cowplot)
+
+
+#plot 
+plot.2006=ggplot(m.T.huss.tot, aes(y=m.T.huss.tot$`mean of 2006`))+ 
+  stat_boxplot(geom="errorbar")+ 
+  scale_x_discrete()+ 
+  geom_boxplot(outlier.color= "gray", outlier.size=2)+ 
+  labs(title=2006, y=" ")+ 
+  ylim(70, 90) 
+plot.2007=ggplot(m.T.huss.tot, aes(y=m.T.huss.tot$"mean of 2007"))+ 
+  stat_boxplot(geom="errorbar")+ 
+  geom_boxplot(outlier.color= "gray", outlier.size=2)+ 
+  scale_x_discrete()+ 
+  ylim(70, 90)+ 
+  labs(title=2007, y=" ") 
+plot.2008=ggplot(m.T.huss.tot, aes(y=m.T.huss.tot$"mean of 2008"))+ 
+  stat_boxplot(geom="errorbar")+ 
+  geom_boxplot(outlier.color= "gray", outlier.size=2)+ 
+  scale_x_discrete()+ 
+  ylim(70, 90)+ 
+  labs(title=2008,y=" ") 
+plot.2009=ggplot(m.T.huss.tot, aes(y=m.T.huss.tot$"mean of 2009"))+ 
+  stat_boxplot(geom="errorbar")+ 
+  geom_boxplot(outlier.color= "gray", outlier.size=2)+ 
+  scale_x_discrete()+ 
+  ylim(70, 90)+ 
+  labs(title=2009,y=" ") 
+plot.2010=ggplot(m.T.huss.tot, aes(y=m.T.huss.tot$"mean of 2010"))+ 
+  stat_boxplot(geom="errorbar")+ 
+  geom_boxplot(outlier.color= "gray", outlier.size=2)+ 
+  scale_x_discrete()+ 
+  ylim(70, 90)+ 
+  labs(title=2010,y=" ") 
+plot.2011=ggplot(m.T.huss.tot, aes(y=m.T.huss.tot$"mean of 2011"))+ 
+  stat_boxplot(geom="errorbar")+ 
+  geom_boxplot(outlier.color= "gray", outlier.size=2)+ 
+  scale_x_discrete()+ 
+  ylim(70, 90)+ 
+  labs(title=2011,y=" ") 
+plot.2012=ggplot(m.T.huss.tot, aes(y=m.T.huss.tot$"mean of 2012"))+ 
+  stat_boxplot(geom="errorbar")+ 
+  geom_boxplot(outlier.color= "gray", outlier.size=2)+ 
+  scale_x_discrete()+ 
+  ylim(70, 90)+ 
+  labs(title=2012,y=" ") 
+plot.2013=ggplot(m.T.huss.tot, aes(y=m.T.huss.tot$"mean of 2013"))+ 
+  stat_boxplot(geom="errorbar")+ 
+  geom_boxplot(outlier.color= "gray", outlier.size=2)+ 
+  scale_x_discrete()+ 
+  ylim(70, 90)+ 
+  labs(title=2013,y=" ") 
+plot.2014=ggplot(m.T.huss.tot, aes(y=m.T.huss.tot$"mean of 2014"))+ 
+  stat_boxplot(geom="errorbar")+ 
+  geom_boxplot(outlier.color= "gray", outlier.size=2)+ 
+  scale_x_discrete()+ 
+  ylim(70, 90)+ 
+  labs(title=2014,y=" ") 
+plot.2015=ggplot(m.T.huss.tot, aes(y=m.T.huss.tot$"mean of 2015"))+ 
+  stat_boxplot(geom="errorbar")+ 
+  geom_boxplot(outlier.color= "gray", outlier.size=2)+ 
+  scale_x_discrete()+ 
+  ylim(70, 90)+ 
+  labs(title=2015,y=" ") 
+plot.2016=ggplot(m.T.huss.tot, aes(y=m.T.huss.tot$"mean of 2016"))+ 
+  stat_boxplot(geom="errorbar")+ 
+  geom_boxplot(outlier.color= "gray", outlier.size=2)+ 
+  scale_x_discrete()+ 
+  ylim(70, 90)+ 
+  labs(title=2016,y=" ") 
+plot.2017=ggplot(m.T.huss.tot, aes(y=m.T.huss.tot$"mean of 2017"))+ 
+  stat_boxplot(geom="errorbar")+ 
+  geom_boxplot(outlier.color= "gray", outlier.size=2)+ 
+  scale_x_discrete()+ 
+  ylim(70, 90)+ 
+  labs(title=2017,y=" ") 
+plot.2018=ggplot(m.T.huss.tot, aes(y=m.T.huss.tot$"mean of 2018"))+ 
+  stat_boxplot(geom="errorbar")+ 
+  geom_boxplot(outlier.color= "gray", outlier.size=2)+ 
+  scale_x_discrete()+ 
+  ylim(70, 90)+ 
+  labs(title=2018,y=" ") 
+plot.2019=ggplot(m.T.huss.tot, aes(y=m.T.huss.tot$"mean of 2019"))+ 
+  stat_boxplot(geom="errorbar")+ 
+  geom_boxplot(outlier.color= "gray", outlier.size=2)+ 
+  scale_x_discrete()+ 
+  ylim(70, 90)+ 
+  labs(title=2019,y=" ") 
+plot.2020=ggplot(m.T.huss.tot, aes(y=m.T.huss.tot$"mean of 2020"))+ 
+  stat_boxplot(geom="errorbar")+ 
+  geom_boxplot(outlier.color= "gray", outlier.size=2)+ 
+  scale_x_discrete()+ 
+  ylim(70, 90)+ 
+  labs(title=2020,y=" ")
+
+#combining the plot makes problems, therefore I have to arrange them in word. 
+plot_grid(plot.2006, plot.2007, plot.2008, plot.2009, plot.2010, plot.2011, plot.2012, plot.2013, nrow = 2, align = "h")
+
+plot_grid(plot.2014, plot.2015, plot.2016, plot.2017, plot.2018, plot.2019, plot.2020, nrow=2, align="h")
+
+# here the plots in a different format
+install.packages("gridExtra") 
+library(gridExtra) 
+grid.arrange(plot.2006, plot.2007, plot.2008, plot.2009, nrow=1)
+grid.arrange(plot.2010, plot.2011, plot.2012, plot.2013, nrow=1)
+grid.arrange(plot.2014, plot.2015, plot.2016, plot.2017, nrow=1)
+grid.arrange(plot.2018, plot.2019, plot.2020, nrow=1)
+
+
+#overview of box plots 
+boxplot(m.T.huss.tot[,-1], main="Mean Yearly Relative Humidity (2006-2020)", xlab= "year", ylab="mean relative humidity")
+
+```
+
+## 5) Plot of Relative Humidity Yearly around 2018 and 2011
+
+the years of 2018 and 2011 show a peak of the median value of relative humidity. I want to compare the yearly pattern of relative humidity between the mentioned years and the surrounding years
+
+```{r}
+#loading necessary library
+library(ggplot2)
+library(dplyr)
+#defining  data to plot
+mean.mon.2010 = apply(T.huss.2010[,-1], 2, mean)
+mean.mon.2011 = apply(T.huss.2011[,-1], 2, mean)
+mean.mon.2012 = apply(T.huss.2012[,-1], 2, mean)
+mean.mon.2018 = apply(T.huss.2018[,-1], 2, mean)
+mean.mon.2017 = apply(T.huss.2017[,-1], 2, mean)
+mean.mon.2019 = apply(T.huss.2019[,-1], 2, mean)
+# combining data in tibbles
+df1 = as_tibble(data.frame(mean.mon.2010, mean.mon.2011, mean.mon.2012))
+df2 = as_tibble(data.frame(mean.mon.2017, mean.mon.2018, mean.mon.2019))
+#creating the plots
+df1%>%
+  ggplot(aes(x=seq(1,12,1), y=mean.mon.2011,color ="2011"), linetype=1)+
+  geom_line(aes(y=mean.mon.2011), linetype=1)+
+  geom_point(aes(y=mean.mon.2011))+
+  geom_line(y=mean.mon.2010, color="violet")+ 
+  geom_point(aes(y=mean.mon.2010,color ="2010"), linetype=1)+
+  geom_line(y=mean.mon.2012, color="orange")+
+  geom_point(aes(y=mean.mon.2012,color ="2012"), linetype=1)+
+  ylim(55,95)+
+  ylab("mean monthly relative humidity [%]")+
+  xlab("month")+
+  ggtitle("Monthly Mean Relative Humidity of All Provinces (2010, 2011, 2012)")+
+  scale_color_manual(values = c("violet", "pink", "orange"))+
+  scale_x_continuous(breaks=c(1,2,3,4,5,6,7,8,9,10,11,12),labels=c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"))
+  
+df2%>%
+  ggplot(aes(x=seq(1,12,1), y=mean.mon.2018,color ="2018"), linetype=1)+
+  geom_line(aes(y=mean.mon.2018, ), linetype=1)+
+  geom_point(aes(y=mean.mon.2018))+
+  geom_line(y=mean.mon.2017, color="violet")+ 
+  geom_point(aes(y=mean.mon.2017,color ="2017"), linetype=1)+
+  geom_line(y=mean.mon.2019, color="orange")+
+  geom_point(aes(y=mean.mon.2019,color ="2019"), linetype=1)+
+  ylim(55,95)+
+  ylab("mean monthly relative humidity [%]")+
+  xlab("month")+
+  ggtitle("Monthly Mean Relative Humidity of All Provinces (2017, 2018, 2019)")+
+  scale_color_manual(values = c("violet", "pink", "orange"))+
+  scale_x_continuous(breaks=c(1,2,3,4,5,6,7,8,9,10,11,12),labels=c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"))
+```
+
+## 6) Plot of Different Exemplary Provinces
+
+To understand the impact of relative humidity on different kinds of areas in Thailand I chose exemplary provinces with different characteristics (position in the country, height of land):
+
+-   Maha-Sarakham (north-east), 100-200m above sea level
+
+-   Chiang Mai (north to north-west), 1000-1500m above sea level
+
+-   Kalasin (central), 0-100m above sea level
+
+-   Chumphon
+
+-   Songkhla (south), 100-200m above sea level
+
+    *Diercke Weltatlas* (1st ed.). (2008). westermann
+
+```{r}
+#loading the library
+install.packages("lubridate")
+library(ggplot2)
+library(dplyr)
+library(lubridate)
+
+# dataframe combining yearly mean of each province 
+month= c("Jan", "Feb", "Mar", "Apr","May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+huss_mean = as.data.frame(rbind(means.jan.v, means.feb.v, means.mar.v, means.apr.v, means.mai.v, means.jun.v, means.jul.v, means.aug.v, means.sep.v, means.oct.v, means.nov.v, means.dec.v))
+                
+colnames(huss_mean)= geography[,"NAME_1"]
+#huss.means.df = as.data.frame(huss.means)
+#adding column with the names of each month
+huss_mean = cbind(month, huss_mean)
+huss_mean
+
+#plotting
+huss_mean%>%
+  ggplot(aes(x=seq(1,12,1), y= huss_mean[,14], color ="Maha Sarakham"), linetype=1)+
+  geom_line(aes(y= huss_mean[,14], color="Maha Sarakam"), linetype=1)+
+  geom_line(aes(y=huss_mean[,10], color="Chiang Mai"))+ 
+  geom_line(aes(y=huss_mean[,60], color="Saraburi"))+
+  geom_line(aes(y=huss_mean[,13], color="Chumphon"))+
+  geom_line(aes(y=huss_mean[,64], color="Songkhla"))+
+  ylim(55,95)+
+  ylab("mean monthly relative humidity [%]")+
+  xlab("month")+
+  ggtitle("Monthly Mean Relative Humidity of Maha Sarakham, Chiang Mai, Saraburi, Chumphon and Songkhala")+
+  scale_x_continuous(breaks=c(1,2,3,4,5,6,7,8,9,10,11,12),labels=c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"))
+```
+
+## 7) Geoplot 2006 to 2020
+
+To find out if there are any overall trends over the years (ex. overall lower relative humidity in the south in 2006 compared to 2020).
+
+```{r}
+library(dplyr)
+library(colorspace)
+library(viridis)
+library(ggplot2)
+
+#merging the dataframe m.T.huss with geo data
+m.T.huss.geo = cbind(m.T.huss, geography)
+#rownames(m.T.huss.geo)= geography[,"NAME_1"]
+colnames(m.T.huss.geo)=c("mean.2006", "mean.2007", "mean.2008", "mean.2009", "mean.2010", "mean.2011", "mean.2012", "mean.2013", "mean.2014", "mean.2015", "mean.2016", "mean.2017", "mean.2018", "mean.2019", "mean.2020",colnames(geography))
+m.T.huss.geo
+
+#defining every column as numeric
+class(m.T.huss.geo$mean.2006) #numbers are numeric but defining them again as numeric makes sure that ggplot recognizes them as such
+m.T.huss.geo$mean.2006 = as.numeric(m.T.huss.geo$mean.2006)
+m.T.huss.geo$mean.2007 = as.numeric(m.T.huss.geo$mean.2007)
+m.T.huss.geo$mean.2008 = as.numeric(m.T.huss.geo$mean.2008)
+m.T.huss.geo$mean.2009 = as.numeric(m.T.huss.geo$mean.2009)
+m.T.huss.geo$mean.2010 = as.numeric(m.T.huss.geo$mean.2010)
+m.T.huss.geo$mean.2011 = as.numeric(m.T.huss.geo$mean.2011)
+m.T.huss.geo$mean.2012 = as.numeric(m.T.huss.geo$mean.2012)
+m.T.huss.geo$mean.2013 = as.numeric(m.T.huss.geo$mean.2013)
+m.T.huss.geo$mean.2014 = as.numeric(m.T.huss.geo$mean.2014)
+m.T.huss.geo$mean.2015 = as.numeric(m.T.huss.geo$mean.2015)
+m.T.huss.geo$mean.2016 = as.numeric(m.T.huss.geo$mean.2016)
+m.T.huss.geo$mean.2017 = as.numeric(m.T.huss.geo$mean.2017)
+m.T.huss.geo$mean.2018 = as.numeric(m.T.huss.geo$mean.2018)
+m.T.huss.geo$mean.2019 = as.numeric(m.T.huss.geo$mean.2019)
+m.T.huss.geo$mean.2020 = as.numeric(m.T.huss.geo$mean.2020)
+
+
+#plotting
+#2006------------------------------------------------------------------------------------------
+ggplot(m.T.huss.geo, aes(geometry=geometry)) +
+  geom_sf (aes(fill = mean.2006)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "Mean Relative Humidity of 2006", fill = "mean of relative humidity [%]")
+
+#2007------------------------------------------------------------------------------------------
+ggplot(m.T.huss.geo, aes(geometry=geometry)) +
+  geom_sf (aes(fill = mean.2007)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "Mean relative Humidity of 2007", fill = "mean of relative humidity [%]")
+
+#2008------------------------------------------------------------------------------------------
+ggplot(m.T.huss.geo, aes(geometry=geometry)) +
+  geom_sf (aes(fill = mean.2008)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "Mean Relative Humidity of 2008", fill = "mean of relative humidity [%]")
+
+#2009------------------------------------------------------------------------------------------
+ggplot(m.T.huss.geo, aes(geometry=geometry)) +
+  geom_sf (aes(fill = mean.2009)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "Mean Relative Humidity of 2009", fill = "mean of relative humidity [%]")
+
+#2010------------------------------------------------------------------------------------------
+ggplot(m.T.huss.geo, aes(geometry=geometry)) +
+  geom_sf (aes(fill = mean.2010)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "Mean Relative Humidity of 2010", fill = "mean of relative humidity [%]")
+
+#2011------------------------------------------------------------------------------------------
+ggplot(m.T.huss.geo, aes(geometry=geometry)) +
+  geom_sf (aes(fill = mean.2011)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "Mean Relative Humidity of 2011", fill = "mean of relative humidity [%]")
+
+#2012------------------------------------------------------------------------------------------
+ggplot(m.T.huss.geo, aes(geometry=geometry)) +
+  geom_sf (aes(fill = mean.2012)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "Mean Relative Humidity of 2012", fill = "mean of relative humidity [%]")
+
+#2013------------------------------------------------------------------------------------------
+ggplot(m.T.huss.geo, aes(geometry=geometry)) +
+  geom_sf (aes(fill = mean.2013)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "Mean Relative Humidity of 2013", fill = "mean of relative humidity [%]")
+
+#2014------------------------------------------------------------------------------------------
+ggplot(m.T.huss.geo, aes(geometry=geometry)) +
+  geom_sf (aes(fill = mean.2014)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "Mean Relative Humidity of 2014", fill = "mean of relative humidity [%]")
+
+#2015------------------------------------------------------------------------------------------
+ggplot(m.T.huss.geo, aes(geometry=geometry)) +
+  geom_sf (aes(fill = mean.2015)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "Mean Relative Humidity of 2015", fill = "mean of relative humidity [%]")
+
+#2016------------------------------------------------------------------------------------------
+ggplot(m.T.huss.geo, aes(geometry=geometry)) +
+  geom_sf (aes(fill = mean.2016)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "Mean Relative Humidity of 2016", fill = "mean of relative humidity [%]")
+
+#2017------------------------------------------------------------------------------------------
+ggplot(m.T.huss.geo, aes(geometry=geometry)) +
+  geom_sf (aes(fill = mean.2017)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "Mean Relative Humidity of 2017", fill = "mean of relative humidity [%]")
+
+#2018------------------------------------------------------------------------------------------
+ggplot(m.T.huss.geo, aes(geometry=geometry)) +
+  geom_sf (aes(fill = mean.2018)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "Mean Relative Humidity of 2018", fill = "mean of relative humidity [%]")
+
+#2019------------------------------------------------------------------------------------------
+ggplot(m.T.huss.geo, aes(geometry=geometry)) +
+  geom_sf (aes(fill = mean.2019)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "Mean Relative Humidity of 2019", fill = "mean of relative humidity [%]")
+
+#2020------------------------------------------------------------------------------------------
+ggplot(m.T.huss.geo, aes(geometry=geometry)) +
+  geom_sf (aes(fill = mean.2006)) +
+  coord_sf() +
+  theme_minimal()+
+  colorspace::scale_fill_continuous_sequential(palette= "plasma")+
+  labs(title = "Mean Relative Humidity of 2020", fill = "mean of relative humidity [%]")
+```
+
+The colour of Chaiyaphum does not seem to be computed correctly. Therefore I had a look at the corresponding values in the dataframe:
+
+When looking at the dataframe I can not see an error in the computation of the mean values...
+
+| **Chaiyaphum** | 67.03113 | 66.70476 | 68.80792 | 70.24007 | 69.92744 | 71.63985 | 70.70724 | 68.62813 | 67.58251 | 66.15548 | 66.67143 | 69.27300 | 69.50314 | 65.33179 | 66.84192 |
+|----:|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|
+
+\--\> overall very scattered
