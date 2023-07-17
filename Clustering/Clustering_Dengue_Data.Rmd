@@ -9,49 +9,32 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+# 0. Loading Dengue Data Normalized and Clima Data and Geographic Data
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
-```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
-
-# 0. Loading Dengue Data Normalized
+I used the Dengue Data normalized with Population Data, Humidity Data and Geography Data. Because we sometimes used the same names for different Data frames , it is necessary to run this chunk in each Markdown.
 
 ```{r}
-
-print()
-#print(dengue.norm[4,2:61])
-print(dengue.norm[35,2:61])
-
-dengue.norm[4,2:61] <- dengue.norm[35,2:61]
-
-print(dengue.norm)
-```
-
-```{r}
-dengue.norm <- read.csv("../dengue_data/dengue_norm.csv")
-
+# Dengue Data
+dengue.norm <- read.csv("../dengue_data/dengue_without_NAs_norm.csv")
 dengue.norm <- subset(dengue.norm, select = setdiff(colnames(dengue.norm), c("X", "X.1","X2006.total", "X2007.total", "X2008.total","X2009.total", "X2010.total", "X2011.total","X2012.total", "X2013.total", "X2014.total","X2015.total", "X2016.total", "X2017.total","X2018.total", "X2019.total", "X2020.total")))
 dengue.norm['numbers']=c(1:77)
-dengue.norm[4,2:61] <- dengue.norm[35,2:61]
-dengue.norm <- replace(dengue.norm, is.na(dengue.norm), 0)
+# Replace Bungkan with Nong Khai Data 
+dengue.norm[4,2:181] <- dengue.norm[35,2:181]
+#dengue.norm <- replace(dengue.norm, is.na(dengue.norm), 0)
 as.data.frame(dengue.norm)
 
-view(dengue.norm)
+## Humidity Data 
+T.huss.mon.ordered <- read.csv("../geo_data/T.huss.mon_correct_provinces.csv")
+T.huss.mon.ordered <- subset(T.huss.mon.ordered, select = -X)
+T.huss.mon.ordered$Number <- c(1:77)
+names(T.huss.mon.ordered)[names(T.huss.mon.ordered) == "Number"] <- "numbers"
+
+## Geo Data 
+shapefilePath <- "../geo_data/gadm36_THA_shp"
+layers <- st_layers(shapefilePath)
+geography <- st_read(shapefilePath, layer = "gadm36_THA_1")
+numbers <- c(1:77)
+geography <- cbind(geography,numbers)
 ```
 
 # 1. Clustering each Years Dengue Cases
@@ -145,7 +128,9 @@ print(ggplot() +
   labs(x="Longitude", y= "Latitude")+
   theme_minimal()+
   colorspace::scale_fill_continuous_sequential(palette= "plasma")+
-  guides(fill = guide_legend(title = "cases for 100.000 citizens", override.aes = list(shape = 22))))
+  guides(fill = guide_legend(title = "cases for 100.000 citizens", override.aes = list(shape = 22)))
+)
+
 }
 
 
@@ -269,6 +254,11 @@ ggplot(dengue.norm.Yearly.Centers.Plot,aes(x=years))+
   geom_point(aes(y = DengueHigh), color = "violet", shape = 16, show.legend = TRUE)+
   scale_color_manual(values = c("low" = "pink", "medium" = "orange", "high" = "violet"),
                      labels = c("low", "medium", "high"),
-                     name = "Dengue Cases for 100.00")
+                     name = "Dengue Cases for 100.00")+
+   scale_x_continuous(breaks = 2006:2020, labels = c("2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020"))
 
+```
+
+```{r}
+cor()
 ```
