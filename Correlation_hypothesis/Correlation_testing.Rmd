@@ -43,9 +43,9 @@ library(stats)
 library(readxl)
 
 #load the needed dataframes
-den_hum_longformat <- read.csv("C:\\Users\\paula\\Documents\\Uni Heidelberg\\4. Semester\\Bioinformatik\\github\\topic04_team01\\Correlation_hypothesis\\den_hum_longformat.csv")
-monsoon_longformat <- read.csv("C:\\Users\\paula\\Documents\\Uni Heidelberg\\4. Semester\\Bioinformatik\\github\\topic04_team01\\Correlation_hypothesis\\monsoon_longformat.csv")
-popu_density_den_hum <- read.csv("C:\\Users\\paula\\Documents\\Uni Heidelberg\\4. Semester\\Bioinformatik\\github\\topic04_team01\\Correlation_hypothesis\\stacked_dengue_population_density_humidity.csv")
+den_hum_longformat <- read.csv("./den_hum_longformat.csv")
+monsoon_longformat <- read.csv("./monsoon_longformat.csv")
+popu_density_den_hum <- read.csv("./stacked_dengue_population_density_humidity.csv")
 ```
 
 ### 1.2 Summary of the Variables
