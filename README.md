@@ -40,7 +40,7 @@ stored under the folder Project Proposal.
 ## **Report**:
 
 You are very welcome to read up on our analysis and findings in our
-report. The report is named Bio
+report. The report is named Project_Report_topic04_team01
 
 ## Structure of the Repository:
 
